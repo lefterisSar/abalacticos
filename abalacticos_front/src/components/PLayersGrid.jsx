@@ -7,7 +7,7 @@ const columns = [
     { field: 'surname', headerName: 'Surname', width: 150 },
     { field: 'age', headerName: 'Age', width: 100 },
     { field: 'debutDate', headerName: 'Debut Date', width: 150 },
-    { field: 'lastGK', headerName: 'Last Game Date', width: 150 },
+    { field: 'lastGK', headerName: 'Last Date as GK', width: 150 },
     { field: 'wins', headerName: 'Wins', width: 100 },
     { field: 'loses', headerName: 'Loses', width: 100 },
     { field: 'draws', headerName: 'Draws', width: 100 },
