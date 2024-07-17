@@ -5,9 +5,8 @@ import com.example.abalacticos.repository.PlayerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Date;
+import java.util.List;
 
-//@CrossOrigin(origins = "http://localhost:3000")
 @RestController
 @RequestMapping("/api/players")
 public class PlayerController {
@@ -23,5 +22,10 @@ public class PlayerController {
     public Player addPlayer(@RequestBody Player player) {
         // Set default values or perform validations if necessary
         return playerRepository.save(player);
+    }
+
+    @GetMapping
+    public List<Player> getAllPlayers() {
+        return playerRepository.findAll();
     }
 }
