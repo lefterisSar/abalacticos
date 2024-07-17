@@ -17,6 +17,13 @@ public class Player {
     private int wins;
     private int loses;
     private int draws;
+    private String invitationFriend;
+    private String favClub;
+    private String sn;
+    private Date birthday;
+    private String phoneNumber;
+    private String address;
+    private String email;
 
     // Getters and setters (constructors can also be added as needed)
 
@@ -91,4 +98,61 @@ public class Player {
     public void setDraws(int draws) {
         this.draws = draws;
     }
+
+    public String getInvitationFriend() {
+        return invitationFriend;
+    }
+
+    public void setInvitationFriend(String invitationFriend) {
+        this.invitationFriend = invitationFriend;
+    }
+
+    public String getFavClub() {
+        return favClub;
+    }
+
+    public void setFavClub(String favClub) {
+        this.favClub = favClub;
+    }
+
+    public String getSn() {
+        return sn;
+    }
+
+    public void setSn(String sn) {
+        this.sn = sn;
+    }
+
+    public Date getBirthday() {
+        return birthday;
+    }
+
+    public void setBirthday(Date birthday) {
+        this.birthday = birthday;
+    }
+
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
 }

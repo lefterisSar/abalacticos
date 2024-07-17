@@ -39,6 +39,7 @@ const App = () => {
                 onRemoveFromTeamB={handleRemoveFromTeamB}
             />
             <TeamSelection teamA={teamA} teamB={teamB} />
+            <PlayerForm ></PlayerForm>
         </div>
     );
 };

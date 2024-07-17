@@ -1,7 +1,7 @@
 package com.example.abalacticos.controller;
 
 import com.example.abalacticos.model.Player;
-import com.example.abalacticos.repository.PlayerRepository;
+import com.example.abalacticos.service.PlayerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -11,21 +11,18 @@ import java.util.List;
 @RequestMapping("/api/players")
 public class PlayerController {
 
-    private final PlayerRepository playerRepository;
-
     @Autowired
-    public PlayerController(PlayerRepository playerRepository) {
-        this.playerRepository = playerRepository;
+    private PlayerService playerService;
+
+    @GetMapping
+    public List<Player> getAllPlayers() {
+        return playerService.getAllPlayers();
     }
 
     @PostMapping("/add")
     public Player addPlayer(@RequestBody Player player) {
-        // Set default values or perform validations if necessary
-        return playerRepository.save(player);
+        return playerService.savePlayer(player);
     }
 
-    @GetMapping
-    public List<Player> getAllPlayers() {
-        return playerRepository.findAll();
-    }
+    // Other CRUD operations if needed
 }
