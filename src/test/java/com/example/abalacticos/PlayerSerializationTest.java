@@ -7,22 +7,32 @@ import com.example.abalacticos.model.CommunicationDetails;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.util.Date;
+
 public class PlayerSerializationTest {
 
     @Test
     public void testPlayerSerialization() {
-        Player player = new Player();
-        player.setName("RONALDO");
-        player.setSurname("RONALDO1");
-        player.setAge(40);
-        // Set other fields as necessary...
+        // Create a sample Player object using the record constructor
+        CommunicationDetails communicationDetails = new CommunicationDetails("123-456-7890",
+                "123 Street Name", "ronaldo@example.com");
 
-        // Set communication details
-        CommunicationDetails communicationDetails = new CommunicationDetails();
-        communicationDetails.setPhoneNumber("123-456-7890");
-        communicationDetails.setAddress("123 Street Name");
-        communicationDetails.setEmail("ronaldo@example.com");
-        player.setCommunicationDetails(communicationDetails);
+        Player player = new Player(
+                null, // id
+                "RONALDO",
+                "RONALDO1",
+                40,
+                null, // debutDate
+                null, // lastGK
+                1, // wins
+                1, // loses
+                1, // draws
+                null, // invitationFriend
+                null, // favClub
+                null, // sn
+                null, // birthday
+                communicationDetails
+        );
 
         try {
             // Create ObjectMapper
@@ -42,9 +52,9 @@ public class PlayerSerializationTest {
                   "age": 40,
                   "debutDate": null,
                   "lastGK": null,
-                  "wins": 0,
-                  "loses": 0,
-                  "draws": 0,
+                  "wins": 1,
+                  "loses": 1,
+                  "draws": 1,
                   "invitationFriend": null,
                   "favClub": null,
                   "sn": null,
