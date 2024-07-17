@@ -1,6 +1,7 @@
 import React, { useEffect, useState, forwardRef, useImperativeHandle } from 'react';
 import axios from 'axios';
 import PlayerForm from "./components/AddPlayerForm";
+import PLayersGrid from "./components/PLayersGrid";
 
 const PlayerList = forwardRef((props, ref) => {
     const [players, setPlayers] = useState([]);
@@ -32,6 +33,7 @@ const PlayerList = forwardRef((props, ref) => {
                     <li key={player.id}>{player.name} {player.surname} - Age: {player.age}</li>
                 ))}
             </ul>
+            <PLayersGrid></PLayersGrid>
         </div>
     );
 });
