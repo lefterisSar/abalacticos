@@ -16,12 +16,19 @@ const PlayersGrid = ({ teamA, teamB, onAddToTeamA, onRemoveFromTeamA, onAddToTea
             });
     }, []);
 
-    const isPlayerInAnyTeam = (id) => {
-        return teamA.some(player => player.id === id) || teamB.some(player => player.id === id);
+    const isPlayerInTeamA = (id) => {
+        return teamA.some(player => player.id === id);
+    };
+
+    const isPlayerInTeamB = (id) => {
+        return teamB.some(player => player.id === id);
+    };
+
+    const isTeamFull = (team) => {
+        return team.length >= 8;
     };
 
     const columns = [
-        // { field: 'id', headerName: 'ID', width: 90 },
         { field: 'name', headerName: 'Name', width: 150 },
         { field: 'surname', headerName: 'Surname', width: 150 },
         { field: 'age', headerName: 'Age', width: 100 },
@@ -35,13 +42,14 @@ const PlayersGrid = ({ teamA, teamB, onAddToTeamA, onRemoveFromTeamA, onAddToTea
             headerName: 'Team A',
             width: 150,
             renderCell: (params) => {
-                const inTeamA = teamA.some(player => player.id === params.row.id);
+                const inTeamA = isPlayerInTeamA(params.row.id);
+                const inTeamB = isPlayerInTeamB(params.row.id);
                 return (
                     <Button
                         variant="contained"
                         color="primary"
                         onClick={() => inTeamA ? onRemoveFromTeamA(params.row) : onAddToTeamA(params.row)}
-                        disabled={isPlayerInAnyTeam(params.row.id) && !inTeamA}
+                        disabled={!inTeamA && (inTeamB || isTeamFull(teamA))}
                     >
                         {inTeamA ? 'Remove from Team A' : 'Add to Team A'}
                     </Button>
@@ -53,13 +61,14 @@ const PlayersGrid = ({ teamA, teamB, onAddToTeamA, onRemoveFromTeamA, onAddToTea
             headerName: 'Team B',
             width: 150,
             renderCell: (params) => {
-                const inTeamB = teamB.some(player => player.id === params.row.id);
+                const inTeamA = isPlayerInTeamA(params.row.id);
+                const inTeamB = isPlayerInTeamB(params.row.id);
                 return (
                     <Button
                         variant="contained"
                         color="secondary"
                         onClick={() => inTeamB ? onRemoveFromTeamB(params.row) : onAddToTeamB(params.row)}
-                        disabled={isPlayerInAnyTeam(params.row.id) && !inTeamB}
+                        disabled={!inTeamB && (inTeamA || isTeamFull(teamB))}
                     >
                         {inTeamB ? 'Remove from Team B' : 'Add to Team B'}
                     </Button>
