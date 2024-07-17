@@ -5,6 +5,10 @@ const PlayerList = () => {
     const [players, setPlayers] = useState([]);
 
     useEffect(() => {
+        fetchPlayers();
+    }, []);
+
+    const fetchPlayers = () => {
         axios.get('http://localhost:8080/api/players')
             .then(response => {
                 setPlayers(response.data);
@@ -12,7 +16,7 @@ const PlayerList = () => {
             .catch(error => {
                 console.error('There was an error fetching the players!', error);
             });
-    }, []);
+    };
 
     return (
         <div>
@@ -24,6 +28,6 @@ const PlayerList = () => {
             </ul>
         </div>
     );
-}
+};
 
 export default PlayerList;

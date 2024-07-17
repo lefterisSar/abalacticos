@@ -1,8 +1,7 @@
-
 import React, { useState } from 'react';
 import axios from 'axios';
 
-const AddPlayerForm = () => {
+const PlayerForm = ({ onPlayerAdded }) => {
     const [playerData, setPlayerData] = useState({
         name: '',
         surname: '',
@@ -20,7 +19,7 @@ const AddPlayerForm = () => {
         try {
             const response = await axios.post('http://localhost:8080/api/players/add', playerData);
             console.log('Player added:', response.data);
-            // Optionally, reset form fields after successful submission
+            // Reset form fields after successful submission
             setPlayerData({
                 name: '',
                 surname: '',
@@ -31,6 +30,8 @@ const AddPlayerForm = () => {
                 loses: '',
                 draws: ''
             });
+            // Call the function passed as prop to notify the parent component
+            onPlayerAdded();
         } catch (error) {
             console.error('Error adding player:', error);
         }
@@ -59,4 +60,4 @@ const AddPlayerForm = () => {
     );
 };
 
-export default AddPlayerForm;
+export default PlayerForm;
