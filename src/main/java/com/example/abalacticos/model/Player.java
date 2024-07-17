@@ -25,7 +25,7 @@ public class Player {
     private String address;
     private String email;
 
-    // Getters and setters (constructors can also be added as needed)
+    private CommunicationDetails communicationDetails;
 
     public String getId() {
         return id;
@@ -131,28 +131,12 @@ public class Player {
         this.birthday = birthday;
     }
 
-    public String getPhoneNumber() {
-        return phoneNumber;
+    public CommunicationDetails getCommunicationDetails() {
+        return communicationDetails;
     }
 
-    public void setPhoneNumber(String phoneNumber) {
-        this.phoneNumber = phoneNumber;
-    }
-
-    public String getAddress() {
-        return address;
-    }
-
-    public void setAddress(String address) {
-        this.address = address;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
+    public void setCommunicationDetails(CommunicationDetails communicationDetails) {
+        this.communicationDetails = communicationDetails;
     }
 
 }

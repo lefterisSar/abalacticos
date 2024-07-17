@@ -15,9 +15,11 @@ const PlayerForm = ({ onPlayerAdded }) => {
         favClub: '',
         sn: '',
         birthday: '',
-        phoneNumber: '',
-        address: '',
-        email: ''
+        communicationDetails: {
+            phoneNumber: '',
+            address: '',
+            email: ''
+        }
     });
 
     const handleSubmit = async (event) => {
@@ -40,12 +42,14 @@ const PlayerForm = ({ onPlayerAdded }) => {
                 favClub: '',
                 sn: '',
                 birthday: '',
-                phoneNumber: '',
-                address: '',
-                email: ''
+                communicationDetails: {
+                    phoneNumber: '',
+                    address: '',
+                    email: ''
+                }
             });
             // Call the function passed as prop to notify the parent component
-            // onPlayerAdded();
+            onPlayerAdded();
         } catch (error) {
             console.error('Error adding player:', error);
         }
@@ -53,10 +57,21 @@ const PlayerForm = ({ onPlayerAdded }) => {
 
     const handleChange = (event) => {
         const { name, value } = event.target;
-        setPlayerData({
-            ...playerData,
-            [name]: value
-        });
+        const [parent, child] = name.split('.');
+        if (child) {
+            setPlayerData({
+                ...playerData,
+                [parent]: {
+                    ...playerData[parent],
+                    [child]: value
+                }
+            });
+        } else {
+            setPlayerData({
+                ...playerData,
+                [name]: value
+            });
+        }
     };
 
     return (
@@ -73,9 +88,9 @@ const PlayerForm = ({ onPlayerAdded }) => {
             <input type="text" name="favClub" value={playerData.favClub} onChange={handleChange} placeholder="Favorite Club" required />
             <input type="text" name="sn" value={playerData.sn} onChange={handleChange} placeholder="Social Network" required />
             <input type="date" name="birthday" value={playerData.birthday} onChange={handleChange} placeholder="Birthday" required />
-            <input type="text" name="phoneNumber" value={playerData.phoneNumber} onChange={handleChange} placeholder="Phone Number" required />
-            <input type="text" name="address" value={playerData.address} onChange={handleChange} placeholder="Address" required />
-            <input type="email" name="email" value={playerData.email} onChange={handleChange} placeholder="Email" required />
+            <input type="text" name="communicationDetails.phoneNumber" value={playerData.communicationDetails.phoneNumber} onChange={handleChange} placeholder="Phone Number" required />
+            <input type="text" name="communicationDetails.address" value={playerData.communicationDetails.address} onChange={handleChange} placeholder="Address" required />
+            <input type="email" name="communicationDetails.email" value={playerData.communicationDetails.email} onChange={handleChange} placeholder="Email" required />
             <button type="submit">Add Player</button>
         </form>
     );
