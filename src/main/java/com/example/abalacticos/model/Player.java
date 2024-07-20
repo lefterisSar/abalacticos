@@ -1,7 +1,9 @@
 package com.example.abalacticos.model;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.security.core.userdetails.User;
 
 import java.util.Date;
 
@@ -20,6 +22,7 @@ public record Player(
         String favClub,
         String sn,
         Date birthday,
-        CommunicationDetails communicationDetails
+        CommunicationDetails communicationDetails,
+        @DBRef AbalacticosUser user
 ) {
 }

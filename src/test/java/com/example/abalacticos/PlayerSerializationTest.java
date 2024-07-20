@@ -1,5 +1,6 @@
 package com.example.abalacticos;
 
+import com.example.abalacticos.model.AbalacticosUser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.example.abalacticos.model.Player;
@@ -16,7 +17,7 @@ public class PlayerSerializationTest {
         // Create a sample Player object using the record constructor
         CommunicationDetails communicationDetails = new CommunicationDetails("123-456-7890",
                 "123 Street Name", "ronaldo@example.com");
-
+        AbalacticosUser abalacticosUser = new AbalacticosUser("user","user", "admin");
         Player player = new Player(
                 null, // id
                 "RONALDO",
@@ -31,7 +32,8 @@ public class PlayerSerializationTest {
                 null, // favClub
                 null, // sn
                 null, // birthday
-                communicationDetails
+                communicationDetails,
+                abalacticosUser
         );
 
         try {
@@ -45,25 +47,32 @@ public class PlayerSerializationTest {
 
             // Expected JSON string
             String expectedJsonString = """
-                {
-                  "id": null,
-                  "name": "RONALDO",
-                  "surname": "RONALDO1",
-                  "age": 40,
-                  "debutDate": null,
-                  "lastGK": null,
-                  "wins": 1,
-                  "loses": 1,
-                  "draws": 1,
-                  "invitationFriend": null,
-                  "favClub": null,
-                  "sn": null,
-                  "birthday": null,
-                  "communicationDetails": {
-                    "phoneNumber": "123-456-7890",
-                    "address": "123 Street Name",
-                    "email": "ronaldo@example.com"
-                  }
+                {"id":null,
+                "name":"RONALDO",
+                "surname":"RONALDO1",
+                "age":40,
+                "debutDate":null,
+                "lastGK":null,
+                "wins":1,
+                "loses":1,
+                "draws":1,
+                "invitationFriend":null,
+                "favClub":null,
+                "sn":null,
+                "birthday":null,
+                "communicationDetails":
+                    {   
+                        "phoneNumber":"123-456-7890",
+                        "address":"123 Street Name",
+                        "email":"ronaldo@example.com"  
+                    },
+                    "user":
+                        {
+                            "id":null,
+                            "username":"user",
+                            "password":"user",
+                            "roles":"admin"
+                        }
                 }
                 """;
 
