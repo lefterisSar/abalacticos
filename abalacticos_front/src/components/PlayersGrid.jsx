@@ -4,7 +4,7 @@ import { Button } from '@mui/material';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
-const PlayersGrid = ({ teamA, teamB, onAddToTeamA, onRemoveFromTeamA, onAddToTeamB, onRemoveFromTeamB }) => {
+const PlayersGrid = () => {
     const [rows, setRows] = useState([]);
     const navigate = useNavigate();
 
@@ -44,18 +44,6 @@ const PlayersGrid = ({ teamA, teamB, onAddToTeamA, onRemoveFromTeamA, onAddToTea
         fetchPlayers();
     }, [navigate]);
 
-    // const isPlayerInTeamA = (id) => {
-    //     return teamA.some(player => player.id === id);
-    // };
-    //
-    // const isPlayerInTeamB = (id) => {
-    //     return teamB.some(player => player.id === id);
-    // };
-    //
-    // const isTeamFull = (team) => {
-    //     return team.length >= 8;
-    // };
-
     const columns = [
         { field: 'name', headerName: 'Name', width: 150 },
         { field: 'surname', headerName: 'Surname', width: 150 },
@@ -65,44 +53,7 @@ const PlayersGrid = ({ teamA, teamB, onAddToTeamA, onRemoveFromTeamA, onAddToTea
         { field: 'wins', headerName: 'Wins', width: 100 },
         { field: 'loses', headerName: 'Loses', width: 100 },
         { field: 'draws', headerName: 'Draws', width: 100 },
-        {
-            field: 'addToTeamA',
-            headerName: 'Team A',
-            width: 150,
-        //     renderCell: (params) => {
-        //         const inTeamA = isPlayerInTeamA(params.row.id);
-        //         const inTeamB = isPlayerInTeamB(params.row.id);
-        //         return (
-        //             <Button
-        //                 variant="contained"
-        //                 color="primary"
-        //                 onClick={() => inTeamA ? onRemoveFromTeamA(params.row) : onAddToTeamA(params.row)}
-        //                 disabled={!inTeamA && (inTeamB || isTeamFull(teamA))}
-        //             >
-        //                 {inTeamA ? 'Remove from Team A' : 'Add to Team A'}
-        //             </Button>
-        //         );
-        //     }
-        // },
-        // {
-        //     field: 'addToTeamB',
-        //     headerName: 'Team B',
-        //     width: 150,
-        //     renderCell: (params) => {
-        //         const inTeamA = isPlayerInTeamA(params.row.id);
-        //         const inTeamB = isPlayerInTeamB(params.row.id);
-        //         return (
-        //             <Button
-        //                 variant="contained"
-        //                 color="secondary"
-        //                 onClick={() => inTeamB ? onRemoveFromTeamB(params.row) : onAddToTeamB(params.row)}
-        //                 disabled={!inTeamB && (inTeamA || isTeamFull(teamB))}
-        //             >
-        //                 {inTeamB ? 'Remove from Team B' : 'Add to Team B'}
-        //             </Button>
-        //         );
-        //     }
-        }
+
     ];
 
     return (
