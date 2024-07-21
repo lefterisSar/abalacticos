@@ -11,15 +11,33 @@ public class AbalacticosUser {
     private String password;
     private String roles; // For simplicity, assume single role
 
-    // Constructors, Getters, and Setters
-    public AbalacticosUser() {}
+    private int wins;
+    private int draws;
+    private int losses;
 
-    public AbalacticosUser(String username, String password, String roles) {
+    // Constructors, Getters, and Setters
+    public AbalacticosUser(String username, String password) {
+        this.username = username;
+        this.password = password;
+    }
+
+    public AbalacticosUser(String username, String password, String roles)
+    {
         this.username = username;
         this.password = password;
         this.roles = roles;
     }
 
+    public AbalacticosUser(String username, String password, String roles, int wins, int draws, int losses) {
+        this.username = username;
+        this.password = password;
+        this.roles = roles;
+        this.wins = wins;
+        this.draws = draws;
+        this.losses = losses;
+    }
+
+    // Getters and setters for all fields
     public String getId() {
         return id;
     }
@@ -50,5 +68,29 @@ public class AbalacticosUser {
 
     public void setRoles(String roles) {
         this.roles = roles;
+    }
+
+    public int getWins() {
+        return wins;
+    }
+
+    public void setWins(int wins) {
+        this.wins = wins;
+    }
+
+    public int getDraws() {
+        return draws;
+    }
+
+    public void setDraws(int draws) {
+        this.draws = draws;
+    }
+
+    public int getLosses() {
+        return losses;
+    }
+
+    public void setLosses(int losses) {
+        this.losses = losses;
     }
 }

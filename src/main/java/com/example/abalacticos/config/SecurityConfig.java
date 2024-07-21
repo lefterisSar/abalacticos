@@ -40,7 +40,7 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authz -> authz
-                        .requestMatchers("/", "/public/**", "/api/users/register", "/register", "/api/auth/**").permitAll() // Ensure /register is permitted
+                        .requestMatchers("/", "/public/**", "/api/users/register","/api/users/registerAdmin", "/register", "/api/auth/**").permitAll() // Ensure /register is permitted
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
