@@ -2,12 +2,15 @@ package com.example.abalacticos.model;
 
 import jakarta.persistence.criteria.ListJoin;
 
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.ArrayList;
 
 public class Match {
     private String matchId;
-    private Date date;
+    private LocalDate date;
     private List<String> teamA;
     private List<String> teamB;
     private int goalsTeamA;
@@ -15,7 +18,7 @@ public class Match {
     private List<PlayerPerformance> playerStats;
     private DayDifficulty dayDifficulty;
 
-    public Match(String matchId, Date date, List<String> teamA, List<String> teamB, int goalsTeamA, int goalsTeamB, List<PlayerPerformance> playerStats, DayDifficulty dayDifficulty){
+    public Match(String matchId, LocalDate date, List<String> teamA, List<String> teamB, int goalsTeamA, int goalsTeamB, List<PlayerPerformance> playerStats, DayDifficulty dayDifficulty){
         this.matchId = matchId;
         this.date = date;
         this.teamA = teamA;
@@ -26,11 +29,11 @@ public class Match {
         this.dayDifficulty = dayDifficulty;
     }
 
-    public Date getDate() {
+    public LocalDate getDate() {
         return date;
     }
 
-    public void setDate(Date date) {
+    public void setDate(LocalDate date) {
         this.date = date;
     }
 
@@ -67,7 +70,7 @@ public class Match {
     }
 
     public List<PlayerPerformance> getPlayerStats() {
-        return playerStats;
+        return List.copyOf(playerStats);
     }
 
     public void setPlayerStats(List<PlayerPerformance> playerStats) {
@@ -96,7 +99,18 @@ public class Match {
         this.goalsTeamB = goalsTeamB;
     }
 
-    //input PlayerPerformance
+    public Map<String, String> getAllPlayers() {
+        Map<String, String> players = new HashMap<>();
+        for  (String player: teamA) {
+            players.put(player, "TeamA");
+        }
+        for  (String player: teamB) {
+            players.put(player, "TeamB");
+        }
+        return players;
+    }
+
+    //input PlayerPerformance - mpourdes
     public void addPlayerPerformance(PlayerPerformance performance){
         for (int i=0; i < playerStats.size(); i++) {
             if (playerStats.get(i).getPlayerId().equals(performance.getPlayerId())) {
@@ -106,6 +120,16 @@ public class Match {
         }
         playerStats.add(performance);
     }
+
+    //gia DayDifficulty kai alla
+    public List<String> getAllParticipatingPlayers() {
+        List<String> players = new ArrayList<>();
+        players.addAll(teamA);
+        players.addAll(teamB);
+        return players;
+    }
+
+
 
     /* gia to validation tou teamA, teamB, twn statistikwn, tis dyskolias
     public boolean validate
