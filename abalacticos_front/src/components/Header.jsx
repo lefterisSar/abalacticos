@@ -26,6 +26,7 @@ const Header = () => {
 
     return (
         <header>
+            <img src="/abalacticosLogo.jpg" alt="Abalacticos Logo" className="logo" />
             <button onClick={handleSignOut}>Sign Out</button>
         </header>
     );
