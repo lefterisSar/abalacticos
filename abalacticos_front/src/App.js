@@ -6,6 +6,7 @@ import Login from './components/Login';
 import PlayerForm from './components/AddPlayerForm';
 import Header from './components/Header';
 import PrivateRoute from './components/PrivateRoute';
+import NotFound from './components/PageNotFound';
 import './style.css';
 
 const App = () => (
@@ -16,7 +17,7 @@ const App = () => (
             <Route path="/players" element={<PlayersGrid />} />
             <Route path="/add-player" element={<PrivateRoute><PlayerForm /></PrivateRoute>} />
             <Route path="/" element={<Navigate to="/players" />} />
-            <Route path="/forbidden" element={<div>Forbidden</div>} />
+            <Route path="*" element={<NotFound />} /> {/* Catch-all route */}
         </Routes>
     </Router>
 );
