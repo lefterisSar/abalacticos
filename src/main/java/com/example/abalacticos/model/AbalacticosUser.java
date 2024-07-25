@@ -8,6 +8,60 @@ public class AbalacticosUser {
     @Id
     private String id;
     private String username;
+    private String password;
+    private String roles; // For simplicity, assume single role
+
+    // Player attributes
+    private String name;
+    private String surname;
+    private int wins;
+    private int losses;
+    private int draws;
+    //
+    private int age;
+    private String debutDate;
+    private String lastGK;
+
+    private String invitationFriend;
+    private String favClub;
+    private String sn;
+    private String birthday;
+    private CommunicationDetails communicationDetails;
+
+    public AbalacticosUser() {}
+
+    // Constructors, Getters, and Setters
+    public AbalacticosUser(String username, String password) {
+        this.username = username;
+        this.password = password;
+    }
+
+    public AbalacticosUser(String username, String password, String roles)
+    {
+        this.username = username;
+        this.password = password;
+        this.roles = roles;
+    }
+
+    public AbalacticosUser(String username, String password, String roles, int wins, int draws, int losses) {
+        this.username = username;
+        this.password = password;
+        this.roles = roles;
+        this.wins = wins;
+        this.draws = draws;
+        this.losses = losses;
+    }
+
+    public AbalacticosUser(String username, String password, String name, String surname,  String roles, int wins, int draws, int losses) {
+        this.username = username;
+        this.password = password;
+        this.roles = roles;
+        this.wins = wins;
+        this.draws = draws;
+        this.losses = losses;
+        this.surname =surname;
+        this.name = name;
+    }
 
     public String getName() {
         return name;
@@ -89,47 +143,8 @@ public class AbalacticosUser {
         this.communicationDetails = communicationDetails;
     }
 
-    private String password;
-    private String roles; // For simplicity, assume single role
 
-    // Player attributes
-    private String name;
-    private String surname;
-    private int age;
-    private String debutDate;
-    private String lastGK;
-    private int wins;
-    private int losses;
-    private int draws;
-    private String invitationFriend;
-    private String favClub;
-    private String sn;
-    private String birthday;
-    private CommunicationDetails communicationDetails;
 
-    public AbalacticosUser() {}
-
-    // Constructors, Getters, and Setters
-    public AbalacticosUser(String username, String password) {
-        this.username = username;
-        this.password = password;
-    }
-
-    public AbalacticosUser(String username, String password, String roles)
-    {
-        this.username = username;
-        this.password = password;
-        this.roles = roles;
-    }
-
-    public AbalacticosUser(String username, String password, String roles, int wins, int draws, int losses) {
-        this.username = username;
-        this.password = password;
-        this.roles = roles;
-        this.wins = wins;
-        this.draws = draws;
-        this.losses = losses;
-    }
 
     // Getters and setters for all fields
     public String getId() {

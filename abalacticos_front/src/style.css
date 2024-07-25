@@ -1,0 +1,13 @@
+/* styles.css or a relevant CSS file */
+header {
+    display: flex;
+    justify-content: flex-end;
+    padding: 10px;
+    background-color: #f8f9fa;
+}
+
+header button {
+    padding: 5px 10px;
+    font-size: 16px;
+    cursor: pointer;
+}

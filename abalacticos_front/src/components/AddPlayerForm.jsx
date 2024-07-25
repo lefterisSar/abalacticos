@@ -87,9 +87,9 @@ const PlayerForm = ({ onPlayerAdded }) => {
             {/*<input type="number" name="age" value={playerData.age} onChange={handleChange} placeholder="Age" required />*/}
             {/*<input type="date" name="debutDate" value={playerData.debutDate} onChange={handleChange} placeholder="Debut Date" required />*/}
             {/*<input type="date" name="lastGK" value={playerData.lastGK} onChange={handleChange} placeholder="Last Game Date" required />*/}
-            <input type="number" name="wins" value={playerData.wins} onChange={handleChange} placeholder="Wins" required />
-            <input type="number" name="loses" value={playerData.loses} onChange={handleChange} placeholder="Loses" required />
-            <input type="number" name="draws" value={playerData.draws} onChange={handleChange} placeholder="Draws" required />
+            <input type="number" name="wins" value={playerData.wins} onChange={handleChange} placeholder="Wins" />
+            <input type="number" name="loses" value={playerData.loses} onChange={handleChange} placeholder="Loses" />
+            <input type="number" name="draws" value={playerData.draws} onChange={handleChange} placeholder="Draws" />
             {/*<input type="text" name="invitationFriend" value={playerData.invitationFriend} onChange={handleChange} placeholder="Invitation Friend" />*/}
             {/*<input type="text" name="favClub" value={playerData.favClub} onChange={handleChange} placeholder="Favorite Club" />*/}
             {/*<input type="text" name="sn" value={playerData.sn} onChange={handleChange} placeholder="Social Network" />*/}

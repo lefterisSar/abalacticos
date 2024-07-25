@@ -24,15 +24,9 @@ public class UserService {
 
     public AbalacticosUser registerUserAdmin(RegistrationDto registrationDto)
     {
-            AbalacticosUser user = new AbalacticosUser(
-                registrationDto.getUsername(),
-                passwordEncoder.encode(registrationDto.getPassword()),
-                "USER", // Default role
-                registrationDto.getWins(),
-                registrationDto.getDraws(),
-                registrationDto.getLosses()
-            );
-        return userRepository.save(user);
+        AbalacticosUser newUser = new AbalacticosUser();
+        setPlayerAttributes(newUser, registrationDto);
+        return userRepository.save(newUser);
     }
 
     public AbalacticosUser registerUser(RegistrationDto registrationDto) {
@@ -65,5 +59,4 @@ public class UserService {
         return userRepository.findAll();
     }
 
-    // Other service methods
 }

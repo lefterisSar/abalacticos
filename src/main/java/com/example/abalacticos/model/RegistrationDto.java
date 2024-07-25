@@ -119,8 +119,6 @@ public class RegistrationDto {
         // Getters and Setters
 
 
-
-
     // Getters and Setters
     public String getUsername() {
         return username;

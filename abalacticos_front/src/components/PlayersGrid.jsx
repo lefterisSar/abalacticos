@@ -37,7 +37,9 @@ const PlayersGrid = () => {
             } catch (error) {
                 console.error('There was an error fetching the players!', error);
                 if (error.response && error.response.status === 401) {
-                    navigate('/login'); // Redirect to login if unauthorized
+                    navigate('/login'); // Redirect to log in if unauthorized
+                } else if (error.response && error.response.status === 403) {
+                    navigate('/forbidden'); // Redirect to a forbidden page if access is denied
                 }
             }
         };
