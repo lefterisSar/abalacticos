@@ -8,12 +8,106 @@ public class AbalacticosUser {
     @Id
     private String id;
     private String username;
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getSurname() {
+        return surname;
+    }
+
+    public void setSurname(String surname) {
+        this.surname = surname;
+    }
+
+    public int getAge() {
+        return age;
+    }
+
+    public void setAge(int age) {
+        this.age = age;
+    }
+
+    public String getDebutDate() {
+        return debutDate;
+    }
+
+    public void setDebutDate(String debutDate) {
+        this.debutDate = debutDate;
+    }
+
+    public String getLastGK() {
+        return lastGK;
+    }
+
+    public void setLastGK(String lastGK) {
+        this.lastGK = lastGK;
+    }
+
+    public String getInvitationFriend() {
+        return invitationFriend;
+    }
+
+    public void setInvitationFriend(String invitationFriend) {
+        this.invitationFriend = invitationFriend;
+    }
+
+    public String getFavClub() {
+        return favClub;
+    }
+
+    public void setFavClub(String favClub) {
+        this.favClub = favClub;
+    }
+
+    public String getSn() {
+        return sn;
+    }
+
+    public void setSn(String sn) {
+        this.sn = sn;
+    }
+
+    public String getBirthday() {
+        return birthday;
+    }
+
+    public void setBirthday(String birthday) {
+        this.birthday = birthday;
+    }
+
+    public CommunicationDetails getCommunicationDetails() {
+        return communicationDetails;
+    }
+
+    public void setCommunicationDetails(CommunicationDetails communicationDetails) {
+        this.communicationDetails = communicationDetails;
+    }
+
     private String password;
     private String roles; // For simplicity, assume single role
 
+    // Player attributes
+    private String name;
+    private String surname;
+    private int age;
+    private String debutDate;
+    private String lastGK;
     private int wins;
-    private int draws;
     private int losses;
+    private int draws;
+    private String invitationFriend;
+    private String favClub;
+    private String sn;
+    private String birthday;
+    private CommunicationDetails communicationDetails;
+
+    public AbalacticosUser() {}
 
     // Constructors, Getters, and Setters
     public AbalacticosUser(String username, String password) {

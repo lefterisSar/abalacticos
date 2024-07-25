@@ -9,7 +9,7 @@ const PlayerList = () => {
     }, []);
 
     const fetchPlayers = () => {
-        axios.get('http://localhost:8080/api/players')
+        axios.get('http://localhost:8080/api/users')
             .then(response => {
                 setPlayers(response.data);
             })

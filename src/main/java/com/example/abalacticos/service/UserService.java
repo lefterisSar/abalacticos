@@ -15,6 +15,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
+
     @Autowired
     public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
@@ -34,13 +35,30 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    public AbalacticosUser registerUser(RegistrationDto registrationDto)
-    {
-        AbalacticosUser user = new AbalacticosUser(
-                registrationDto.getUsername(),
-                passwordEncoder.encode(registrationDto.getPassword())
-        );
-        return userRepository.save(user);
+    public AbalacticosUser registerUser(RegistrationDto registrationDto) {
+        AbalacticosUser newUser = new AbalacticosUser();
+        newUser.setUsername(registrationDto.getUsername());
+        newUser.setPassword(passwordEncoder.encode(registrationDto.getPassword()));
+        newUser.setRoles("USER");
+        // Set player attributes
+        setPlayerAttributes(newUser, registrationDto);
+        return userRepository.save(newUser);
+    }
+
+    private void setPlayerAttributes(AbalacticosUser newUser, RegistrationDto registrationDto) {
+        newUser.setName(registrationDto.getName());
+        newUser.setSurname(registrationDto.getSurname());
+        newUser.setAge(registrationDto.getAge());
+        newUser.setDebutDate(registrationDto.getDebutDate());
+        newUser.setLastGK(registrationDto.getLastGK());
+        newUser.setWins(registrationDto.getWins());
+        newUser.setLosses(registrationDto.getLosses());
+        newUser.setDraws(registrationDto.getDraws());
+        newUser.setInvitationFriend(registrationDto.getInvitationFriend());
+        newUser.setFavClub(registrationDto.getFavClub());
+        newUser.setSn(registrationDto.getSn());
+        newUser.setBirthday(registrationDto.getBirthday());
+        newUser.setCommunicationDetails(registrationDto.getCommunicationDetails());
     }
 
     public List<AbalacticosUser> getAllUsers() {

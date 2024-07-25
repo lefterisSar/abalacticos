@@ -1,3 +1,4 @@
+// PlayersGrid.jsx
 import React, { useState, useEffect } from 'react';
 import { DataGrid } from '@mui/x-data-grid';
 import { Button } from '@mui/material';
@@ -18,7 +19,7 @@ const PlayersGrid = () => {
             }
 
             try {
-                const response = await axios.get('http://localhost:8080/api/players', {
+                const response = await axios.get('http://localhost:8080/api/users', {
                     headers: {
                         Authorization: `Bearer ${token}`
                     }
