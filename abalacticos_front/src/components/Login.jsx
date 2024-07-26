@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import {jwtDecode} from "jwt-decode";
 
 const Login = () => {
     const [username, setUsername] = useState('');
@@ -20,7 +21,9 @@ const Login = () => {
 
             if (response.data && response.data.token) {
                 localStorage.setItem('authToken', response.data.token);
-                navigate('/players'); // Redirect to players page after successful login
+                const decodedToken = jwtDecode(response.data.token);
+                localStorage.setItem('userRole', decodedToken.sub);
+                decodedToken.sub.toUpperCase()!=="ADMIN"? navigate('/players'): navigate('/admin-dashboard')
             } else {
                 setError('Unexpected response format');
                 console.error('Unexpected response format:', response.data);

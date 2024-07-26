@@ -1,33 +1,46 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import { Link, useNavigate } from 'react-router-dom';
+import '../Header.css';
 
 const Header = () => {
     const navigate = useNavigate();
 
-    const handleSignOut = async () => {
-        const token = localStorage.getItem('authToken');
+    const token = localStorage.getItem('authToken');
+    let role = localStorage.getItem('userRole');
+    if(role===null){
+        role="null";
+    }
 
-        if (token) {
-            try {
-                await axios.post('http://localhost:8080/api/auth/logout', {}, {
-                    headers: {
-                        Authorization: `Bearer ${token}`
-                    }
-                });
-            } catch (error) {
-                console.error('Error during sign out:', error);
-            }
-        }
-
+    const handleLogout = () => {
         localStorage.removeItem('authToken');
+        localStorage.removeItem('userRole');
         navigate('/login');
     };
 
     return (
-        <header>
-            <img src="/abalacticosLogo.jpg" alt="Abalacticos Logo" className="logo" />
-            <button onClick={handleSignOut}>Sign Out</button>
+        <header className="header">
+            <img src="/abalacticosLogo.jpg" alt="Abalacticos Logo" className="logo"/>
+            <li>{role}</li>
+            <nav>
+                <ul>
+                    {token && (
+                        <>
+                            <li><Link to="/players">Players</Link></li>
+                            {role === 'ADMIN' && (
+                                <>
+                                    <li><Link to="/admin-dashboard">Admin Dashboard</Link></li>
+                                </>
+                            )}
+                        </>
+                    )}
+                    {!token && (
+                        <li><Link to="/login">Login</Link></li>
+                    )}
+                </ul>
+                {token && (
+                    <button onClick={handleLogout}>Logout</button>
+                )}
+            </nav>
         </header>
     );
 };

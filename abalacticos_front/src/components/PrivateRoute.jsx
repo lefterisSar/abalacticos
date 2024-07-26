@@ -2,7 +2,7 @@ import React from 'react';
 import { Navigate } from 'react-router-dom';
 import {jwtDecode} from 'jwt-decode';
 
-const PrivateRoute = ({ children }) => {
+const PrivateRoute = ({ children, role }) => {
     const token = localStorage.getItem('authToken');
 
     if (!token) {
@@ -11,7 +11,7 @@ const PrivateRoute = ({ children }) => {
 
     try {
         const decodedToken = jwtDecode(token);
-        if (decodedToken.sub.toUpperCase() !== 'ADMIN') {
+        if (role && decodedToken.sub.toUpperCase() !== role) {
             return <Navigate to="/forbidden" />;
         }
     } catch (error) {

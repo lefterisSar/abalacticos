@@ -25,6 +25,8 @@ public class UserService {
     public AbalacticosUser registerUserAdmin(RegistrationDto registrationDto)
     {
         AbalacticosUser newUser = new AbalacticosUser();
+        newUser.setUsername(registrationDto.getUsername());
+        newUser.setPassword(passwordEncoder.encode(registrationDto.getPassword()));
         setPlayerAttributes(newUser, registrationDto);
         return userRepository.save(newUser);
     }

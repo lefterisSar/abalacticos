@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -20,6 +21,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 @Configuration
 @EnableWebSecurity
+//@EnableMethodSecurity
 public class SecurityConfig {
 
     @Autowired
@@ -41,8 +43,8 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authz -> authz
-                    .requestMatchers("/", "/public/**", "/api/users/register", "/register", "/api/auth/**").permitAll() // Ensure /register is permitted
-                    .requestMatchers("/api/users/registerAdmin").hasRole("ADMIN")
+                    .requestMatchers("/", "/public/**", "/api/users/register", "/api/auth/**","/api/users/registerAdmin").permitAll() //TODO: Change API USERS registnt
+//                    .requestMatchers("/api/users/registerAdmin").hasRole("ADMIN")erAdmin to have server side safety too like shown below in the comme
                     .anyRequest().authenticated()
                 )
                 .formLogin(form -> form

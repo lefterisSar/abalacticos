@@ -29,7 +29,11 @@ public class CustomUserDetailsService implements UserDetailsService {
         if (user == null) {
             throw new UsernameNotFoundException("User not found");
         }
+        System.out.println("Loading user: " + username + " with role: " + user.getRoles());
+        // Add "ROLE_" prefix to roles
         return new org.springframework.security.core.userdetails.User(
-                user.getUsername(), user.getPassword(), Collections.singletonList(new SimpleGrantedAuthority(user.getRoles())));
+                user.getUsername(), user.getPassword(), Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + user.getRoles())));
     }
+
+
 }
