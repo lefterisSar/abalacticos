@@ -7,6 +7,7 @@ Personal project related to a 8x8 football team located in Heraklion.
     - Java 17 (backend) 
     - Spring Boot (backend)
     - Spring Security (backend)
+    - Spring Data JPA
     - Maven ( build automation tool ) 
     - MongoDB (BAckend DB) 
     - JAvascript (front-end)
