@@ -10,6 +10,10 @@ const Header = () => {
     if(role===null){
         role="null";
     }
+    let userName = localStorage.getItem('userName');
+    if(userName===null){
+        userName="null";
+    }
 
     const handleLogout = () => {
         localStorage.removeItem('authToken');
@@ -20,7 +24,8 @@ const Header = () => {
     return (
         <header className="header">
             <img src="/abalacticosLogo.jpg" alt="Abalacticos Logo" className="logo"/>
-            <li>{role}</li>
+            <li>Role: {role}</li>
+            <li>UserName: {userName}</li>
             <nav>
                 <ul>
                     {token && (

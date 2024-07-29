@@ -7,8 +7,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Component;
+import org.springframework.security.core.GrantedAuthority;
 
 import java.util.Date;
+import java.util.stream.Collectors;
 
 @Component
 public class JwtTokenProvider {
@@ -24,9 +26,13 @@ public class JwtTokenProvider {
 
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + jwtExpirationMs);
-
+        String roles = userPrincipal.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.joining(","));
+        String newRoles = roles.substring(5);
         return Jwts.builder()
                 .setSubject(userPrincipal.getUsername())
+                .claim("role", newRoles) // Add roles as a claim
                 .setIssuedAt(new Date())
                 .setExpiration(expiryDate)
                 .signWith(SignatureAlgorithm.HS512, jwtSecret)
