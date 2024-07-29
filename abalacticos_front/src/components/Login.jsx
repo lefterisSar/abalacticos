@@ -24,7 +24,7 @@ const Login = () => {
                 const decodedToken = jwtDecode(response.data.token);
                 localStorage.setItem('userRole', decodedToken.role);
                 localStorage.setItem('userName', decodedToken.sub);
-                decodedToken.sub.toUpperCase()!=="ADMIN"? navigate('/players'): navigate('/admin-dashboard')
+                decodedToken.role.toUpperCase()!=="ADMIN"? navigate('/players'): navigate('/admin-dashboard')
             } else {
                 setError('Unexpected response format');
                 console.error('Unexpected response format:', response.data);

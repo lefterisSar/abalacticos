@@ -11,7 +11,7 @@ const PrivateRoute = ({ children, role }) => {
 
     try {
         const decodedToken = jwtDecode(token);
-        if (role && decodedToken.sub.toUpperCase() !== role) {
+        if (role && decodedToken.role.toUpperCase() !== role) {
             return <Navigate to="/forbidden" />;
         }
     } catch (error) {
