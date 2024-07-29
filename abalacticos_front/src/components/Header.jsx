@@ -18,6 +18,7 @@ const Header = () => {
     const handleLogout = () => {
         localStorage.removeItem('authToken');
         localStorage.removeItem('userRole');
+        localStorage.removeItem('userName');
         navigate('/login');
     };
 
