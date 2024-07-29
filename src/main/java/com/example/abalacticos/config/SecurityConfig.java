@@ -43,8 +43,8 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authz -> authz
-                    .requestMatchers("/", "/public/**", "/api/users/register", "/api/auth/**","/api/users/registerAdmin").permitAll() //TODO: Change API USERS registnt
-//                    .requestMatchers("/api/users/registerAdmin").hasRole("ADMIN")erAdmin to have server side safety too like shown below in the comme
+                    .requestMatchers("/", "/public/**", "/api/users/register", "/api/auth/**").permitAll()
+                    .requestMatchers("/api/users/registerAdmin").hasRole("ADMIN")
                     .anyRequest().authenticated()
                 )
                 .formLogin(form -> form

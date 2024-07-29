@@ -27,8 +27,18 @@ const PlayerForm = ({ onPlayerAdded }) => {
     const handleSubmit = async (event) => {
         event.preventDefault();
 
+        const token = localStorage.getItem('authToken');
+        if (!token) {
+            console.error('No auth token found');
+            return;
+        }
+
         try {
-            const response = await axios.post('http://localhost:8080/api/users/registerAdmin', playerData);
+            const response = await axios.post('http://localhost:8080/api/users/registerAdmin', playerData, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
             console.log('Player added:', response.data);
             // Reset form fields after successful submission
             setPlayerData({
@@ -58,6 +68,7 @@ const PlayerForm = ({ onPlayerAdded }) => {
             console.error('Error adding player:', error);
         }
     };
+
 
     const handleChange = (event) => {
         const { name, value } = event.target;
