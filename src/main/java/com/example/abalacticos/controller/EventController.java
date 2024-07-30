@@ -8,6 +8,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/availability")
@@ -27,5 +28,21 @@ public class EventController {
         event.setUsername(username);
         eventRepository.save(event);
         return ResponseEntity.ok(event);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteEvent(@PathVariable String id, Authentication authentication) {
+        Optional<Event> eventOptional = eventRepository.findById(id);
+        if (eventOptional.isPresent()) {
+            Event event = eventOptional.get();
+            if (event.getUsername().equals(authentication.getName())) {
+                eventRepository.delete(event);
+                return ResponseEntity.ok("Event deleted successfully");
+            } else {
+                return ResponseEntity.status(403).body("You are not authorized to delete this event");
+            }
+        } else {
+            return ResponseEntity.status(404).body("Event not found");
+        }
     }
 }

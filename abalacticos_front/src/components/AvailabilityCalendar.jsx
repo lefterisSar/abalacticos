@@ -61,6 +61,32 @@ const AvailabilityCalendar = () => {
         }
     };
 
+    const handleSelectEvent = (event) => {
+        const confirmDelete = window.confirm(`Do you want to delete the event '${event.title}'?`);
+        if (confirmDelete) {
+            deleteEventFromBackend(event);
+        }
+    };
+
+    const deleteEventFromBackend = async (event) => {
+        const token = localStorage.getItem('authToken');
+        if (!token) {
+            console.error('No auth token found');
+            return;
+        }
+
+        try {
+            await axios.delete(`http://localhost:8080/api/availability/${event.id}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+            setEvents(events.filter(e => e.id !== event.id));
+        } catch (error) {
+            console.error('Error deleting event:', error);
+        }
+    };
+
     return (
         <div>
             <Calendar
@@ -71,7 +97,7 @@ const AvailabilityCalendar = () => {
                 style={{ height: 500 }}
                 selectable
                 onSelectSlot={handleSelectSlot}
-                onSelectEvent={event => setSelectedEvent(event)}
+                onSelectEvent={handleSelectEvent}
             />
         </div>
     );
