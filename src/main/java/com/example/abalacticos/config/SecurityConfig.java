@@ -21,7 +21,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 @Configuration
 @EnableWebSecurity
-//@EnableMethodSecurity
+@EnableMethodSecurity
 public class SecurityConfig {
 
     @Autowired
@@ -44,7 +44,7 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authz -> authz
                     .requestMatchers("/", "/public/**", "/api/users/register", "/api/auth/**").permitAll()
-                    .requestMatchers("/api/users/registerAdmin").hasRole("ADMIN")
+                    .requestMatchers("/api/users/registerAdmin","/api/users/update/**").hasRole("ADMIN")
                     .anyRequest().authenticated()
                 )
                 .formLogin(form -> form

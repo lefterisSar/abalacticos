@@ -8,6 +8,26 @@ const PlayersGrid = () => {
     const [rows, setRows] = useState([]);
     const navigate = useNavigate();
 
+    const handleProcessRowUpdate = async (newRow, oldRow) => {
+        const updatedRow = { ...oldRow, ...newRow };
+
+        try {
+            const token = localStorage.getItem('authToken');
+            await axios.put(`http://localhost:8080/api/users/${updatedRow.id}`, updatedRow, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+            return updatedRow;
+        } catch (error) {
+            console.error('Error updating player:', error);
+            if (error.response && (error.response.status === 401 || error.response.status === 403)) {
+                navigate('/login'); // Redirect to login if unauthorized or forbidden
+            }
+            throw error; // Let DataGrid revert the changes
+        }
+    };
+
     useEffect(() => {
         const fetchPlayers = async () => {
             const token = localStorage.getItem('authToken');
@@ -47,20 +67,24 @@ const PlayersGrid = () => {
     }, [navigate]);
 
     const columns = [
-        { field: 'name', headerName: 'Name', width: 150 },
-        { field: 'surname', headerName: 'Surname', width: 150 },
-        { field: 'age', headerName: 'Age', width: 100 },
-        { field: 'debutDate', headerName: 'Debut Date', width: 150 },
-        { field: 'lastGK', headerName: 'Last GK Date', width: 150 },
-        { field: 'wins', headerName: 'Wins', width: 100 },
-        { field: 'loses', headerName: 'Loses', width: 100 },
-        { field: 'draws', headerName: 'Draws', width: 100 },
+        { field: 'name', headerName: 'Name', width: 150,editable: localStorage.getItem('userRole') === "ADMIN" },
+        { field: 'surname', headerName: 'Surname', width: 150,editable: localStorage.getItem('userRole') === "ADMIN"  },
+        { field: 'age', headerName: 'Age', width: 100, editable: localStorage.getItem('userRole') === "ADMIN"  },
+        { field: 'debutDate', headerName: 'Debut Date', width: 150, editable: localStorage.getItem('userRole') === "ADMIN"  },
+        { field: 'lastGK', headerName: 'Last GK Date', width: 150, editable: localStorage.getItem('userRole') === "ADMIN"  },
+        { field: 'wins', headerName: 'Wins', width: 100, editable: localStorage.getItem('userRole') === "ADMIN"  },
+        { field: 'loses', headerName: 'Loses', width: 100, editable: localStorage.getItem('userRole') === "ADMIN"  },
+        { field: 'draws', headerName: 'Draws', width: 100, editable: localStorage.getItem('userRole') === "ADMIN"  },
 
     ];
 
     return (
         <div style={{ height: 600, width: '100%' }}>
-            <DataGrid rows={rows} columns={columns} />
+            <DataGrid
+                rows={rows}
+                columns={columns}
+                processRowUpdate={handleProcessRowUpdate}
+            />
         </div>
     );
 };

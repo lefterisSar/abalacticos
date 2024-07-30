@@ -1,9 +1,10 @@
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import {Link, useLocation, useNavigate} from 'react-router-dom';
 import '../Header.css';
 
 const Header = () => {
     const navigate = useNavigate();
+    const location = useLocation();
 
     const token = localStorage.getItem('authToken');
     let role = localStorage.getItem('userRole');
@@ -32,14 +33,14 @@ const Header = () => {
                     {token && (
                         <>
                             <li><Link to="/players">Players</Link></li>
-                            {role === 'ADMIN' && (
+                            {role === 'ADMIN' &&  location.pathname !== '/admin-dashboard' && (
                                 <>
                                     <li><Link to="/admin-dashboard">Admin Dashboard</Link></li>
                                 </>
                             )}
                         </>
                     )}
-                    {!token && (
+                    {!token && location.pathname !== '/login' && (
                         <li><Link to="/login">Login</Link></li>
                     )}
                 </ul>

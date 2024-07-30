@@ -30,7 +30,7 @@ public class UserController {
         this.userService = userService;
     }
 
-//    @PreAuthorize("hasRole('ADMIN')") TODO: Fix this along with backend ROLES.
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/registerAdmin")
     public ResponseEntity<?> registerUserAdmin(@RequestBody @Valid RegistrationDto registrationDto) {
         System.out.println("Registering user: " + registrationDto.getUsername());
@@ -43,6 +43,16 @@ public class UserController {
         System.out.println("Registering user: " + registrationDto.getUsername());
         AbalacticosUser newUser = userService.registerUser(registrationDto);
         return ResponseEntity.ok("User registered successfully");
+    }
+
+
+    // New endpoint for updating user details
+    @PreAuthorize("hasRole('ADMIN')")
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateUser(@PathVariable String id, @RequestBody AbalacticosUser updatedUser) {
+        System.out.println("Updating user: " + updatedUser.getUsername());
+        userService.updateUser(id, updatedUser);
+        return ResponseEntity.ok("User updated successfully");
     }
 
     @GetMapping

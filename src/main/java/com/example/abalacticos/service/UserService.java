@@ -58,6 +58,19 @@ public class UserService {
         newUser.setCommunicationDetails(registrationDto.getCommunicationDetails());
     }
 
+
+    public void updateUser(String id, AbalacticosUser updatedUser) {
+        AbalacticosUser existingUser = userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
+        existingUser.setUsername(updatedUser.getUsername());
+//        existingUser.setPassword(updatedUser.getPassword() != null ? passwordEncoder.encode(updatedUser.getPassword()) : existingUser.getPassword());
+        existingUser.setRoles(updatedUser.getRoles());
+        existingUser.setDraws(updatedUser.getDraws());
+        existingUser.setWins(updatedUser.getWins());
+        existingUser.setLosses(updatedUser.getLosses());
+        existingUser.setCommunicationDetails(updatedUser.getCommunicationDetails());
+        userRepository.save(existingUser);
+    }
+
     public List<AbalacticosUser> getAllUsers() {
         return userRepository.findAll();
     }
