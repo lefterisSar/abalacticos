@@ -73,7 +73,6 @@ const PlayerForm = ({ onPlayerAdded }) => {
         }
     };
 
-
     const handleChange = (event) => {
         const { name, value } = event.target;
         const [parent, child] = name.split('.');
@@ -103,19 +102,21 @@ const PlayerForm = ({ onPlayerAdded }) => {
             </select>
             <input type="text" name="name" value={playerData.name} onChange={handleChange} placeholder="Name" required />
             <input type="text" name="surname" value={playerData.surname} onChange={handleChange} placeholder="Surname" required />
-            {/*<input type="number" name="age" value={playerData.age} onChange={handleChange} placeholder="Age" required />*/}
-            {/*<input type="date" name="debutDate" value={playerData.debutDate} onChange={handleChange} placeholder="Debut Date" required />*/}
-            {/*<input type="date" name="lastGK" value={playerData.lastGK} onChange={handleChange} placeholder="Last Game Date" required />*/}
+            <input type="date" name="debutDate" value={playerData.debutDate} onChange={handleChange} placeholder="Debut Date" required />
+            <input type="date" name="lastGK" value={playerData.lastGK} onChange={handleChange} placeholder="Last Game Date" />
             <input type="number" name="wins" value={playerData.wins} onChange={handleChange} placeholder="Wins" />
             <input type="number" name="loses" value={playerData.loses} onChange={handleChange} placeholder="Loses" />
             <input type="number" name="draws" value={playerData.draws} onChange={handleChange} placeholder="Draws" />
-            {/*<input type="text" name="invitationFriend" value={playerData.invitationFriend} onChange={handleChange} placeholder="Invitation Friend" />*/}
-            {/*<input type="text" name="favClub" value={playerData.favClub} onChange={handleChange} placeholder="Favorite Club" />*/}
-            {/*<input type="text" name="sn" value={playerData.sn} onChange={handleChange} placeholder="Social Network" />*/}
-            {/*<input type="date" name="birthday" value={playerData.birthday} onChange={handleChange} placeholder="Birthday" />*/}
-            {/*<input type="text" name="communicationDetails.phoneNumber" value={playerData.communicationDetails.phoneNumber} onChange={handleChange} placeholder="Phone Number" />*/}
-            {/*<input type="text" name="communicationDetails.address" value={playerData.communicationDetails.address} onChange={handleChange} placeholder="Address" />*/}
-            {/*<input type="email" name="communicationDetails.email" value={playerData.communicationDetails.email} onChange={handleChange} placeholder="Email" />*/}
+            <input type="text" name="invitationFriend" value={playerData.invitationFriend} onChange={handleChange} placeholder="Invitation Friend" />
+            <input type="text" name="favClub" value={playerData.favClub} onChange={handleChange} placeholder="Favorite Club" />
+            <input type="text" name="sn" value={playerData.sn} onChange={handleChange} placeholder="Social Network" />
+            <input type="date" name="birthday" value={playerData.birthday} onChange={handleChange} placeholder="Birthday" />
+            <input type="text" name="communicationDetails.phoneNumber" value={playerData.communicationDetails.phoneNumber}
+               onChange={handleChange} placeholder="Phone Number" />
+            <input type="text" name="communicationDetails.address" value={playerData.communicationDetails.address}
+               onChange={handleChange} placeholder="Address" />
+            <input type="email" name="communicationDetails.email" value={playerData.communicationDetails.email}
+               onChange={handleChange} placeholder="Email" />
             <button type="submit">Add Player</button>
             {error && <div style={{color: 'red'}}>{error}</div>}
         </form>
