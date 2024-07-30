@@ -22,7 +22,8 @@ const PlayerForm = ({ onPlayerAdded }) => {
             email: ''
         },
         username: '',
-        password: ''
+        password: '',
+        role: 'USER'  // Default role
     });
 
     const handleSubmit = async (event) => {
@@ -61,11 +62,12 @@ const PlayerForm = ({ onPlayerAdded }) => {
                     email: ''
                 },
                 username: '',
-                password: ''
+                password: '',
+                role: 'USER'  // Reset to default role
             });
             // Call the function passed as prop to notify the parent component
             // onPlayerAdded();
-        }catch (error) {
+        } catch (error) {
             console.error('Error registering user:', error);
             setError(error.response.data);
         }
@@ -95,6 +97,10 @@ const PlayerForm = ({ onPlayerAdded }) => {
         <form onSubmit={handleSubmit}>
             <input type="text" name="username" value={playerData.username} onChange={handleChange} placeholder="Username" required />
             <input type="password" name="password" value={playerData.password} onChange={handleChange} placeholder="Password" required />
+            <select name="role" value={playerData.role} onChange={handleChange} required>
+                <option value="USER">USER</option>
+                <option value="ADMIN">ADMIN</option>
+            </select>
             <input type="text" name="name" value={playerData.name} onChange={handleChange} placeholder="Name" required />
             <input type="text" name="surname" value={playerData.surname} onChange={handleChange} placeholder="Surname" required />
             {/*<input type="number" name="age" value={playerData.age} onChange={handleChange} placeholder="Age" required />*/}

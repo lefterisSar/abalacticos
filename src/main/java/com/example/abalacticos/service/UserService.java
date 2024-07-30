@@ -30,7 +30,7 @@ public class UserService {
         AbalacticosUser newUser = new AbalacticosUser();
         newUser.setUsername(registrationDto.getUsername());
         newUser.setPassword(passwordEncoder.encode(registrationDto.getPassword()));
-        newUser.setRoles("USER");
+        newUser.setRoles(registrationDto.getRole());
         setPlayerAttributes(newUser, registrationDto);
         return userRepository.save(newUser);
     }

@@ -11,7 +11,7 @@ public class RegistrationDto {
         private String password;
         @NotEmpty
         private String email;
-
+        private String role;
         // Player attributes
         private String name;
         private String surname;
@@ -40,6 +40,14 @@ public class RegistrationDto {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
     }
 
     public String getSurname() {
