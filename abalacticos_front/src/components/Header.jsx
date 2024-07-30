@@ -25,6 +25,10 @@ const Header = () => {
 
     return (
         <header className="header">
+            {location.pathname !== '/availability' && (
+                <li><Link to="/availability">Availability</Link></li>
+            )}
+
             <img src="/abalacticosLogo.jpg" alt="Abalacticos Logo" className="logo"/>
             <li>Role: {role}</li>
             <li>UserName: {userName}</li>
