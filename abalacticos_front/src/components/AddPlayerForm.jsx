@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 
 const PlayerForm = ({ onPlayerAdded }) => {
+    const [error, setError] = useState('');
     const [playerData, setPlayerData] = useState({
         name: '',
         surname: '',
@@ -64,8 +65,9 @@ const PlayerForm = ({ onPlayerAdded }) => {
             });
             // Call the function passed as prop to notify the parent component
             // onPlayerAdded();
-        } catch (error) {
-            console.error('Error adding player:', error);
+        }catch (error) {
+            console.error('Error registering user:', error);
+            setError(error.response.data);
         }
     };
 
@@ -109,6 +111,7 @@ const PlayerForm = ({ onPlayerAdded }) => {
             {/*<input type="text" name="communicationDetails.address" value={playerData.communicationDetails.address} onChange={handleChange} placeholder="Address" />*/}
             {/*<input type="email" name="communicationDetails.email" value={playerData.communicationDetails.email} onChange={handleChange} placeholder="Email" />*/}
             <button type="submit">Add Player</button>
+            {error && <div style={{color: 'red'}}>{error}</div>}
         </form>
     );
 };

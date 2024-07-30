@@ -24,6 +24,9 @@ public class UserService {
 
     public AbalacticosUser registerUserAdmin(RegistrationDto registrationDto)
     {
+        if (userRepository.findByUsername(registrationDto.getUsername()) != null) {
+            throw new RuntimeException("Username already exists");
+        }
         AbalacticosUser newUser = new AbalacticosUser();
         newUser.setUsername(registrationDto.getUsername());
         newUser.setPassword(passwordEncoder.encode(registrationDto.getPassword()));
@@ -33,6 +36,9 @@ public class UserService {
     }
 
     public AbalacticosUser registerUser(RegistrationDto registrationDto) {
+        if (userRepository.findByUsername(registrationDto.getUsername()) != null) {
+            throw new RuntimeException("Username already exists");
+        }
         AbalacticosUser newUser = new AbalacticosUser();
         newUser.setUsername(registrationDto.getUsername());
         newUser.setPassword(passwordEncoder.encode(registrationDto.getPassword()));

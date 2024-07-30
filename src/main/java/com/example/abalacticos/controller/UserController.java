@@ -33,16 +33,21 @@ public class UserController {
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/registerAdmin")
     public ResponseEntity<?> registerUserAdmin(@RequestBody @Valid RegistrationDto registrationDto) {
-        System.out.println("Registering user: " + registrationDto.getUsername());
-        AbalacticosUser newUser = userService.registerUserAdmin(registrationDto);
-        return ResponseEntity.ok("User registered successfully");
+        try {
+            userService.registerUserAdmin(registrationDto);
+            return ResponseEntity.ok("User registered successfully");
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
-
-  @PostMapping("/register")
+    @PostMapping("/register")
     public ResponseEntity<?> registerUser(@RequestBody @Valid RegistrationDto registrationDto) {
-        System.out.println("Registering user: " + registrationDto.getUsername());
-        AbalacticosUser newUser = userService.registerUser(registrationDto);
-        return ResponseEntity.ok("User registered successfully");
+        try {
+            userService.registerUser(registrationDto);
+            return ResponseEntity.ok("User registered successfully");
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
 
