@@ -32,7 +32,11 @@ const Header = () => {
                 <ul>
                     {token && (
                         <>
-                            <li><Link to="/players">Players</Link></li>
+                            { location.pathname !== '/players' && (
+                                <>
+                                    <li><Link to="/players">Players</Link></li>
+                                </>
+                            )}
                             {role === 'ADMIN' &&  location.pathname !== '/admin-dashboard' && (
                                 <>
                                     <li><Link to="/admin-dashboard">Admin Dashboard</Link></li>
