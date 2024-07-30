@@ -3,10 +3,34 @@ import React, { useState, useEffect } from 'react';
 import { DataGrid } from '@mui/x-data-grid';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { Button } from '@mui/material';
 
 const PlayersGrid = () => {
     const [rows, setRows] = useState([]);
     const navigate = useNavigate();
+
+    const handleDelete = async (id) => {
+        if (window.confirm("Are you sure you want to delete this user?")) {
+            const token = localStorage.getItem('authToken');
+            if (!token) {
+                console.error('No auth token found');
+                navigate('/login'); // Redirect to login if not authenticated
+                return;
+            }
+
+            try {
+                await axios.delete(`http://localhost:8080/api/users/${id}`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                });
+                setRows(rows.filter(row => row.id !== id));
+            } catch (error) {
+                console.error('Error deleting user:', error);
+            }
+        }
+    };
+
 
     const handleProcessRowUpdate = async (newRow, oldRow) => {
         const updatedRow = { ...oldRow, ...newRow };
@@ -66,16 +90,35 @@ const PlayersGrid = () => {
         fetchPlayers();
     }, [navigate]);
 
+    const role = localStorage.getItem('userRole')
     const columns = [
-        { field: 'name', headerName: 'Name', width: 150,editable: localStorage.getItem('userRole') === "ADMIN" },
-        { field: 'surname', headerName: 'Surname', width: 150,editable: localStorage.getItem('userRole') === "ADMIN"  },
-        { field: 'age', headerName: 'Age', width: 100, editable: localStorage.getItem('userRole') === "ADMIN"  },
-        { field: 'debutDate', headerName: 'Debut Date', width: 150, editable: localStorage.getItem('userRole') === "ADMIN"  },
-        { field: 'lastGK', headerName: 'Last GK Date', width: 150, editable: localStorage.getItem('userRole') === "ADMIN"  },
-        { field: 'wins', headerName: 'Wins', width: 100, editable: localStorage.getItem('userRole') === "ADMIN"  },
-        { field: 'loses', headerName: 'Loses', width: 100, editable: localStorage.getItem('userRole') === "ADMIN"  },
-        { field: 'draws', headerName: 'Draws', width: 100, editable: localStorage.getItem('userRole') === "ADMIN"  },
+        { field: 'name', headerName: 'Name', width: 150,editable: role === "ADMIN" },
+        { field: 'surname', headerName: 'Surname', width: 150,editable: role === "ADMIN"  },
+        { field: 'age', headerName: 'Age', width: 100, editable: role === "ADMIN"  },
+        { field: 'debutDate', headerName: 'Debut Date', width: 150, editable: role === "ADMIN"  },
+        { field: 'lastGK', headerName: 'Last GK Date', width: 150, editable: role === "ADMIN"  },
+        { field: 'wins', headerName: 'Wins', width: 100, editable: role === "ADMIN"  },
+        { field: 'loses', headerName: 'Loses', width: 100, editable: role === "ADMIN"  },
+        { field: 'draws', headerName: 'Draws', width: 100, editable: role === "ADMIN"  },
+        {
+            field: 'actions',
+            headerName: 'Actions',
+            width: 150,
+            renderCell: (params) => {
 
+
+                if(role==="ADMIN")
+                {
+                   return( <Button
+                        variant="contained"
+                        color="secondary"
+                        onClick={() => handleDelete(params.id)}>
+                        Delete
+                    </Button>);
+                 }
+
+            }
+        }
     ];
 
     return (

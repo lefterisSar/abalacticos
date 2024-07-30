@@ -77,6 +77,10 @@ public class UserService {
         userRepository.save(existingUser);
     }
 
+    public void deleteUser(String id) {
+        userRepository.deleteById(id);
+    }
+
     public List<AbalacticosUser> getAllUsers() {
         return userRepository.findAll();
     }
