@@ -79,6 +79,12 @@ public class UserService {
         userRepository.save(existingUser);
     }
 
+    public void updateAvailability(AbalacticosUser user) {
+        AbalacticosUser existingUser = userRepository.findById(user.getId()).orElseThrow(() -> new RuntimeException("User not found"));
+        existingUser.setAvailability(user.getAvailability());
+        userRepository.save(existingUser);
+    }
+
     public void deleteUser(String id) {
         userRepository.deleteById(id);
     }

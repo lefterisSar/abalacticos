@@ -1,4 +1,3 @@
-// PlayersGrid.jsx
 import React, { useState, useEffect } from 'react';
 import { DataGrid } from '@mui/x-data-grid';
 import axios from 'axios';
@@ -32,7 +31,6 @@ const PlayersGrid = () => {
         }
     };
 
-
     const handleProcessRowUpdate = async (newRow, oldRow) => {
         const updatedRow = { ...oldRow, ...newRow };
 
@@ -53,7 +51,6 @@ const PlayersGrid = () => {
         }
     };
 
-    //Player fetching
     useEffect(() => {
         const fetchPlayers = async () => {
             const token = localStorage.getItem('authToken');
@@ -63,7 +60,7 @@ const PlayersGrid = () => {
                 return;
             }
             const role = localStorage.getItem('userRole');
-            role==="ADMIN"? setIsAdmin(true): setIsAdmin(false);
+            role === "ADMIN" ? setIsAdmin(true) : setIsAdmin(false);
             try {
                 const response = await axios.get('http://localhost:8080/api/users', {
                     headers: {
@@ -74,7 +71,8 @@ const PlayersGrid = () => {
                 if (response.data && Array.isArray(response.data)) {
                     const playersWithId = response.data.map(player => ({
                         ...player,
-                        id: player.id || `${player.name}-${player.surname}-${player.age}` // Fallback if no id field is present
+                        id: player.id || `${player.name}-${player.surname}-${player.age}`, // Fallback if no id field is present
+                        availability: player.availability || [] // Ensure availability is an array
                     }));
                     setRows(playersWithId);
                 } else {
@@ -93,8 +91,63 @@ const PlayersGrid = () => {
         fetchPlayers();
     }, [navigate]);
 
+    const handleAvailabilityChange = async (event, row) => {
+        const { value, checked } = event.target;
+        const updatedAvailability = checked
+            ? [...row.availability, value]
+            : row.availability.filter(day => day !== value);
+
+        try {
+            const token = localStorage.getItem('authToken');
+            if (!token) {
+                console.error('No auth token found');
+                navigate('/login'); // Redirect to login if not authenticated
+                return;
+            }
+
+            await axios.put(
+                `http://localhost:8080/api/users/updateAvailability`,
+                { id: row.id, availability: updatedAvailability },
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                }
+            );
+
+            setRows((prevRows) =>
+                prevRows.map((r) =>
+                    r.id === row.id ? { ...r, availability: updatedAvailability } : r
+                )
+            );
+        } catch (error) {
+            console.error('Error updating availability:', error);
+        }
+    };
+
+    const renderAvailabilityCheckboxes = (params) => {
+        const days = ['Tuesday', 'Wednesday', 'Friday'];
+        const availability = params.row.availability || []; // Ensure availability is an array
+        return (
+            <>
+                {days.map(day => (
+                    <label key={day}>
+                        <input
+                            type="checkbox"
+                            value={day}
+                            checked={availability.includes(day)}
+                            disabled={params.row.username !== localStorage.getItem('userName')}
+                            onChange={(event) => handleAvailabilityChange(event, params.row)}
+                        />
+                        {day}
+                    </label>
+                ))}
+            </>
+        );
+    };
+
     const columns = [
-        { field: 'username', headerName: 'Username', width: 150 , editable: isAdmin},
+        { field: 'username', headerName: 'Username', width: 150, editable: isAdmin },
         { field: 'name', headerName: 'Name', width: 150, editable: isAdmin },
         { field: 'surname', headerName: 'Surname', width: 150, editable: isAdmin },
         { field: 'wins', headerName: 'Wins', width: 100, editable: isAdmin },
@@ -103,12 +156,17 @@ const PlayersGrid = () => {
         { field: 'age', headerName: 'Age', width: 100, editable: isAdmin },
         { field: 'debutDate', headerName: 'Debut Date', width: 150, editable: isAdmin },
         { field: 'lastGK', headerName: 'Last GK Date', width: 150, editable: isAdmin },
-        { field: 'availability', headerName: 'Availability', width: 200, editable: true },
+        {
+            field: 'availability',
+            headerName: 'Availability',
+            width: 300,
+            renderCell: renderAvailabilityCheckboxes,
+        },
         isAdmin && { field: 'communicationDetails.phoneNumber', headerName: 'Phone Number', width: 150, editable: isAdmin },
         isAdmin && { field: 'communicationDetails.address', headerName: 'Address', width: 200, editable: isAdmin },
         isAdmin && { field: 'communicationDetails.email', headerName: 'Email', width: 200, editable: isAdmin },
         isAdmin && { field: 'birthday', headerName: 'Birthday', width: 150, editable: isAdmin },
-        isAdmin &&  {
+        isAdmin && {
             field: 'actions',
             headerName: 'Actions',
             width: 150,
@@ -127,7 +185,8 @@ const PlayersGrid = () => {
             <DataGrid
                 rows={rows}
                 columns={columns}
-                processRowUpdate={handleProcessRowUpdate}/>
+                processRowUpdate={handleProcessRowUpdate}
+            />
         </div>
     );
 };

@@ -72,5 +72,11 @@ public class UserController {
         return ResponseEntity.ok("User deleted successfully");
     }
 
+    @PutMapping("/updateAvailability")
+    public ResponseEntity<?> updateAvailability(@RequestBody AbalacticosUser user) {
+        userService.updateAvailability(user);
+        return ResponseEntity.ok("Availability updated successfully");
+    }
+
     // Other CRUD operations if needed
 }
