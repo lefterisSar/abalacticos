@@ -3,6 +3,8 @@ package com.example.abalacticos.model;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.util.List;
+
 @Document(collection = "abalacticos_users")
 public class AbalacticosUser {
     @Id
@@ -27,6 +29,7 @@ public class AbalacticosUser {
     private String sn;
     private String birthday;
     private CommunicationDetails communicationDetails;
+    private List<String> availability;
 
     public AbalacticosUser() {}
 
@@ -143,7 +146,13 @@ public class AbalacticosUser {
         this.communicationDetails = communicationDetails;
     }
 
+    public List<String> getAvailability() {
+        return availability;
+    }
 
+    public void setAvailability(List<String> availability) {
+        this.availability = availability;
+    }
 
 
     // Getters and setters for all fields

@@ -7,6 +7,7 @@ import { Button } from '@mui/material';
 
 const PlayersGrid = () => {
     const [rows, setRows] = useState([]);
+    const [isAdmin, setIsAdmin] = useState(false);
     const navigate = useNavigate();
 
     const handleDelete = async (id) => {
@@ -52,6 +53,7 @@ const PlayersGrid = () => {
         }
     };
 
+    //Player fetching
     useEffect(() => {
         const fetchPlayers = async () => {
             const token = localStorage.getItem('authToken');
@@ -60,7 +62,8 @@ const PlayersGrid = () => {
                 navigate('/login'); // Redirect to login if not authenticated
                 return;
             }
-
+            const role = localStorage.getItem('userRole');
+            role==="ADMIN"? setIsAdmin(true): setIsAdmin(false);
             try {
                 const response = await axios.get('http://localhost:8080/api/users', {
                     headers: {
@@ -90,44 +93,41 @@ const PlayersGrid = () => {
         fetchPlayers();
     }, [navigate]);
 
-    const role = localStorage.getItem('userRole')
     const columns = [
-        { field: 'name', headerName: 'Name', width: 150,editable: role === "ADMIN" },
-        { field: 'surname', headerName: 'Surname', width: 150,editable: role === "ADMIN"  },
-        { field: 'age', headerName: 'Age', width: 100, editable: role === "ADMIN"  },
-        { field: 'debutDate', headerName: 'Debut Date', width: 150, editable: role === "ADMIN"  },
-        { field: 'lastGK', headerName: 'Last GK Date', width: 150, editable: role === "ADMIN"  },
-        { field: 'wins', headerName: 'Wins', width: 100, editable: role === "ADMIN"  },
-        { field: 'loses', headerName: 'Loses', width: 100, editable: role === "ADMIN"  },
-        { field: 'draws', headerName: 'Draws', width: 100, editable: role === "ADMIN"  },
-        {
+        { field: 'username', headerName: 'Username', width: 150 },
+        { field: 'name', headerName: 'Name', width: 150 },
+        { field: 'surname', headerName: 'Surname', width: 150 },
+        { field: 'wins', headerName: 'Wins', width: 100 },
+        { field: 'losses', headerName: 'Losses', width: 100 },
+        { field: 'draws', headerName: 'Draws', width: 100 },
+        { field: 'age', headerName: 'Age', width: 100 },
+        { field: 'debutDate', headerName: 'Debut Date', width: 150 },
+        { field: 'lastGK', headerName: 'Last GK Date', width: 150 },
+        { field: 'availability', headerName: 'Availability', width: 200 },
+        isAdmin && { field: 'communicationDetails.phoneNumber', headerName: 'Phone Number', width: 150 },
+        isAdmin && { field: 'communicationDetails.address', headerName: 'Address', width: 200 },
+        isAdmin && { field: 'communicationDetails.email', headerName: 'Email', width: 200 },
+        isAdmin && { field: 'birthday', headerName: 'Birthday', width: 150 },
+        isAdmin &&  {
             field: 'actions',
             headerName: 'Actions',
             width: 150,
-            renderCell: (params) => {
-
-
-                if(role==="ADMIN")
-                {
-                   return( <Button
-                        variant="contained"
-                        color="secondary"
-                        onClick={() => handleDelete(params.id)}>
-                        Delete
-                    </Button>);
-                 }
-
-            }
-        }
-    ];
+            renderCell: (params) =>
+            {
+                return( <Button
+                    variant="contained"
+                    color="secondary"
+                    onClick={() => handleDelete(params.id)}>
+                    Delete
+                </Button>)
+            }}].filter(Boolean); // Filter out the false values for non-admins
 
     return (
         <div style={{ height: 600, width: '100%' }}>
             <DataGrid
                 rows={rows}
                 columns={columns}
-                processRowUpdate={handleProcessRowUpdate}
-            />
+                processRowUpdate={handleProcessRowUpdate}/>
         </div>
     );
 };

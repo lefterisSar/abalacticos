@@ -62,6 +62,7 @@ public class UserService {
         newUser.setSn(registrationDto.getSn());
         newUser.setBirthday(registrationDto.getBirthday());
         newUser.setCommunicationDetails(registrationDto.getCommunicationDetails());
+        newUser.setAvailability(registrationDto.getAvailability());
     }
 
 
@@ -74,6 +75,7 @@ public class UserService {
         existingUser.setWins(updatedUser.getWins());
         existingUser.setLosses(updatedUser.getLosses());
         existingUser.setCommunicationDetails(updatedUser.getCommunicationDetails());
+        existingUser.setAvailability(updatedUser.getAvailability());
         userRepository.save(existingUser);
     }
 

@@ -3,6 +3,8 @@ package com.example.abalacticos.model;
 
 import jakarta.validation.constraints.NotEmpty;
 
+import java.util.List;
+
 public class RegistrationDto {
 
         @NotEmpty
@@ -25,6 +27,8 @@ public class RegistrationDto {
         private String favClub;
         private String sn;
         private String birthday;
+        private List<String> availability;
+
 
     public String getEmail() {
         return email;
@@ -166,5 +170,13 @@ public class RegistrationDto {
 
     public void setLosses(int losses) {
         this.losses = losses;
+    }
+
+    public List<String> getAvailability() {
+        return availability;
+    }
+
+    public void setAvailability(List<String> availability) {
+        this.availability = availability;
     }
 }

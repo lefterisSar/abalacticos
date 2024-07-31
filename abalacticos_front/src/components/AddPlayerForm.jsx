@@ -23,7 +23,8 @@ const PlayerForm = ({ onPlayerAdded }) => {
         },
         username: '',
         password: '',
-        role: 'USER'  // Default role
+        role: 'USER',
+        availability: [],
     });
 
     const handleSubmit = async (event) => {
@@ -63,7 +64,8 @@ const PlayerForm = ({ onPlayerAdded }) => {
                 },
                 username: '',
                 password: '',
-                role: 'USER'  // Reset to default role
+                role: 'USER',
+                availability: [],
             });
             // Call the function passed as prop to notify the parent component
             // onPlayerAdded();
@@ -92,10 +94,22 @@ const PlayerForm = ({ onPlayerAdded }) => {
         }
     };
 
+    const handleAvailabilityChange = (event) => {
+        const { value, checked } = event.target;
+        setPlayerData(prevState => ({
+            ...prevState,
+            availability: checked
+                ? [...prevState.availability, value]
+                : prevState.availability.filter(day => day !== value)
+        }));
+    };
+
     return (
         <form onSubmit={handleSubmit}>
-            <input type="text" name="username" value={playerData.username} onChange={handleChange} placeholder="Username" required />
-            <input type="password" name="password" value={playerData.password} onChange={handleChange} placeholder="Password" required />
+            <input type="text" name="username" value={playerData.username} onChange={handleChange}
+                   placeholder="Username" required/>
+            <input type="password" name="password" value={playerData.password} onChange={handleChange}
+                   placeholder="Password" required/>
             <select name="role" value={playerData.role} onChange={handleChange} required>
                 <option value="USER">USER</option>
                 <option value="ADMIN">ADMIN</option>
@@ -109,14 +123,31 @@ const PlayerForm = ({ onPlayerAdded }) => {
             <input type="number" name="draws" value={playerData.draws} onChange={handleChange} placeholder="Draws" />
             <input type="text" name="invitationFriend" value={playerData.invitationFriend} onChange={handleChange} placeholder="Invitation Friend" />
             <input type="text" name="favClub" value={playerData.favClub} onChange={handleChange} placeholder="Favorite Club" />
-            <input type="text" name="sn" value={playerData.sn} onChange={handleChange} placeholder="Social Network" />
+            <input type="text" name="sn" value={playerData.sn} onChange={handleChange} placeholder="Serial Number" />
             <input type="date" name="birthday" value={playerData.birthday} onChange={handleChange} placeholder="Birthday" />
             <input type="text" name="communicationDetails.phoneNumber" value={playerData.communicationDetails.phoneNumber}
                onChange={handleChange} placeholder="Phone Number" />
             <input type="text" name="communicationDetails.address" value={playerData.communicationDetails.address}
                onChange={handleChange} placeholder="Address" />
             <input type="email" name="communicationDetails.email" value={playerData.communicationDetails.email}
-               onChange={handleChange} placeholder="Email" />
+                onChange={handleChange} placeholder="Email"/>
+            <div>
+                <label>
+                    <input type="checkbox" value="Tuesday" checked={playerData.availability.includes("Tuesday")}
+                           onChange={handleAvailabilityChange}/>
+                    Tuesday
+                </label>
+                <label>
+                    <input type="checkbox" value="Wednesday" checked={playerData.availability.includes("Wednesday")}
+                           onChange={handleAvailabilityChange}/>
+                    Wednesday
+                </label>
+                <label>
+                    <input type="checkbox" value="Friday" checked={playerData.availability.includes("Friday")}
+                           onChange={handleAvailabilityChange}/>
+                    Friday
+                </label>
+            </div>
             <button type="submit">Add Player</button>
             {error && <div style={{color: 'red'}}>{error}</div>}
         </form>
