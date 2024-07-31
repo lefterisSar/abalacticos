@@ -59,7 +59,7 @@ const PlayersGrid = () => {
             const token = localStorage.getItem('authToken');
             if (!token) {
                 console.error('No auth token found');
-                navigate('/login'); // Redirect to login if not authenticated
+                navigate('/login'); // Redirect to log in if not authenticated
                 return;
             }
             const role = localStorage.getItem('userRole');
@@ -94,20 +94,20 @@ const PlayersGrid = () => {
     }, [navigate]);
 
     const columns = [
-        { field: 'username', headerName: 'Username', width: 150 },
-        { field: 'name', headerName: 'Name', width: 150 },
-        { field: 'surname', headerName: 'Surname', width: 150 },
-        { field: 'wins', headerName: 'Wins', width: 100 },
-        { field: 'losses', headerName: 'Losses', width: 100 },
-        { field: 'draws', headerName: 'Draws', width: 100 },
-        { field: 'age', headerName: 'Age', width: 100 },
-        { field: 'debutDate', headerName: 'Debut Date', width: 150 },
-        { field: 'lastGK', headerName: 'Last GK Date', width: 150 },
-        { field: 'availability', headerName: 'Availability', width: 200 },
-        isAdmin && { field: 'communicationDetails.phoneNumber', headerName: 'Phone Number', width: 150 },
-        isAdmin && { field: 'communicationDetails.address', headerName: 'Address', width: 200 },
-        isAdmin && { field: 'communicationDetails.email', headerName: 'Email', width: 200 },
-        isAdmin && { field: 'birthday', headerName: 'Birthday', width: 150 },
+        { field: 'username', headerName: 'Username', width: 150 , editable: isAdmin},
+        { field: 'name', headerName: 'Name', width: 150, editable: isAdmin },
+        { field: 'surname', headerName: 'Surname', width: 150, editable: isAdmin },
+        { field: 'wins', headerName: 'Wins', width: 100, editable: isAdmin },
+        { field: 'losses', headerName: 'Losses', width: 100, editable: isAdmin },
+        { field: 'draws', headerName: 'Draws', width: 100, editable: isAdmin },
+        { field: 'age', headerName: 'Age', width: 100, editable: isAdmin },
+        { field: 'debutDate', headerName: 'Debut Date', width: 150, editable: isAdmin },
+        { field: 'lastGK', headerName: 'Last GK Date', width: 150, editable: isAdmin },
+        { field: 'availability', headerName: 'Availability', width: 200, editable: true },
+        isAdmin && { field: 'communicationDetails.phoneNumber', headerName: 'Phone Number', width: 150, editable: isAdmin },
+        isAdmin && { field: 'communicationDetails.address', headerName: 'Address', width: 200, editable: isAdmin },
+        isAdmin && { field: 'communicationDetails.email', headerName: 'Email', width: 200, editable: isAdmin },
+        isAdmin && { field: 'birthday', headerName: 'Birthday', width: 150, editable: isAdmin },
         isAdmin &&  {
             field: 'actions',
             headerName: 'Actions',
