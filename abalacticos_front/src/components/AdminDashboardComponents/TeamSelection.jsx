@@ -43,7 +43,6 @@ function HeaderWithIcon(props) {
 
 const TeamSelection = () => {
     const [players, setPlayers] = useState([]);
-    const [isAdmin, setIsAdmin] = useState(false);
     const [teamA, setTeamA] = useState([]);
     const [teamB, setTeamB] = useState([]);
     const navigate = useNavigate();
@@ -58,8 +57,6 @@ const TeamSelection = () => {
                 navigate('/login'); // Redirect to login if not authenticated
                 return;
             }
-            const role = localStorage.getItem('userRole');
-            role === "ADMIN" ? setIsAdmin(true) : setIsAdmin(false);
             try {
                 const response = await axios.get('http://localhost:8080/api/users', {
                     headers: {
@@ -71,7 +68,8 @@ const TeamSelection = () => {
                     const playersWithId = response.data.map(player => ({
                         ...player,
                         id: player.id || `${player.name}-${player.surname}-${player.age}`, // Fallback if no id field is present
-                        availability: player.availability || [] // Ensure availability is an array
+                        availability: player.availability || [], // Ensure availability is an array
+                        overallApps: (player.wins || 0) + (player.loses || 0) + (player.draws || 0) // Calculate overallApps
                     }));
                     setPlayers(playersWithId);
                 } else {
@@ -113,6 +111,7 @@ const TeamSelection = () => {
         { field: 'wins', headerName: 'Wins', flex: 1,renderCell: (params) => <span style={{ whiteSpace: 'nowrap' }}>{params.value}</span>},
         { field: 'losses', headerName: 'Losses', flex: 1, renderCell: (params) => <span style={{ whiteSpace: 'nowrap' }}>{params.value}</span>},
         { field: 'draws', headerName: 'Draws', flex: 1, renderCell: (params) => <span style={{ whiteSpace: 'nowrap' }}>{params.value}</span>},
+        { field: 'overallApps', headerName: 'Overall Apps', minWidth: 50, flex: 1 },
         { field: 'debutDate', headerName: 'Debut Date', flex: 1, renderCell: (params) => <span style={{ whiteSpace: 'nowrap' }}>{params.value}</span>},
         { field: 'lastGK', headerName: 'Last GK Date', flex: 1, renderCell: (params) => <span style={{ whiteSpace: 'nowrap' }}>{params.value}</span>},
         {
@@ -192,6 +191,11 @@ const TeamSelection = () => {
                     rows={filteredPlayers}
                     columns={columns}
                     autoHeight
+                    initialState={{
+                        sorting: {
+                            sortModel: [{ field: 'overallApps', sort: 'desc' }],
+                        },
+                    }}
                     columnGroupingModel={[
                         {
                             groupId: 'Basic Info',
@@ -203,7 +207,7 @@ const TeamSelection = () => {
                         },
                         {
                             groupId: 'stats',
-                            children: [{ field: 'wins' }, { field: 'losses' }, { field: 'draws' }],
+                            children: [{ field: 'wins' }, { field: 'losses' }, { field: 'draws' },{field: 'overallApps' }],
                             renderHeaderGroup: (params) => (
                                 <HeaderWithIcon {...params} icon={<Calculator fontSize="small" />} />
                             ),
