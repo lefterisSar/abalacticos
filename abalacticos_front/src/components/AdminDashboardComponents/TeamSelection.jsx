@@ -2,7 +2,44 @@ import React, { useState, useEffect } from 'react';
 import { DataGrid } from '@mui/x-data-grid';
 import axios from 'axios';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Button } from '@mui/material';
+import { Button, styled } from '@mui/material';
+import PersonIcon from '@mui/icons-material/Person';
+import Calculator from '@mui/icons-material/QueryStats';
+
+const CustomDataGrid = styled(DataGrid)(({ theme }) => ({
+    '& .MuiDataGrid-columnHeaderTitleContainer': {
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    '& .MuiDataGrid-columnHeaderTitleContainerContent': {
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+}));
+
+const HeaderWithIconRoot = styled('div')(({ theme }) => ({
+    overflow: 'hidden',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    '& span': {
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        marginRight: theme.spacing(0.5),
+    },
+}));
+
+function HeaderWithIcon(props) {
+    const { icon, ...params } = props;
+
+    return (
+        <HeaderWithIconRoot>
+            <span>{params.headerName ?? params.groupId}</span> {icon}
+        </HeaderWithIconRoot>
+    );
+}
 
 const TeamSelection = () => {
     const [players, setPlayers] = useState([]);
@@ -69,15 +106,15 @@ const TeamSelection = () => {
     };
 
     const columns = [
-        { field: 'username', headerName: 'Username', flex: 1 },
-        { field: 'name', headerName: 'Name', flex: 1 },
-        { field: 'surname', headerName: 'Surname', flex: 1 },
-        { field: 'wins', headerName: 'Wins', flex: 1 },
-        { field: 'losses', headerName: 'Losses', flex: 1 },
-        { field: 'draws', headerName: 'Draws', flex: 1 },
-        { field: 'age', headerName: 'Age', flex: 1 },
-        { field: 'debutDate', headerName: 'Debut Date', flex: 1 },
-        { field: 'lastGK', headerName: 'Last GK Date', flex: 1 },
+        { field: 'username', headerName: 'Username', flex: 1, renderCell: (params) => <span style={{ whiteSpace: 'nowrap' }}>{params.value}</span> },
+        { field: 'name', headerName: 'Name', flex: 1, renderCell: (params) => <span style={{ whiteSpace: 'nowrap' }}>{params.value}</span>},
+        { field: 'surname', headerName: 'Surname', flex: 1, renderCell: (params) => <span style={{ whiteSpace: 'nowrap' }}>{params.value}</span> },
+        { field: 'age', headerName: 'Age', flex: 1, renderCell: (params) => <span style={{ whiteSpace: 'nowrap' }}>{params.value}</span> },
+        { field: 'wins', headerName: 'Wins', flex: 1,renderCell: (params) => <span style={{ whiteSpace: 'nowrap' }}>{params.value}</span>},
+        { field: 'losses', headerName: 'Losses', flex: 1, renderCell: (params) => <span style={{ whiteSpace: 'nowrap' }}>{params.value}</span>},
+        { field: 'draws', headerName: 'Draws', flex: 1, renderCell: (params) => <span style={{ whiteSpace: 'nowrap' }}>{params.value}</span>},
+        { field: 'debutDate', headerName: 'Debut Date', flex: 1, renderCell: (params) => <span style={{ whiteSpace: 'nowrap' }}>{params.value}</span>},
+        { field: 'lastGK', headerName: 'Last GK Date', flex: 1, renderCell: (params) => <span style={{ whiteSpace: 'nowrap' }}>{params.value}</span>},
         {
             field: 'actions',
             headerName: 'Actions',
@@ -128,16 +165,18 @@ const TeamSelection = () => {
     const teamPositions = ['GK', 'DL', 'DC', 'DR', 'ML', 'MC', 'MR', 'FC'];
 
     const renderTeam = (team) => (
-        <ul style={{padding: '0 20px'}}>
+        <ul style={{ padding: '0 20px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
             {teamPositions.map((position, index) => (
-            <li key={index}>{position}: {team[index] ? `${team[index].name} ${team[index].surname}` : 'N/A'}</li>
-        ))}
+                <li key={index} style={{ listStyleType: 'none', padding: '5px 0' }}>
+                    {position}: {team[index] ? `${team[index].name} ${team[index].surname}` : 'N/A'}
+                </li>
+            ))}
         </ul>
     );
 
     return (
         <div>
-            <h2 style={{display:'flex', justifyContent: 'center'}}>{day} Team Selection</h2>
+            <h2 style={{ display: 'flex', justifyContent: 'center' }}>{day} Team Selection</h2>
             <div style={{ display: 'flex', justifyContent: 'space-around' }}>
                 <div>
                     <h3>Team A</h3>
@@ -149,13 +188,29 @@ const TeamSelection = () => {
                 </div>
             </div>
             <div style={{ height: 'calc(100vh - 100px)', width: '100%' }}>
-                <DataGrid
+                <CustomDataGrid
                     rows={filteredPlayers}
                     columns={columns}
                     autoHeight
+                    columnGroupingModel={[
+                        {
+                            groupId: 'Basic Info',
+                            children: [{ field: 'name' }, { field: 'surname' }, { field: 'age' }],
+                            description: 'Basic information about the player',
+                            renderHeaderGroup: (params) => (
+                                <HeaderWithIcon {...params} icon={<PersonIcon fontSize="small" />} />
+                            ),
+                        },
+                        {
+                            groupId: 'stats',
+                            children: [{ field: 'wins' }, { field: 'losses' }, { field: 'draws' }],
+                            renderHeaderGroup: (params) => (
+                                <HeaderWithIcon {...params} icon={<Calculator fontSize="small" />} />
+                            ),
+                        },
+                    ]}
                 />
             </div>
-            );
         </div>
     );
 };
