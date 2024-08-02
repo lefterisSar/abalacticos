@@ -31,6 +31,7 @@ const HeaderWithIconRoot = styled('div')(({ theme }) => ({
     },
 }));
 
+
 function HeaderWithIcon(props) {
     const { icon, ...params } = props;
 
@@ -47,6 +48,23 @@ const TeamSelection = () => {
     const [teamB, setTeamB] = useState([]);
     const navigate = useNavigate();
     const { day } = useParams();
+    const [columnVisibilityModel, setColumnVisibilityModel] = useState({});
+    const userId = localStorage.getItem('userName'); // Assuming userId is stored in localStorage
+
+
+    const handleColumnVisibilityChange = (newModel) => {
+        setColumnVisibilityModel(newModel);
+        saveColumnVisibility(userId, newModel);
+    };
+
+    const saveColumnVisibility = (userId, visibilityModel) => {
+        localStorage.setItem(`columnVisibility_${userId}`, JSON.stringify(visibilityModel));
+    };
+
+    const loadColumnVisibility = (userId) => {
+        const savedModel = localStorage.getItem(`columnVisibility_${userId}`);
+        return savedModel ? JSON.parse(savedModel) : {};
+    };
 
     // Fetch players data
     useEffect(() => {
@@ -84,9 +102,11 @@ const TeamSelection = () => {
                 }
             }
         };
-
+        // Load column visibility preferences
+        const savedVisibilityModel = loadColumnVisibility(userId);
+        setColumnVisibilityModel(savedVisibilityModel);
         fetchPlayers();
-    }, [navigate]);
+    }, [navigate,userId]);
 
     // Filter players based on availability
     const filteredPlayers = players.filter(player => player.availability.includes(day));
@@ -191,6 +211,8 @@ const TeamSelection = () => {
                     rows={filteredPlayers}
                     columns={columns}
                     autoHeight
+                    columnVisibilityModel={columnVisibilityModel}
+                    onColumnVisibilityModelChange={handleColumnVisibilityChange}
                     initialState={{
                         sorting: {
                             sortModel: [{ field: 'overallApps', sort: 'desc' }],
