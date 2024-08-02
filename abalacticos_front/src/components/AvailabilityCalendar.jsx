@@ -8,7 +8,6 @@ const localizer = momentLocalizer(moment);
 
 const AvailabilityCalendar = () => {
     const [events, setEvents] = useState([]);
-    const [selectedEvent, setSelectedEvent] = useState(null);
 
     useEffect(() => {
         const fetchEvents = async () => {
