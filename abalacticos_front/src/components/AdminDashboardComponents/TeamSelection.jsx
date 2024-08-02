@@ -131,7 +131,22 @@ const TeamSelection = () => {
         { field: 'wins', headerName: 'Wins', flex: 1,renderCell: (params) => <span style={{ whiteSpace: 'nowrap' }}>{params.value}</span>},
         { field: 'losses', headerName: 'Losses', flex: 1, renderCell: (params) => <span style={{ whiteSpace: 'nowrap' }}>{params.value}</span>},
         { field: 'draws', headerName: 'Draws', flex: 1, renderCell: (params) => <span style={{ whiteSpace: 'nowrap' }}>{params.value}</span>},
-        { field: 'overallApps', headerName: 'Overall Apps', minWidth: 50, flex: 1 },
+        {
+            field: 'overallApps',
+            headerName: 'Overall Apps',
+            minWidth: 50,
+            flex: 1,
+            renderHeader: (params) => (
+                <strong>
+                    {'Overall Apps '}
+                    <span role="img" aria-label="enjoy">
+                </span>
+                </strong>
+            ),
+            renderCell: (params) => (
+                <span style={{ fontWeight: 'bold' }}>{params.value}</span>
+            )
+        },
         { field: 'debutDate', headerName: 'Debut Date', flex: 1, renderCell: (params) => <span style={{ whiteSpace: 'nowrap' }}>{params.value}</span>},
         { field: 'lastGK', headerName: 'Last GK Date', flex: 1, renderCell: (params) => <span style={{ whiteSpace: 'nowrap' }}>{params.value}</span>},
         {
