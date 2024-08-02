@@ -1,7 +1,7 @@
 import React, { useEffect, useState, forwardRef, useImperativeHandle } from 'react';
-import PlayerForm from "./components/AddPlayerForm";
+import PlayerForm from "./components/AdminDashboardComponents/AddPlayerForm";
 import PlayersGrid from "./components/PlayersGrid";
-import TeamSelection from "./components/TeamSelection";
+import TeamSelection from "./components/AdminDashboardComponents/TeamSelection";
 
 //TODO TThis is kept on purpose but not used right now.
 
