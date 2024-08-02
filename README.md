@@ -12,6 +12,7 @@ Personal project related to a 8x8 football team located in Heraklion.
     - MongoDB (BAckend DB) 
     - JAvascript (front-end)
     - React (front-end)
+    - React Router (Front-end Paging Router)
     - MUI component library (front-end)
     - Docker (deployment)
     - NPM (front-end package manager)
