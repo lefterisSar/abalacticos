@@ -51,6 +51,35 @@ const TeamSelection = () => {
     const [columnVisibilityModel, setColumnVisibilityModel] = useState({});
     const userId = localStorage.getItem('userName'); // Assuming userId is stored in localStorage
 
+    const handleConfirmTeams = async () => {
+        const match = {
+            datePlayed: new Date().toISOString().split('T')[0],
+            teamA: teamA.map(player => player.username),
+            teamB: teamB.map(player => player.username),
+        };
+
+        try {
+            const token = localStorage.getItem('authToken');
+            if (!token) {
+                console.error('No auth token found');
+                navigate('/login');
+                return;
+            }
+
+            const response = await axios.post('http://localhost:8080/api/matches', match, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+
+            if (response.status === 200) {
+                alert('Teams confirmed and saved successfully!');
+            }
+        } catch (error) {
+            console.error('Error saving match:', error);
+        }
+    };
+
 
     const handleColumnVisibilityChange = (newModel) => {
         setColumnVisibilityModel(newModel);
@@ -149,8 +178,7 @@ const TeamSelection = () => {
         },
         { field: 'debutDate', headerName: 'Debut Date', flex: 1, renderCell: (params) => <span style={{ whiteSpace: 'nowrap' }}>{params.value}</span>},
         { field: 'lastGK', headerName: 'Last GK Date', flex: 1, renderCell: (params) => <span style={{ whiteSpace: 'nowrap' }}>{params.value}</span>},
-        {
-            field: 'actions',
+        { field: 'actions',
             headerName: 'Actions',
             width: 300,
             renderCell: (params) => (
@@ -252,6 +280,13 @@ const TeamSelection = () => {
                     ]}
                 />
             </div>
+            {localStorage.getItem('userRole')==="ADMIN" && (
+                <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
+                    <Button variant="contained" color="primary" onClick={handleConfirmTeams}>
+                        Confirm Teams
+                    </Button>
+                </div>
+            )}
         </div>
     );
 };
