@@ -55,8 +55,8 @@ const TeamSelection = () => {
         const match = {
             day,
             date: new Date().toISOString(),
-            teamA: teamA.map(player => player.id),
-            teamB: teamB.map(player => player.id),
+            teamA: teamA.map(player => player.username),
+            teamB: teamB.map(player => player.username),
         };
 
         try {
@@ -79,7 +79,7 @@ const TeamSelection = () => {
             setTeamB(incrementOverallApps(teamB));
 
             setPlayers(players.map(player => {
-                if (teamA.some(p => p.id === player.id) || teamB.some(p => p.id === player.id)) {
+                if (teamA.some(p => p.username === player.username) || teamB.some(p => p.username === player.username)) {
                     return {
                         ...player,
                         overallApps: player.overallApps + 1
@@ -256,6 +256,13 @@ const TeamSelection = () => {
                     {renderTeam(teamB)}
                 </div>
             </div>
+            {localStorage.getItem('userRole')==="ADMIN" && (
+                <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
+                    <Button variant="contained" color="primary" onClick={handleConfirmTeams} disabled={teamA.length === 0 && teamB.length === 0}>
+                        Confirm Teams
+                    </Button>
+                </div>
+            )}
             <div style={{ height: 'calc(100vh - 100px)', width: '100%' }}>
                 <CustomDataGrid
                     rows={filteredPlayers}
@@ -287,13 +294,6 @@ const TeamSelection = () => {
                     ]}
                 />
             </div>
-            {localStorage.getItem('userRole')==="ADMIN" && (
-                <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
-                    <Button variant="contained" color="primary" onClick={handleConfirmTeams}>
-                        Confirm Teams
-                    </Button>
-                </div>
-            )}
         </div>
     );
 };
