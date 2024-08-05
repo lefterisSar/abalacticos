@@ -131,7 +131,19 @@ const TeamSelection = () => {
                         id: player.id || `${player.name}-${player.surname}-${player.age}`, // Fallback if no id field is present
                         availability: player.availability || [], // Ensure availability is an array
                     }));
+
+                    // Filter players based on availability and sort by overallApps in descending order
+                    const filteredPlayers = playersWithId.filter(player => player.availability.includes(day));
+                    const sortedPlayers = filteredPlayers.sort((a, b) => b.overallApps - a.overallApps);
+
+                    // Prepopulate teams
+                    const prepopulatedTeamA = sortedPlayers.slice(0, 8);
+                    const prepopulatedTeamB = sortedPlayers.slice(8, 16);
+
                     setPlayers(playersWithId);
+                    setTeamA(prepopulatedTeamA);
+                    setTeamB(prepopulatedTeamB);
+
                 } else {
                     console.error('Unexpected response format:', response.data);
                 }
