@@ -24,6 +24,8 @@ public class AbalacticosUser {
     private String debutDate;
     private String lastGK;
 
+    private int overallApps;
+
     private String invitationFriend;
     private String favClub;
     private String sn;
@@ -144,6 +146,14 @@ public class AbalacticosUser {
 
     public void setCommunicationDetails(CommunicationDetails communicationDetails) {
         this.communicationDetails = communicationDetails;
+    }
+
+    public int getOverallApps() {
+        return overallApps;
+    }
+
+    public void setOverallApps(int overallApps) {
+        this.overallApps = overallApps;
     }
 
     public List<String> getAvailability() {

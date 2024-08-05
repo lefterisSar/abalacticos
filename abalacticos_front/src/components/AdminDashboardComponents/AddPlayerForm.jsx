@@ -50,6 +50,7 @@ const PlayerForm = ({ onPlayerAdded }) => {
                 age: '',
                 debutDate: '',
                 lastGK: '',
+                overallApps: '',
                 wins: '',
                 loses: '',
                 draws: '',

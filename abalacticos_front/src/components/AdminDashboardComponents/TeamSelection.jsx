@@ -53,30 +53,44 @@ const TeamSelection = () => {
 
     const handleConfirmTeams = async () => {
         const match = {
-            datePlayed: new Date().toISOString().split('T')[0],
-            teamA: teamA.map(player => player.username),
-            teamB: teamB.map(player => player.username),
+            day,
+            date: new Date().toISOString(),
+            teamA: teamA.map(player => player.id),
+            teamB: teamB.map(player => player.id),
         };
 
         try {
             const token = localStorage.getItem('authToken');
-            if (!token) {
-                console.error('No auth token found');
-                navigate('/login');
-                return;
-            }
-
-            const response = await axios.post('http://localhost:8080/api/matches', match, {
+            await axios.post('http://localhost:8080/api/matches', match, {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }
             });
 
-            if (response.status === 200) {
-                alert('Teams confirmed and saved successfully!');
-            }
+            // Increment overallApps for teamA and teamB in frontend state
+            const incrementOverallApps = (team) => {
+                return team.map(player => ({
+                    ...player,
+                    overallApps: player.overallApps + 1
+                }));
+            };
+
+            setTeamA(incrementOverallApps(teamA));
+            setTeamB(incrementOverallApps(teamB));
+
+            setPlayers(players.map(player => {
+                if (teamA.some(p => p.id === player.id) || teamB.some(p => p.id === player.id)) {
+                    return {
+                        ...player,
+                        overallApps: player.overallApps + 1
+                    };
+                }
+                return player;
+            }));
+
+            alert('Teams confirmed and match recorded!');
         } catch (error) {
-            console.error('Error saving match:', error);
+            console.error('Error confirming teams:', error);
         }
     };
 
@@ -116,7 +130,6 @@ const TeamSelection = () => {
                         ...player,
                         id: player.id || `${player.name}-${player.surname}-${player.age}`, // Fallback if no id field is present
                         availability: player.availability || [], // Ensure availability is an array
-                        overallApps: (player.wins || 0) + (player.loses || 0) + (player.draws || 0) // Calculate overallApps
                     }));
                     setPlayers(playersWithId);
                 } else {
@@ -165,16 +178,10 @@ const TeamSelection = () => {
             headerName: 'Overall Apps',
             minWidth: 50,
             flex: 1,
-            renderHeader: (params) => (
-                <strong>
-                    {'Overall Apps '}
-                    <span role="img" aria-label="enjoy">
-                </span>
-                </strong>
-            ),
+            headerClassName: 'bold-header',
             renderCell: (params) => (
-                <span style={{ fontWeight: 'bold' }}>{params.value}</span>
-            )
+                <strong>{params.value}</strong>
+            ),
         },
         { field: 'debutDate', headerName: 'Debut Date', flex: 1, renderCell: (params) => <span style={{ whiteSpace: 'nowrap' }}>{params.value}</span>},
         { field: 'lastGK', headerName: 'Last GK Date', flex: 1, renderCell: (params) => <span style={{ whiteSpace: 'nowrap' }}>{params.value}</span>},

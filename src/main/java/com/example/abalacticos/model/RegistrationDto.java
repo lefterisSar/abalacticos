@@ -27,7 +27,16 @@ public class RegistrationDto {
         private String favClub;
         private String sn;
         private String birthday;
+        private int overallApps;
         private List<String> availability;
+
+    public int getOverallApps() {
+        return overallApps;
+    }
+
+    public void setOverallApps(int overallApps) {
+        this.overallApps = overallApps;
+    }
 
 
     public String getEmail() {

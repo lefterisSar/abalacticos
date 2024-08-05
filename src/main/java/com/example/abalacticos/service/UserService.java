@@ -63,6 +63,7 @@ public class UserService {
         newUser.setBirthday(registrationDto.getBirthday());
         newUser.setCommunicationDetails(registrationDto.getCommunicationDetails());
         newUser.setAvailability(registrationDto.getAvailability());
+        newUser.setOverallApps(registrationDto.getOverallApps());
     }
 
 
@@ -76,6 +77,7 @@ public class UserService {
         existingUser.setLosses(updatedUser.getLosses());
         existingUser.setCommunicationDetails(updatedUser.getCommunicationDetails());
         existingUser.setAvailability(updatedUser.getAvailability());
+        existingUser.setOverallApps(updatedUser.getOverallApps());
         userRepository.save(existingUser);
     }
 
@@ -91,6 +93,14 @@ public class UserService {
 
     public List<AbalacticosUser> getAllUsers() {
         return userRepository.findAll();
+    }
+
+    public void incrementOverallApps(List<String> playerIds) {
+        for (String playerId : playerIds) {
+            AbalacticosUser user = userRepository.findById(playerId).orElseThrow(() -> new RuntimeException("User not found"));
+            user.setOverallApps(user.getOverallApps() + 1);
+            userRepository.save(user);
+        }
     }
 
 }

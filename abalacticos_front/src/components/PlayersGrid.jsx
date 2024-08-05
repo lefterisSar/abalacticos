@@ -150,6 +150,7 @@ const PlayersGrid = () => {
         { field: 'username', headerName: 'Username', width: 150, editable: isAdmin },
         { field: 'name', headerName: 'Name', width: 150, editable: isAdmin },
         { field: 'surname', headerName: 'Surname', width: 150, editable: isAdmin },
+        { field: 'overallApps', headerName:'Apps', width: 150, editable: isAdmin },
         { field: 'wins', headerName: 'Wins', width: 100, editable: isAdmin },
         { field: 'losses', headerName: 'Losses', width: 100, editable: isAdmin },
         { field: 'draws', headerName: 'Draws', width: 100, editable: isAdmin },
