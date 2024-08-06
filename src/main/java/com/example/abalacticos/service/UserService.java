@@ -125,5 +125,8 @@ public class UserService {
         }
     }
 
+    public List<AbalacticosUser> findUsersByIds(List<String> ids) {
+        return userRepository.findAllById(ids);
+    }
 
 }

@@ -45,6 +45,9 @@ const Header = () => {
                                     <li><Link to="/admin-dashboard">Admin Dashboard</Link></li>
                                 </>
                             )}
+                            {location.pathname !== '/matches' && (
+                                <li><Link to="/matches">Matches</Link></li>
+                            )}
                         </>
                     )}
                     {!token && location.pathname !== '/login' && (

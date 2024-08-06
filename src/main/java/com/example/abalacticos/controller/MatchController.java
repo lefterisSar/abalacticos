@@ -27,12 +27,14 @@ public class MatchController {
     @PostMapping
     public ResponseEntity<?> saveMatch(@RequestBody Match match) {
         Match savedMatch = matchService.saveMatch(match);
+        userService.incrementDayAppearances(match.getTeamA(), match.getDay());
+        userService.incrementDayAppearances(match.getTeamB(), match.getDay());
 
         // Increment overallApps for all players in the match
         userService.incrementOverallApps(match.getTeamA());
         userService.incrementOverallApps(match.getTeamB());
 
-        return ResponseEntity.ok(savedMatch);
+        return ResponseEntity.ok("Match recorded and player appearances updated");
     }
 
     @GetMapping

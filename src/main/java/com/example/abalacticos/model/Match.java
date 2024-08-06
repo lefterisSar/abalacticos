@@ -9,19 +9,19 @@ import java.util.List;
 @Document(collection = "matches")
 public class Match {
     @Id
-    private String username;
+    private String id;
     private String datePlayed;
     private List<String> teamA;
     private List<String> teamB;
     private String day;
 
     // Getters and Setters
-    public String getUsername() {
-        return username;
+    public String getId() {
+        return id;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
+    public void setId(String id) {
+        this.id = id;
     }
 
     public String getDatePlayed() {

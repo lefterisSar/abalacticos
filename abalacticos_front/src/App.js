@@ -10,6 +10,7 @@ import PrivateRoute from './components/PrivateRoute';
 import Header from './components/Header';
 import PageNotFound from './components/PageNotFound';
 import AvailabilityCalendar from "./components/AvailabilityCalendar";
+import MatchesGrid from "./components/MatchesGrid";
 
 const App = () => (
     <Router>
@@ -23,6 +24,7 @@ const App = () => (
             <Route path="/availability" element={<AvailabilityCalendar />} />
             <Route path="/team-selection" element={<PrivateRoute role="ADMIN"><AdminDashboard /></PrivateRoute>} />
             <Route path="/team-selection/:day" element={<PrivateRoute role="ADMIN"><TeamSelection /></PrivateRoute>} />
+            <Route path="/matches" element={<MatchesGrid/>} />
             <Route path="/" element={<Navigate to="/players" />} />
             <Route path="*" element={<PageNotFound />} />
         </Routes>

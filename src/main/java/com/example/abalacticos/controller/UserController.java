@@ -51,6 +51,11 @@ public class UserController {
         }
     }
 
+    @PostMapping("/fetchByIds")
+    public ResponseEntity<List<AbalacticosUser>> fetchUsersByIds(@RequestBody List<String> ids) {
+        List<AbalacticosUser> users = userService.findUsersByIds(ids);
+        return ResponseEntity.ok(users);
+    }
 
     // New endpoint for updating user details
     @PreAuthorize("hasRole('ADMIN')")
@@ -78,14 +83,6 @@ public class UserController {
         userService.updateAvailability(user);
         return ResponseEntity.ok("Availability updated successfully");
     }
-
-    @PostMapping("/matches")
-    public ResponseEntity<?> createMatch(@RequestBody Match match) {
-        userService.incrementDayAppearances(match.getTeamA(), match.getDay());
-        userService.incrementDayAppearances(match.getTeamB(), match.getDay());
-        return ResponseEntity.ok("Match recorded and player appearances updated");
-    }
-
 
     // Other CRUD operations if needed
 }
