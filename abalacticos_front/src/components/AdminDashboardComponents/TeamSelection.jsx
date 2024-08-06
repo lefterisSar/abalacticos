@@ -5,13 +5,14 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { Button, styled } from '@mui/material';
 import PersonIcon from '@mui/icons-material/Person';
 import Calculator from '@mui/icons-material/QueryStats';
+import { format, addDays, nextDay } from 'date-fns';
 
 const CustomDataGrid = styled(DataGrid)(({ theme }) => ({
     '& .MuiDataGrid-columnHeaderTitleContainer': {
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
-        fontWeight: 'bold', // Make headers bold
+        fontWeight: 'bold',
     },
     '& .MuiDataGrid-columnHeaderTitleContainerContent': {
         display: 'flex',
@@ -29,7 +30,7 @@ const HeaderWithIconRoot = styled('div')(({ theme }) => ({
         overflow: 'hidden',
         textOverflow: 'ellipsis',
         marginRight: theme.spacing(0.5),
-        fontWeight: 'bold', // Make header group text bold
+        fontWeight: 'bold',
     },
 }));
 
@@ -50,12 +51,13 @@ const TeamSelection = () => {
     const navigate = useNavigate();
     const { day } = useParams();
     const [columnVisibilityModel, setColumnVisibilityModel] = useState({});
-    const userId = localStorage.getItem('userName'); // Assuming userId is stored in localStorage
+    const [nextMatchDate, setNextMatchDate] = useState(new Date());
+    const userId = localStorage.getItem('userName');
 
     const handleConfirmTeams = async () => {
         const match = {
             day,
-            date: new Date().toISOString(),
+            datePlayed: nextMatchDate.toISOString(),
             teamA: teamA.map(player => player.id),
             teamB: teamB.map(player => player.id),
         };
@@ -104,6 +106,7 @@ const TeamSelection = () => {
             }));
 
             alert('Teams confirmed and match recorded!');
+            updateNextMatchDate();
         } catch (error) {
             console.error('Error confirming teams:', error);
         }
@@ -168,7 +171,7 @@ const TeamSelection = () => {
                     setPlayers(playersWithId);
                     setTeamA(prepopulatedTeamA);
                     setTeamB(prepopulatedTeamB);
-
+                    setNextMatchDate(getNextMatchDate(day));
                 } else {
                     console.error('Unexpected response format:', response.data);
                 }
@@ -185,9 +188,26 @@ const TeamSelection = () => {
         const savedVisibilityModel = loadColumnVisibility(userId);
         setColumnVisibilityModel(savedVisibilityModel);
         fetchPlayers();
-    }, [navigate, userId]);
+    }, [navigate, userId, day]);
 
-    // Filter players based on availability
+    const getNextMatchDate = (dayOfWeek) => {
+        const today = new Date();
+        switch (dayOfWeek) {
+            case "Tuesday":
+                return nextDay(today, 2);
+            case "Wednesday":
+                return nextDay(today, 3);
+            case "Friday":
+                return nextDay(today, 5);
+            default:
+                return today;
+        }
+    };
+
+    const updateNextMatchDate = () => {
+        setNextMatchDate(getNextMatchDate(day));
+    };
+
     const filteredPlayers = players.filter(player => player.availability.includes(day));
 
     const handleAddToTeam = (team, setTeam, player) => {
@@ -296,7 +316,7 @@ const TeamSelection = () => {
 
     return (
         <div>
-            <h2 style={{ display: 'flex', justifyContent: 'center' }}>{day} Team Selection</h2>
+            <h2 style={{ display: 'flex', justifyContent: 'center' }}>{day} Team Selection for {format(nextMatchDate, 'MMMM do, yyyy')}</h2>
             <div style={{ display: 'flex', justifyContent: 'space-around' }}>
                 <div>
                     <h3>Team A</h3>

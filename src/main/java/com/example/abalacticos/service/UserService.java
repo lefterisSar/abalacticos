@@ -73,13 +73,20 @@ public class UserService {
     public void updateUser(String id, AbalacticosUser updatedUser) {
         AbalacticosUser existingUser = userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
         existingUser.setUsername(updatedUser.getUsername());
+        existingUser.setSurname(updatedUser.getSurname());
+        existingUser.setName(updatedUser.getName());
+        existingUser.setSn(updatedUser.getSn());
         existingUser.setRoles(updatedUser.getRoles());
-        existingUser.setDraws(updatedUser.getDraws());
         existingUser.setWins(updatedUser.getWins());
+        existingUser.setDraws(updatedUser.getDraws());
         existingUser.setLosses(updatedUser.getLosses());
         existingUser.setCommunicationDetails(updatedUser.getCommunicationDetails());
         existingUser.setAvailability(updatedUser.getAvailability());
         existingUser.setOverallApps(updatedUser.getOverallApps());
+        existingUser.setDebutDate(updatedUser.getDebutDate());
+        existingUser.setLastGK(updatedUser.getLastGK());
+        //TODO: Below line is not working
+        existingUser.setCommunicationDetails(existingUser.getCommunicationDetails());
         userRepository.save(existingUser);
     }
 

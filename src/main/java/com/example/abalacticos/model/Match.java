@@ -4,13 +4,14 @@ package com.example.abalacticos.model;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Document(collection = "matches")
 public class Match {
     @Id
     private String id;
-    private String datePlayed;
+    private LocalDate datePlayed;
     private List<String> teamA;
     private List<String> teamB;
     private String day;
@@ -24,11 +25,11 @@ public class Match {
         this.id = id;
     }
 
-    public String getDatePlayed() {
+    public LocalDate getDatePlayed() {
         return datePlayed;
     }
 
-    public void setDatePlayed(String datePlayed) {
+    public void setDatePlayed(LocalDate datePlayed) {
         this.datePlayed = datePlayed;
     }
 

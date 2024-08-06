@@ -37,6 +37,18 @@ public class MatchController {
         return ResponseEntity.ok("Match recorded and player appearances updated");
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteMatch(@PathVariable String id) {
+        try {
+            matchService.deleteMatch(id);
+            return ResponseEntity.ok("Match deleted successfully");
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+
     @GetMapping
     public List<Match> getAllMatches() {
         return matchService.getAllMatches();

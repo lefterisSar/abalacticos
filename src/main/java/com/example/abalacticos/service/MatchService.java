@@ -21,6 +21,10 @@ public class MatchService {
         return matchRepository.save(match);
     }
 
+    public void deleteMatch(String id) {
+        matchRepository.deleteById(id);
+    }
+
     public List<Match> getAllMatches() {
         return matchRepository.findAll();
     }
