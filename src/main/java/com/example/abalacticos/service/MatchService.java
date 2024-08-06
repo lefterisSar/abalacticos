@@ -28,4 +28,8 @@ public class MatchService {
     public List<Match> getAllMatches() {
         return matchRepository.findAll();
     }
+
+    public Match getMatchById(String id) {
+        return matchRepository.findById(id).orElseThrow(() -> new RuntimeException("Match not found"));
+    }
 }

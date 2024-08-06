@@ -41,8 +41,16 @@ public class MatchController {
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteMatch(@PathVariable String id) {
         try {
+            Match match = matchService.getMatchById(id);
             matchService.deleteMatch(id);
-            return ResponseEntity.ok("Match deleted successfully");
+            userService.decrementDayAppearances(match.getTeamA(), match.getDay());
+            userService.decrementDayAppearances(match.getTeamB(), match.getDay());
+
+            // Decrement overallApps for all players in the match
+            userService.decrementOverallApps(match.getTeamA());
+            userService.decrementOverallApps(match.getTeamB());
+
+                return ResponseEntity.ok("Match deleted and player appearances updated");
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }

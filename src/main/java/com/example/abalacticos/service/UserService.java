@@ -132,6 +132,32 @@ public class UserService {
         }
     }
 
+    public void decrementDayAppearances(List<String> playerIds, String day) {
+        for (String playerId : playerIds) {
+            AbalacticosUser player = userRepository.findById(playerId).orElseThrow(() -> new RuntimeException("Player not found"));
+            switch (day) {
+                case "Tuesday":
+                    player.setTuesdayAppearances(player.getTuesdayAppearances() - 1);
+                    break;
+                case "Wednesday":
+                    player.setWednesdayAppearances(player.getWednesdayAppearances() - 1);
+                    break;
+                case "Friday":
+                    player.setFridayAppearances(player.getFridayAppearances() - 1);
+                    break;
+            }
+            userRepository.save(player);
+        }
+    }
+
+    public void decrementOverallApps(List<String> playerIds) {
+        for (String playerId : playerIds) {
+            AbalacticosUser player = userRepository.findById(playerId).orElseThrow(() -> new RuntimeException("Player not found"));
+            player.setOverallApps(player.getOverallApps() - 1);
+            userRepository.save(player);
+        }
+    }
+
     public List<AbalacticosUser> findUsersByIds(List<String> ids) {
         return userRepository.findAllById(ids);
     }
