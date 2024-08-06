@@ -8,6 +8,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collections;
 import java.util.List;
 
 @RestController
@@ -33,6 +34,14 @@ public class MatchController {
         // Increment overallApps for all players in the match
         userService.incrementOverallApps(match.getTeamA());
         userService.incrementOverallApps(match.getTeamB());
+
+        // Update the lastGK date for the player in the GK position
+        if (!match.getTeamA().isEmpty()) {
+            userService.updateLastGK(Collections.singletonList(match.getTeamA().get(0)), match.getDatePlayed());
+        }
+        if (!match.getTeamB().isEmpty()) {
+            userService.updateLastGK(Collections.singletonList(match.getTeamB().get(0)), match.getDatePlayed());
+        }
 
         return ResponseEntity.ok("Match recorded and player appearances updated");
     }

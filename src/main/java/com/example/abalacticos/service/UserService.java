@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -154,6 +155,14 @@ public class UserService {
         for (String playerId : playerIds) {
             AbalacticosUser player = userRepository.findById(playerId).orElseThrow(() -> new RuntimeException("Player not found"));
             player.setOverallApps(player.getOverallApps() - 1);
+            userRepository.save(player);
+        }
+    }
+
+    public void updateLastGK(List<String> playerIds, LocalDate matchDate) {
+        for (String playerId : playerIds) {
+            AbalacticosUser player = userRepository.findById(playerId).orElseThrow(() -> new RuntimeException("Player not found"));
+            player.setLastGK(matchDate.toString());
             userRepository.save(player);
         }
     }

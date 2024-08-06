@@ -105,6 +105,14 @@ const TeamSelection = () => {
                 return player;
             }));
 
+            // Update lastGK date for players in GK position (assuming the first player is the GK)
+            if (teamA.length > 0) {
+                setPlayers(players.map(player => player.id === teamA[0].id ? { ...player, lastGK: new Date().toISOString().split('T')[0] } : player));
+            }
+            if (teamB.length > 0) {
+                setPlayers(players.map(player => player.id === teamB[0].id ? { ...player, lastGK: new Date().toISOString().split('T')[0] } : player));
+            }
+
             alert('Teams confirmed and match recorded!');
             updateNextMatchDate();
         } catch (error) {
