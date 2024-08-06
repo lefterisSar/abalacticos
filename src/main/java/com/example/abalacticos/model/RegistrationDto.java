@@ -29,6 +29,33 @@ public class RegistrationDto {
         private String birthday;
         private int overallApps;
         private List<String> availability;
+        private int tuesdayAppearances;
+        private int wednesdayAppearances;
+        private int fridayAppearances;
+
+    public int getTuesdayAppearances() {
+        return tuesdayAppearances;
+    }
+
+    public void setTuesdayAppearances(int tuesdayAppearances) {
+        this.tuesdayAppearances = tuesdayAppearances;
+    }
+
+    public int getWednesdayAppearances() {
+        return wednesdayAppearances;
+    }
+
+    public void setWednesdayAppearances(int wednesdayAppearances) {
+        this.wednesdayAppearances = wednesdayAppearances;
+    }
+
+    public int getFridayAppearances() {
+        return fridayAppearances;
+    }
+
+    public void setFridayAppearances(int fridayAppearances) {
+        this.fridayAppearances = fridayAppearances;
+    }
 
     public int getOverallApps() {
         return overallApps;

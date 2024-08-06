@@ -13,6 +13,7 @@ public class Match {
     private String datePlayed;
     private List<String> teamA;
     private List<String> teamB;
+    private String day;
 
     // Getters and Setters
     public String getUsername() {
@@ -45,5 +46,13 @@ public class Match {
 
     public void setTeamB(List<String> teamB) {
         this.teamB = teamB;
+    }
+
+    public String getDay() {
+        return day;
+    }
+
+    public void setDay(String day) {
+        this.day = day;
     }
 }

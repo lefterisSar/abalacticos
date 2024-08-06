@@ -64,13 +64,15 @@ public class UserService {
         newUser.setCommunicationDetails(registrationDto.getCommunicationDetails());
         newUser.setAvailability(registrationDto.getAvailability());
         newUser.setOverallApps(registrationDto.getOverallApps());
+        newUser.setTuesdayAppearances(registrationDto.getTuesdayAppearances());
+        newUser.setFridayAppearances(registrationDto.getFridayAppearances());
+        newUser.setWednesdayAppearances(registrationDto.getWednesdayAppearances());
     }
 
 
     public void updateUser(String id, AbalacticosUser updatedUser) {
         AbalacticosUser existingUser = userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
         existingUser.setUsername(updatedUser.getUsername());
-//        existingUser.setPassword(updatedUser.getPassword() != null ? passwordEncoder.encode(updatedUser.getPassword()) : existingUser.getPassword());
         existingUser.setRoles(updatedUser.getRoles());
         existingUser.setDraws(updatedUser.getDraws());
         existingUser.setWins(updatedUser.getWins());
@@ -102,5 +104,26 @@ public class UserService {
             userRepository.save(user);
         }
     }
+
+    public void incrementDayAppearances(List<String> playerIds, String day) {
+        for (String playerId : playerIds) {
+            AbalacticosUser user = userRepository.findById(playerId).orElseThrow(() -> new RuntimeException("User not found"));
+            if (user != null) {
+                switch (day) {
+                    case "Tuesday":
+                        user.setTuesdayAppearances(user.getTuesdayAppearances() + 1);
+                        break;
+                    case "Wednesday":
+                        user.setWednesdayAppearances(user.getWednesdayAppearances() + 1);
+                        break;
+                    case "Friday":
+                        user.setFridayAppearances(user.getFridayAppearances() + 1);
+                        break;
+                }
+                userRepository.save(user);
+            }
+        }
+    }
+
 
 }

@@ -32,6 +32,9 @@ public class AbalacticosUser {
     private String birthday;
     private CommunicationDetails communicationDetails;
     private List<String> availability;
+    private int tuesdayAppearances;
+    private int wednesdayAppearances;
+    private int fridayAppearances;
 
     public AbalacticosUser() {}
 
@@ -67,6 +70,35 @@ public class AbalacticosUser {
         this.surname =surname;
         this.name = name;
     }
+
+
+
+    // Getters and Setters for all fields including new appearance fields
+
+    public int getTuesdayAppearances() {
+        return tuesdayAppearances;
+    }
+
+    public void setTuesdayAppearances(int tuesdayAppearances) {
+        this.tuesdayAppearances = tuesdayAppearances;
+    }
+
+    public int getWednesdayAppearances() {
+        return wednesdayAppearances;
+    }
+
+    public void setWednesdayAppearances(int wednesdayAppearances) {
+        this.wednesdayAppearances = wednesdayAppearances;
+    }
+
+    public int getFridayAppearances() {
+        return fridayAppearances;
+    }
+
+    public void setFridayAppearances(int fridayAppearances) {
+        this.fridayAppearances = fridayAppearances;
+    }
+
 
     public String getName() {
         return name;

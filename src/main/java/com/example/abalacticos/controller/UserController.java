@@ -1,6 +1,7 @@
 package com.example.abalacticos.controller;
 
 import com.example.abalacticos.model.AbalacticosUser;
+import com.example.abalacticos.model.Match;
 import com.example.abalacticos.model.RegistrationDto;
 import com.example.abalacticos.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -77,6 +78,14 @@ public class UserController {
         userService.updateAvailability(user);
         return ResponseEntity.ok("Availability updated successfully");
     }
+
+    @PostMapping("/matches")
+    public ResponseEntity<?> createMatch(@RequestBody Match match) {
+        userService.incrementDayAppearances(match.getTeamA(), match.getDay());
+        userService.incrementDayAppearances(match.getTeamB(), match.getDay());
+        return ResponseEntity.ok("Match recorded and player appearances updated");
+    }
+
 
     // Other CRUD operations if needed
 }

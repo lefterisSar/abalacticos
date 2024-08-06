@@ -11,6 +11,7 @@ const CustomDataGrid = styled(DataGrid)(({ theme }) => ({
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
+        fontWeight: 'bold', // Make headers bold
     },
     '& .MuiDataGrid-columnHeaderTitleContainerContent': {
         display: 'flex',
@@ -28,9 +29,9 @@ const HeaderWithIconRoot = styled('div')(({ theme }) => ({
         overflow: 'hidden',
         textOverflow: 'ellipsis',
         marginRight: theme.spacing(0.5),
+        fontWeight: 'bold', // Make header group text bold
     },
 }));
-
 
 function HeaderWithIcon(props) {
     const { icon, ...params } = props;
@@ -55,35 +56,49 @@ const TeamSelection = () => {
         const match = {
             day,
             date: new Date().toISOString(),
-            teamA: teamA.map(player => player.username),
-            teamB: teamB.map(player => player.username),
+            teamA: teamA.map(player => player.id),
+            teamB: teamB.map(player => player.id),
         };
 
         try {
             const token = localStorage.getItem('authToken');
-            await axios.post('http://localhost:8080/api/matches', match, {
+            await axios.post('http://localhost:8080/api/users/matches', match, {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }
             });
 
-            // Increment overallApps for teamA and teamB in frontend state
-            const incrementOverallApps = (team) => {
-                return team.map(player => ({
-                    ...player,
-                    overallApps: player.overallApps + 1
-                }));
+            // Increment day-specific appearances for teamA and teamB in frontend state
+            const incrementDayAppearances = (team) => {
+                return team.map(player => {
+                    switch (day) {
+                        case "Tuesday":
+                            return { ...player, tuesdayAppearances: player.tuesdayAppearances + 1 };
+                        case "Wednesday":
+                            return { ...player, wednesdayAppearances: player.wednesdayAppearances + 1 };
+                        case "Friday":
+                            return { ...player, fridayAppearances: player.fridayAppearances + 1 };
+                        default:
+                            return player;
+                    }
+                });
             };
 
-            setTeamA(incrementOverallApps(teamA));
-            setTeamB(incrementOverallApps(teamB));
+            setTeamA(incrementDayAppearances(teamA));
+            setTeamB(incrementDayAppearances(teamB));
 
             setPlayers(players.map(player => {
-                if (teamA.some(p => p.username === player.username) || teamB.some(p => p.username === player.username)) {
-                    return {
-                        ...player,
-                        overallApps: player.overallApps + 1
-                    };
+                if (teamA.some(p => p.id === player.id) || teamB.some(p => p.id === player.id)) {
+                    switch (day) {
+                        case "Tuesday":
+                            return { ...player, tuesdayAppearances: player.tuesdayAppearances + 1 };
+                        case "Wednesday":
+                            return { ...player, wednesdayAppearances: player.wednesdayAppearances + 1 };
+                        case "Friday":
+                            return { ...player, fridayAppearances: player.fridayAppearances + 1 };
+                        default:
+                            return player;
+                    }
                 }
                 return player;
             }));
@@ -93,7 +108,6 @@ const TeamSelection = () => {
             console.error('Error confirming teams:', error);
         }
     };
-
 
     const handleColumnVisibilityChange = (newModel) => {
         setColumnVisibilityModel(newModel);
@@ -132,9 +146,20 @@ const TeamSelection = () => {
                         availability: player.availability || [], // Ensure availability is an array
                     }));
 
-                    // Filter players based on availability and sort by overallApps in descending order
+                    // Filter players based on availability and sort by day-specific apps in descending order
                     const filteredPlayers = playersWithId.filter(player => player.availability.includes(day));
-                    const sortedPlayers = filteredPlayers.sort((a, b) => b.overallApps - a.overallApps);
+                    const sortedPlayers = filteredPlayers.sort((a, b) => {
+                        switch (day) {
+                            case "Tuesday":
+                                return (b.tuesdayAppearances || 0) - (a.tuesdayAppearances || 0);
+                            case "Wednesday":
+                                return (b.wednesdayAppearances || 0) - (a.wednesdayAppearances || 0);
+                            case "Friday":
+                                return (b.fridayAppearances || 0) - (a.fridayAppearances || 0);
+                            default:
+                                return 0;
+                        }
+                    });
 
                     // Prepopulate teams
                     const prepopulatedTeamA = sortedPlayers.slice(0, 8);
@@ -160,7 +185,7 @@ const TeamSelection = () => {
         const savedVisibilityModel = loadColumnVisibility(userId);
         setColumnVisibilityModel(savedVisibilityModel);
         fetchPlayers();
-    }, [navigate,userId]);
+    }, [navigate, userId]);
 
     // Filter players based on availability
     const filteredPlayers = players.filter(player => player.availability.includes(day));
@@ -179,25 +204,39 @@ const TeamSelection = () => {
 
     const columns = [
         { field: 'username', headerName: 'Username', flex: 1, renderCell: (params) => <span style={{ whiteSpace: 'nowrap' }}>{params.value}</span> },
-        { field: 'name', headerName: 'Name', flex: 1, renderCell: (params) => <span style={{ whiteSpace: 'nowrap' }}>{params.value}</span>},
+        { field: 'name', headerName: 'Name', flex: 1, renderCell: (params) => <span style={{ whiteSpace: 'nowrap' }}>{params.value}</span> },
         { field: 'surname', headerName: 'Surname', flex: 1, renderCell: (params) => <span style={{ whiteSpace: 'nowrap' }}>{params.value}</span> },
         { field: 'age', headerName: 'Age', flex: 1, renderCell: (params) => <span style={{ whiteSpace: 'nowrap' }}>{params.value}</span> },
         { field: 'wins', headerName: 'Wins', flex: 1,renderCell: (params) => <span style={{ whiteSpace: 'nowrap' }}>{params.value}</span>},
         { field: 'losses', headerName: 'Losses', flex: 1, renderCell: (params) => <span style={{ whiteSpace: 'nowrap' }}>{params.value}</span>},
         { field: 'draws', headerName: 'Draws', flex: 1, renderCell: (params) => <span style={{ whiteSpace: 'nowrap' }}>{params.value}</span>},
         {
-            field: 'overallApps',
-            headerName: 'Overall Apps',
+            field: 'daySpecificApps',
+            headerName: `${day} Apps`,
             minWidth: 50,
             flex: 1,
             headerClassName: 'bold-header',
+            valueGetter: (value, row) => {
+                if (!row) return 0;
+                switch (day) {
+                    case "Tuesday":
+                        return row.tuesdayAppearances || 0;
+                    case "Wednesday":
+                        return row.wednesdayAppearances || 0;
+                    case "Friday":
+                        return row.fridayAppearances || 0;
+                    default:
+                        return 0;
+                }
+            },
             renderCell: (params) => (
                 <strong>{params.value}</strong>
             ),
         },
-        { field: 'debutDate', headerName: 'Debut Date', flex: 1, renderCell: (params) => <span style={{ whiteSpace: 'nowrap' }}>{params.value}</span>},
-        { field: 'lastGK', headerName: 'Last GK Date', flex: 1, renderCell: (params) => <span style={{ whiteSpace: 'nowrap' }}>{params.value}</span>},
-        { field: 'actions',
+        { field: 'debutDate', headerName: 'Debut Date', flex: 1, renderCell: (params) => <span style={{ whiteSpace: 'nowrap' }}>{params.value}</span> },
+        { field: 'lastGK', headerName: 'Last GK Date', flex: 1, renderCell: (params) => <span style={{ whiteSpace: 'nowrap' }}>{params.value}</span> },
+        {
+            field: 'actions',
             headerName: 'Actions',
             width: 300,
             renderCell: (params) => (
@@ -268,7 +307,7 @@ const TeamSelection = () => {
                     {renderTeam(teamB)}
                 </div>
             </div>
-            {localStorage.getItem('userRole')==="ADMIN" && (
+            {localStorage.getItem('userRole') === "ADMIN" && (
                 <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
                     <Button variant="contained" color="primary" onClick={handleConfirmTeams} disabled={teamA.length === 0 && teamB.length === 0}>
                         Confirm Teams
@@ -284,7 +323,7 @@ const TeamSelection = () => {
                     onColumnVisibilityModelChange={handleColumnVisibilityChange}
                     initialState={{
                         sorting: {
-                            sortModel: [{ field: 'overallApps', sort: 'desc' }],
+                            sortModel: [{ field: 'daySpecificApps', sort: 'desc' }],
                         },
                     }}
                     columnGroupingModel={[
@@ -298,7 +337,7 @@ const TeamSelection = () => {
                         },
                         {
                             groupId: 'stats',
-                            children: [{ field: 'wins' }, { field: 'losses' }, { field: 'draws' },{field: 'overallApps' }],
+                            children: [{ field: 'wins' }, { field: 'losses' }, { field: 'draws' }, { field: 'daySpecificApps' }],
                             renderHeaderGroup: (params) => (
                                 <HeaderWithIcon {...params} icon={<Calculator fontSize="small" />} />
                             ),
