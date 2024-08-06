@@ -17,7 +17,7 @@ const App = () => (
         <Header />
         <Routes>
             <Route path="/login" element={<Login />} />
-            <Route path="/players" element={<PrivateRoute><PlayersGrid /></PrivateRoute>} />
+            <Route path="/players" element={<PlayersGrid />} />
             <Route path="/add-player" element={<PrivateRoute role="ADMIN"><AddPlayerForm /></PrivateRoute>} />
             <Route path="/team-selection" element={<PrivateRoute role="ADMIN"><TeamSelection /></PrivateRoute>} />
             <Route path="/admin-dashboard" element={<PrivateRoute role="ADMIN"><AdminDashboard /></PrivateRoute>} />
