@@ -196,16 +196,34 @@ const TeamSelection = () => {
 
     const getNextMatchDate = (dayOfWeek) => {
         const today = new Date();
+        const currentDay = today.getDay(); // Sunday - Saturday: 0 - 6
+        let matchDay;
+
         switch (dayOfWeek) {
             case "Tuesday":
-                return nextDay(today, 2);
+                matchDay = 2;
+                break;
             case "Wednesday":
-                return nextDay(today, 3);
+                matchDay = 3;
+                break;
             case "Friday":
-                return nextDay(today, 5);
+                matchDay = 5;
+                break;
             default:
                 return today;
         }
+        // If today is the match day, set the match date to today
+        if (currentDay === matchDay) {
+            return today;
+        } else if (currentDay > matchDay) {
+            // If the current day is past the match day, schedule for next week
+            return addDays(nextDay(today, matchDay), 7);
+        } else {
+            // Otherwise, schedule for this week
+            return nextDay(today, matchDay);
+        }
+
+
     };
 
     const updateNextMatchDate = () => {
