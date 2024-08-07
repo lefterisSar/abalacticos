@@ -86,31 +86,27 @@ const TeamSelection = () => {
                 });
             };
 
-            setTeamA(incrementDayAppearances(teamA));
-            setTeamB(incrementDayAppearances(teamB));
+            const updatedTeamA = incrementDayAppearances(teamA);
+            const updatedTeamB = incrementDayAppearances(teamB);
 
+            setTeamA(updatedTeamA);
+            setTeamB(updatedTeamB);
+
+            // Update players with the new appearances
             setPlayers(players.map(player => {
-                if (teamA.some(p => p.id === player.id) || teamB.some(p => p.id === player.id)) {
-                    switch (day) {
-                        case "Tuesday":
-                            return { ...player, tuesdayAppearances: player.tuesdayAppearances + 1 };
-                        case "Wednesday":
-                            return { ...player, wednesdayAppearances: player.wednesdayAppearances + 1 };
-                        case "Friday":
-                            return { ...player, fridayAppearances: player.fridayAppearances + 1 };
-                        default:
-                            return player;
-                    }
-                }
+                const updatedPlayerA = updatedTeamA.find(p => p.id === player.id);
+                const updatedPlayerB = updatedTeamB.find(p => p.id === player.id);
+                if (updatedPlayerA) return updatedPlayerA;
+                if (updatedPlayerB) return updatedPlayerB;
                 return player;
             }));
 
             // Update lastGK date for players in GK position (assuming the first player is the GK)
             if (teamA.length > 0) {
-                setPlayers(players.map(player => player.id === teamA[0].id ? { ...player, lastGK: new Date().toISOString().split('T')[0] } : player));
+                setPlayers(prevPlayers => prevPlayers.map(player => player.id === teamA[0].id ? { ...player, lastGK: new Date().toISOString().split('T')[0] } : player));
             }
             if (teamB.length > 0) {
-                setPlayers(players.map(player => player.id === teamB[0].id ? { ...player, lastGK: new Date().toISOString().split('T')[0] } : player));
+                setPlayers(prevPlayers => prevPlayers.map(player => player.id === teamB[0].id ? { ...player, lastGK: new Date().toISOString().split('T')[0] } : player));
             }
 
             alert('Teams confirmed and match recorded!');

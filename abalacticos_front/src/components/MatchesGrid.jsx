@@ -103,7 +103,16 @@ const MatchesGrid = () => {
 
     return (
         <div style={{ height: '100vh', width: '100%' }}>
-            <DataGrid rows={matches} columns={columns} getRowId={(row) => row.id} />
+            <DataGrid
+                rows={matches}
+                columns={columns}
+                getRowId={(row) => row.id}
+                initialState={{
+                    sorting: {
+                        sortModel: [{ field: 'datePlayed', sort: 'desc' }],
+                    },
+                }}
+            />
         </div>
     );
 };
