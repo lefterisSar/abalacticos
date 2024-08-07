@@ -167,6 +167,33 @@ public class UserService {
         }
     }
 
+    public void incrementWins(List<String> playerIds) {
+        playerIds.forEach(playerId -> {
+            AbalacticosUser user = userRepository.findById(playerId)
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+            user.setWins(user.getWins() + 1);
+            userRepository.save(user);
+        });
+    }
+
+    public void incrementLosses(List<String> playerIds) {
+        for (String playerId : playerIds) {
+            AbalacticosUser user = userRepository.findById(playerId)
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+            user.setLosses(user.getLosses() + 1);
+            userRepository.save(user);
+        }
+    }
+
+    public void incrementDraws(List<String> playerIds) {
+        for (String playerId : playerIds) {
+            AbalacticosUser user = userRepository.findById(playerId)
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+            user.setDraws(user.getDraws() + 1);
+            userRepository.save(user);
+        }
+    }
+
     public List<AbalacticosUser> findUsersByIds(List<String> ids) {
         return userRepository.findAllById(ids);
     }

@@ -23,6 +23,24 @@ const MatchesGrid = () => {
         }
     };
 
+    const handleUpdateMatchResult = async (id, result) => {
+        const token = localStorage.getItem('authToken');
+        try {
+            await axios.put(`http://localhost:8080/api/matches/${id}/win`, null, {
+                params: { winner: result },
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+            // Update the match result in the frontend state
+            setMatches(matches.map(match => match.id === id ? { ...match, result: result || 'Draw' } : match));
+        } catch (error) {
+            console.error('Error updating match result:', error);
+        }
+    };
+
+
+
     useEffect(() => {
         const fetchMatchesAndPlayers = async () => {
             const token = localStorage.getItem('authToken');
@@ -81,18 +99,42 @@ const MatchesGrid = () => {
             flex: 1,
             valueGetter: (value, row)=> row.teamB.map(id => players[id]?.name + ' ' + players[id]?.surname).join(', ')
         },
+        { field: 'result', headerName: 'Result', width: 80 },
         role === 'ADMIN' && {
             field: 'actions',
             headerName: 'Actions',
             flex: 1,
             renderCell: (params) => (
-                <Button
-                    variant="contained"
-                    color="secondary"
-                    onClick={() => handleDeleteMatch(params.row.id)}
-                >
-                    Delete
-                </Button>
+                <div>
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        onClick={() => handleUpdateMatchResult(params.row.id, 'TeamA')}
+                    >
+                        Team A Wins
+                    </Button>
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        onClick={() => handleUpdateMatchResult(params.row.id, 'TeamB')}
+                    >
+                        Team B Wins
+                    </Button>
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        onClick={() => handleUpdateMatchResult(params.row.id, '')}
+                    >
+                        Draw
+                    </Button>
+                    <Button
+                        variant="contained"
+                        color="secondary"
+                        onClick={() => handleDeleteMatch(params.row.id)}
+                    >
+                        Delete
+                    </Button>
+                </div>
             ),
         }
     ].filter(Boolean);

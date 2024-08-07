@@ -15,6 +15,15 @@ public class Match {
     private List<String> teamA;
     private List<String> teamB;
     private String day;
+    private String result;
+
+    public String getResult() {
+        return result;
+    }
+
+    public void setResult(String result) {
+        this.result = result;
+    }
 
     // Getters and Setters
     public String getId() {

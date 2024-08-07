@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/matches")
@@ -64,6 +65,24 @@ public class MatchController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PutMapping("/{id}/win")
+    public ResponseEntity<?> updateMatchResult(@PathVariable String id, @RequestParam String winner) {
+        Match match = matchService.getMatchById(id);
+
+        if (winner.equals("TeamA")) {
+            matchService.updateMatchResult(match, "TeamA");
+        } else if (winner.equals("TeamB")) {
+            matchService.updateMatchResult(match, "TeamB");
+        } else if (winner.isEmpty()) { // Handle draw
+            matchService.updateMatchResult(match, "Draw");
+        }
+
+        return ResponseEntity.ok("Match result updated and player statistics updated");
+    }
+
+
 
 
     @GetMapping
