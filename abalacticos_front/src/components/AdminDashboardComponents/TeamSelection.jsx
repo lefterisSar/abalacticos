@@ -378,7 +378,7 @@ const TeamSelection = () => {
                         },
                         {
                             groupId: 'stats',
-                            children: [{ field: 'wins' }, { field: 'losses' }, { field: 'draws' }, { field: 'daySpecificApps' }],
+                            children: [{ field: 'wins' }, { field: 'losses' }, { field: 'draws' }],
                             renderHeaderGroup: (params) => (
                                 <HeaderWithIcon {...params} icon={<Calculator fontSize="small" />} />
                             ),
