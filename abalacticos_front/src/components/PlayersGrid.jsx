@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { DataGrid } from '@mui/x-data-grid';
+import {DataGrid, GridToolbar} from '@mui/x-data-grid';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@mui/material';
@@ -163,9 +163,9 @@ const PlayersGrid = () => {
             width: 300,
             renderCell: renderAvailabilityCheckboxes,
         },
-        isAdmin && { field: 'communicationDetails.phoneNumber', headerName: 'Phone Number', width: 150, editable: isAdmin },
-        isAdmin && { field: 'communicationDetails.address', headerName: 'Address', width: 200, editable: isAdmin },
-        isAdmin && { field: 'communicationDetails.email', headerName: 'Email', width: 200, editable: isAdmin },
+        isAdmin && { field: 'communicationDetailsphoneNumber', headerName: 'Phone Number', width: 150, editable: isAdmin },
+        isAdmin && { field: 'communicationDetailsaddress', headerName: 'Address', width: 200, editable: isAdmin },
+        isAdmin && { field: 'communicationDetailsemail', headerName: 'Email', width: 200, editable: isAdmin },
         isAdmin && { field: 'birthday', headerName: 'Birthday', width: 150, editable: isAdmin },
         isAdmin && {
             field: 'actions',
@@ -181,12 +181,27 @@ const PlayersGrid = () => {
                 </Button>)
             }}].filter(Boolean); // Filter out the false values for non-admins
 
+    const [columnVisibilityModel, setColumnVisibilityModel] = React.useState({
+        communicationDetailsaddress: false,
+        communicationDetailsemail: false,
+        communicationDetailsphoneNumber: false,
+        birthday: false
+    });
+
+
     return (
         <div style={{ height: 600, width: '100%' }}>
             <DataGrid
                 rows={rows}
                 columns={columns}
                 processRowUpdate={handleProcessRowUpdate}
+                columnVisibilityModel={columnVisibilityModel}
+                onColumnVisibilityModelChange={(newModel) =>
+                    setColumnVisibilityModel(newModel)
+                }
+                slots={{
+                    toolbar: GridToolbar,
+                }}
             />
         </div>
     );
