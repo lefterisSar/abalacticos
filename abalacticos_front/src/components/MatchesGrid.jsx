@@ -10,16 +10,18 @@ const MatchesGrid = () => {
     const role = localStorage.getItem('userRole');
 
     const handleDeleteMatch = async (id) => {
-        const token = localStorage.getItem('authToken');
-        try {
-            await axios.delete(`http://localhost:8080/api/matches/${id}`, {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
-            });
-            setMatches(matches.filter(match => match.id !== id));
-        } catch (error) {
-            console.error('Error deleting match:', error);
+        if (window.confirm("Are you sure you want to delete this match?")) {
+            const token = localStorage.getItem('authToken');
+            try {
+                await axios.delete(`http://localhost:8080/api/matches/${id}`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                });
+                setMatches(matches.filter(match => match.id !== id));
+            } catch (error) {
+                console.error('Error deleting match:', error);
+            }
         }
     };
 
