@@ -55,25 +55,30 @@ const TeamSelection = () => {
     const userId = localStorage.getItem('userName');
     const [channelId, setChannelId] = useState('');
 
-    useEffect(() => {
-        const fetchChannelId = async () => {
-            try {
-                const response = await fetch('http://localhost:8080/api/config/channelId');
-                if (response.ok) {
-                    const id = await response.text();
-                    setChannelId(id);
-                } else {
-                    console.error('Failed to fetch channel ID');
-                }
-            } catch (error) {
-                console.error('Error fetching channel ID:', error);
-            }
-        };
+    const fetchChannelId = async () => {
+        try {
 
-        fetchChannelId();
-    }, []);
+            const response = await fetch(`http://localhost:8080/api/config/channelId?message=${encodeURIComponent(day)}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+            if (response.ok) {
+                const id = await response.text();
+                setChannelId(id);
+            } else {
+                console.error('Failed to fetch channel ID');
+            }
+        } catch (error) {
+            console.error('Error fetching channel ID:', error);
+        }
+    };
+
+    fetchChannelId();
 
     const sendDiscordMessage = async (teamA, teamB) => {
+        fetchChannelId()
         const formatTeam = (team, teamName) => {
             return `${teamName}:\n${team.map((player, index) => `${teamPositions[index]}: ${player.name} ${player.surname}`).join('\n')}`;
         };
