@@ -17,7 +17,6 @@ public class RegistrationDto {
         // Player attributes
         private String name;
         private String surname;
-        private int age;
         private String debutDate;
         private String lastGK;
         private int wins;
@@ -99,13 +98,6 @@ public class RegistrationDto {
         this.surname = surname;
     }
 
-    public int getAge() {
-        return age;
-    }
-
-    public void setAge(int age) {
-        this.age = age;
-    }
 
     public String getDebutDate() {
         return debutDate;

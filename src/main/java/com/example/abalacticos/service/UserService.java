@@ -53,7 +53,6 @@ public class UserService {
     private void setPlayerAttributes(AbalacticosUser newUser, RegistrationDto registrationDto) {
         newUser.setName(registrationDto.getName());
         newUser.setSurname(registrationDto.getSurname());
-        newUser.setAge(registrationDto.getAge());
         newUser.setDebutDate(registrationDto.getDebutDate());
         newUser.setLastGK(registrationDto.getLastGK());
         newUser.setWins(registrationDto.getWins());
@@ -89,6 +88,8 @@ public class UserService {
         existingUser.setDebutDate(updatedUser.getDebutDate());
         existingUser.setLastGK(updatedUser.getLastGK());
         existingUser.setDiscordID(updatedUser.getDiscordID());
+        existingUser.setBirthday(updatedUser.getBirthday());
+        existingUser.setDebutDate(updatedUser.getDebutDate());
         //TODO: Below line is not working
         existingUser.setCommunicationDetails(existingUser.getCommunicationDetails());
         userRepository.save(existingUser);
