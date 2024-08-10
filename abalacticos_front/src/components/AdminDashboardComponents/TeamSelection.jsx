@@ -73,14 +73,23 @@ const TeamSelection = () => {
         fetchChannelId();
     }, []);
 
-    const sendDiscordMessage = async (message) => {
+    const sendDiscordMessage = async (teamA, teamB) => {
+        const formatTeam = (team, teamName) => {
+            return `${teamName}:\n${team.map((player, index) => `${teamPositions[index]}: ${player.name} ${player.surname}`).join('\n')}`;
+        };
+
+        const teamAMessage = formatTeam(teamA, 'Team A');
+        const teamBMessage = formatTeam(teamB, 'Team B');
+
+        const fullMessage = `Teams for ${day} have been confirmed!\n\n${teamAMessage}\n\n${teamBMessage}\n\n@everyone`;
+
         const url = `http://localhost:8080/api/discord/${channelId}/send`;
         const response = await fetch(url, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ message }),
+            body: JSON.stringify({ message: fullMessage }),
         });
 
         if (!response.ok) {
@@ -144,9 +153,9 @@ const TeamSelection = () => {
                 setPlayers(prevPlayers => prevPlayers.map(player => player.id === teamB[0].id ? { ...player, lastGK: new Date().toISOString().split('T')[0] } : player));
             }
 
-            alert('Teams confirmed and match recorded!');
+            alert('Teams confirmed and match recorded! Sending Discord message...');
             updateNextMatchDate();
-            await sendDiscordMessage(`Teams for ${day} have been confirmed!`);
+            await sendDiscordMessage(updatedTeamA, updatedTeamB);
         } catch (error) {
             console.error('Error confirming teams:', error);
         }
