@@ -64,7 +64,6 @@ public class SecurityConfig {
         configuration.addAllowedMethod("*"); // Allow all HTTP methods
         configuration.addAllowedHeader("Authorization"); // Allow Authorization header
         configuration.addAllowedHeader("Content-Type"); // Allow Content-Type header
-        configuration.addAllowedHeader("*");
         configuration.setAllowCredentials(true); // Allow credentials (e.g., cookies, authorization headers)
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

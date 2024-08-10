@@ -32,6 +32,7 @@ public class RegistrationDto {
         private int tuesdayAppearances;
         private int wednesdayAppearances;
         private int fridayAppearances;
+        private String discordID;
 
     public int getTuesdayAppearances() {
         return tuesdayAppearances;
@@ -214,5 +215,9 @@ public class RegistrationDto {
 
     public void setAvailability(List<String> availability) {
         this.availability = availability;
+    }
+
+    public String getDiscordID() {
+        return this.discordID;
     }
 }

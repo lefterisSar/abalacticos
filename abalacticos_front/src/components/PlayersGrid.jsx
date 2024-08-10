@@ -167,6 +167,7 @@ const PlayersGrid = () => {
         isAdmin && { field: 'communicationDetailsaddress', headerName: 'Address', width: 200, editable: isAdmin },
         isAdmin && { field: 'communicationDetailsemail', headerName: 'Email', width: 200, editable: isAdmin },
         isAdmin && { field: 'birthday', headerName: 'Birthday', width: 150, editable: isAdmin },
+        isAdmin && { field: 'discordID', headerName: 'Discord ID', width: 150, editable: isAdmin, type: 'string' },
         isAdmin && {
             field: 'actions',
             headerName: 'Actions',

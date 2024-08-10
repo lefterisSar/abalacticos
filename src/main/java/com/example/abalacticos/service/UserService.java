@@ -68,6 +68,7 @@ public class UserService {
         newUser.setTuesdayAppearances(registrationDto.getTuesdayAppearances());
         newUser.setFridayAppearances(registrationDto.getFridayAppearances());
         newUser.setWednesdayAppearances(registrationDto.getWednesdayAppearances());
+        newUser.setDiscordID(registrationDto.getDiscordID());
     }
 
 
@@ -86,6 +87,7 @@ public class UserService {
         existingUser.setOverallApps(updatedUser.getOverallApps());
         existingUser.setDebutDate(updatedUser.getDebutDate());
         existingUser.setLastGK(updatedUser.getLastGK());
+        existingUser.setDiscordID(updatedUser.getDiscordID());
         //TODO: Below line is not working
         existingUser.setCommunicationDetails(existingUser.getCommunicationDetails());
         userRepository.save(existingUser);

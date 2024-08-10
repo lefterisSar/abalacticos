@@ -35,6 +35,7 @@ public class AbalacticosUser {
     private int tuesdayAppearances;
     private int wednesdayAppearances;
     private int fridayAppearances;
+    private String discordID;
 
     public AbalacticosUser() {}
 
@@ -73,7 +74,16 @@ public class AbalacticosUser {
 
 
 
-    // Getters and Setters for all fields including new appearance fields
+
+    // Getters and Setters for all fields
+
+    public String getDiscordID() {
+        return discordID;
+    }
+
+    public void setDiscordID(String discordID) {
+        this.discordID = discordID;
+    }
 
     public int getTuesdayAppearances() {
         return tuesdayAppearances;

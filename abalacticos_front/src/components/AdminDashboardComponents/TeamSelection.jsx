@@ -78,9 +78,11 @@ const TeamSelection = () => {
     fetchChannelId();
 
     const sendDiscordMessage = async (teamA, teamB) => {
-        fetchChannelId()
         const formatTeam = (team, teamName) => {
-            return `${teamName}:\n${team.map((player, index) => `${teamPositions[index]}: ${player.name} ${player.surname}`).join('\n')}`;
+            return `${teamName}:\n${team.map((player, index) => {
+                const mention = player.discordID ? `<@${player.discordID}>` : `${player.name} ${player.surname}`;
+                return `${teamPositions[index]}: ${mention}`;
+            }).join('\n')}`;
         };
 
         const teamAMessage = formatTeam(teamA, 'Team A');
@@ -201,6 +203,7 @@ const TeamSelection = () => {
                         ...player,
                         id: player.id || `${player.name}-${player.surname}-${player.age}`, // Fallback if no id field is present
                         availability: player.availability || [], // Ensure availability is an array
+                        discordUserId: player.discordUserId // Ensure discordUserId is included
                     }));
 
                     // Filter players based on availability and sort by day-specific apps in descending order

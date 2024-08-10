@@ -28,6 +28,7 @@ const PlayerForm = ({ onPlayerAdded }) => {
         tuesdayAppearances: '',
         wednesdayAppearances: '',
         fridayAppearances: '',
+        discordID: '',
     });
 
     const handleSubmit = async (event) => {
@@ -81,6 +82,7 @@ const PlayerForm = ({ onPlayerAdded }) => {
                 tuesdayAppearances: '',
                 wednesdayAppearances: '',
                 fridayAppearances: '',
+                discordID: '',
             });
             // Call the function passed as prop to notify the parent component
             // onPlayerAdded();
@@ -151,9 +153,10 @@ const PlayerForm = ({ onPlayerAdded }) => {
             <input type="number" name="wednesdayAppearances" value={playerData.wednesdayAppearances}
                    onChange={handleChange} placeholder="Wednesday"/>
             <input type="number" name="fridayAppearances" value={playerData.fridayAppearances} onChange={handleChange}
-                   placeholder="Friday"/>
-            <input type="text" name="communicationDetails.phoneNumber"
-                   value={playerData.communicationDetails.phoneNumber}
+                    placeholder="Friday"/>
+            <input type="text" name="discordID" value={playerData.discordID} onChange={handleChange}
+                    placeholder="Discord Username"/>
+            <input type="text" name="communicationDetails.phoneNumber" value={playerData.communicationDetails.phoneNumber}
                    onChange={handleChange} placeholder="Phone Number"/>
             <input type="text" name="communicationDetails.address" value={playerData.communicationDetails.address}
                    onChange={handleChange} placeholder="Address"/>
