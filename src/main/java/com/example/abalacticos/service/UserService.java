@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class UserService {
@@ -108,91 +109,151 @@ public class UserService {
     }
 
     public void incrementOverallApps(List<String> playerIds) {
-        for (String playerId : playerIds) {
-            AbalacticosUser user = userRepository.findById(playerId).orElseThrow(() -> new RuntimeException("User not found"));
-            user.setOverallApps(user.getOverallApps() + 1);
-            userRepository.save(user);
+        for (String playerId : playerIds)
+        {
+            Optional<AbalacticosUser> playerOpt = userRepository.findById(playerId);
+            if (playerOpt.isPresent()) {
+                AbalacticosUser player = playerOpt.get();
+                player.setOverallApps(player.getOverallApps() + 1);
+                userRepository.save(player);
+            }
+            else
+            {
+                System.err.println("Player not found with ID: " + playerId);
+            }
         }
     }
 
     public void incrementDayAppearances(List<String> playerIds, String day) {
-        for (String playerId : playerIds) {
-            AbalacticosUser user = userRepository.findById(playerId).orElseThrow(() -> new RuntimeException("User not found"));
-            if (user != null) {
+        for (String playerId : playerIds)
+        {
+            Optional<AbalacticosUser> playerOpt = userRepository.findById(playerId);
+            if (playerOpt.isPresent()) {
+                AbalacticosUser player = playerOpt.get();
                 switch (day) {
                     case "Tuesday":
-                        user.setTuesdayAppearances(user.getTuesdayAppearances() + 1);
+                        player.setTuesdayAppearances(player.getTuesdayAppearances() + 1);
                         break;
                     case "Wednesday":
-                        user.setWednesdayAppearances(user.getWednesdayAppearances() + 1);
+                        player.setWednesdayAppearances(player.getWednesdayAppearances() + 1);
                         break;
                     case "Friday":
-                        user.setFridayAppearances(user.getFridayAppearances() + 1);
+                        player.setFridayAppearances(player.getFridayAppearances() + 1);
                         break;
                 }
-                userRepository.save(user);
+                userRepository.save(player);
+            }
+            else
+            {
+                System.err.println("Player not found with ID: " + playerId);
             }
         }
     }
 
-    public void decrementDayAppearances(List<String> playerIds, String day) {
-        for (String playerId : playerIds) {
-            AbalacticosUser player = userRepository.findById(playerId).orElseThrow(() -> new RuntimeException("Player not found"));
-            switch (day) {
-                case "Tuesday":
-                    player.setTuesdayAppearances(player.getTuesdayAppearances() - 1);
-                    break;
-                case "Wednesday":
-                    player.setWednesdayAppearances(player.getWednesdayAppearances() - 1);
-                    break;
-                case "Friday":
-                    player.setFridayAppearances(player.getFridayAppearances() - 1);
-                    break;
+    public void decrementDayAppearances(List<String> playerIds, String day)
+    {
+        for (String playerId : playerIds)
+        {
+            Optional<AbalacticosUser> playerOpt = userRepository.findById(playerId);
+            if (playerOpt.isPresent()) {
+                AbalacticosUser player = playerOpt.get();
+                switch (day) {
+                    case "Tuesday":
+                        player.setTuesdayAppearances(player.getTuesdayAppearances() - 1);
+                        break;
+                    case "Wednesday":
+                        player.setWednesdayAppearances(player.getWednesdayAppearances() - 1);
+                        break;
+                    case "Friday":
+                        player.setFridayAppearances(player.getFridayAppearances() - 1);
+                        break;
+                }
+                userRepository.save(player);
             }
-            userRepository.save(player);
+            else
+            {
+                System.err.println("Player not found with ID: " + playerId);
+            }
         }
     }
 
     public void decrementOverallApps(List<String> playerIds) {
-        for (String playerId : playerIds) {
-            AbalacticosUser player = userRepository.findById(playerId).orElseThrow(() -> new RuntimeException("Player not found"));
-            player.setOverallApps(player.getOverallApps() - 1);
-            userRepository.save(player);
+        for (String playerId : playerIds)
+        {
+            Optional<AbalacticosUser> playerOpt = userRepository.findById(playerId);
+            if (playerOpt.isPresent()) {
+                AbalacticosUser player = playerOpt.get();
+                player.setOverallApps(player.getOverallApps() - 1);
+                userRepository.save(player);
+            }
+            else
+            {
+                System.err.println("Player not found with ID: " + playerId);
+            }
         }
     }
 
     public void updateLastGK(List<String> playerIds, LocalDate matchDate) {
-        for (String playerId : playerIds) {
-            AbalacticosUser player = userRepository.findById(playerId).orElseThrow(() -> new RuntimeException("Player not found"));
-            player.setLastGK(matchDate.toString());
-            userRepository.save(player);
+        for (String playerId : playerIds)
+        {
+            Optional<AbalacticosUser> playerOpt = userRepository.findById(playerId);
+            if (playerOpt.isPresent()) {
+                AbalacticosUser player = playerOpt.get();
+                player.setLastGK(matchDate.toString());
+                userRepository.save(player);
+            }
+            else
+            {
+                System.err.println("Player not found with ID: " + playerId);
+            }
         }
     }
 
     public void incrementWins(List<String> playerIds) {
-        playerIds.forEach(playerId -> {
-            AbalacticosUser user = userRepository.findById(playerId)
-                    .orElseThrow(() -> new RuntimeException("User not found"));
-            user.setWins(user.getWins() + 1);
-            userRepository.save(user);
-        });
+        for (String playerId : playerIds)
+        {
+            Optional<AbalacticosUser> playerOpt = userRepository.findById(playerId);
+            if (playerOpt.isPresent()) {
+                AbalacticosUser player = playerOpt.get();
+                player.setWins(player.getWins() + 1);
+                userRepository.save(player);
+            }
+            else
+            {
+                System.err.println("Player not found with ID: " + playerId);
+            }
+        }
     }
 
     public void incrementLosses(List<String> playerIds) {
-        for (String playerId : playerIds) {
-            AbalacticosUser user = userRepository.findById(playerId)
-                    .orElseThrow(() -> new RuntimeException("User not found"));
-            user.setLosses(user.getLosses() + 1);
-            userRepository.save(user);
+        for (String playerId : playerIds)
+        {
+            Optional<AbalacticosUser> playerOpt = userRepository.findById(playerId);
+            if (playerOpt.isPresent()) {
+                AbalacticosUser player = playerOpt.get();
+                player.setLosses(player.getLosses() + 1);
+                userRepository.save(player);
+            }
+            else
+            {
+                System.err.println("Player not found with ID: " + playerId);
+            }
         }
     }
 
     public void incrementDraws(List<String> playerIds) {
-        for (String playerId : playerIds) {
-            AbalacticosUser user = userRepository.findById(playerId)
-                    .orElseThrow(() -> new RuntimeException("User not found"));
-            user.setDraws(user.getDraws() + 1);
-            userRepository.save(user);
+        for (String playerId : playerIds)
+        {
+            Optional<AbalacticosUser> playerOpt = userRepository.findById(playerId);
+            if (playerOpt.isPresent()) {
+                AbalacticosUser player = playerOpt.get();
+                player.setDraws(player.getDraws() + 1);
+                userRepository.save(player);
+            }
+            else
+            {
+                System.err.println("Player not found with ID: " + playerId);
+            }
         }
     }
 

@@ -54,14 +54,14 @@ public class MatchController {
     public ResponseEntity<?> deleteMatch(@PathVariable String id) {
         try {
             Match match = matchService.getMatchById(id);
-            matchService.deleteMatch(id);
+
             userService.decrementDayAppearances(match.getTeamA(), match.getDay());
             userService.decrementDayAppearances(match.getTeamB(), match.getDay());
 
             // Decrement overallApps for all players in the match
             userService.decrementOverallApps(match.getTeamA());
             userService.decrementOverallApps(match.getTeamB());
-
+            matchService.deleteMatch(id);
             return ResponseEntity.ok("Match deleted and player appearances updated");
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());

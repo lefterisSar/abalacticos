@@ -61,10 +61,8 @@ const MatchesGrid = () => {
                 const matches = matchesResponse.data;
                 setMatches(matches);
 
-                // Get all unique player IDs from matches
                 const playerIds = [...new Set(matches.flatMap(match => [...match.teamA, ...match.teamB]))];
 
-                // Fetch player details by IDs
                 const playersResponse = await axios.post('http://localhost:8080/api/users/fetchByIds', playerIds, {
                     headers: {
                         Authorization: `Bearer ${token}`
@@ -93,13 +91,17 @@ const MatchesGrid = () => {
             field: 'teamA',
             headerName: 'Team A',
             flex: 1,
-            valueGetter: (value, row) => row.teamA.map(id => players[id]?.name + ' ' + players[id]?.surname).join(', ')
+            valueGetter: (value,row) => row.teamA
+                .map(id => players[id] ? `${players[id].name} ${players[id].surname}` : 'Unknown Player')
+                .join(', ')
         },
         {
             field: 'teamB',
             headerName: 'Team B',
             flex: 1,
-            valueGetter: (value, row)=> row.teamB.map(id => players[id]?.name + ' ' + players[id]?.surname).join(', ')
+            valueGetter: (value,row) => row.teamB
+                .map(id => players[id] ? `${players[id].name} ${players[id].surname}` : 'Unknown Player')
+                .join(', ')
         },
         { field: 'result', headerName: 'Result', width: 80 },
         role === 'ADMIN' && {
