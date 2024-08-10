@@ -47,6 +47,8 @@ public class MatchController {
         return ResponseEntity.ok("Match recorded and player appearances updated");
     }
 
+    //TODO This should instead delete the win/loss/draw from the players'
+    // stats and the Overall Apps should be counted based on those 3.
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteMatch(@PathVariable String id) {
@@ -60,7 +62,7 @@ public class MatchController {
             userService.decrementOverallApps(match.getTeamA());
             userService.decrementOverallApps(match.getTeamB());
 
-                return ResponseEntity.ok("Match deleted and player appearances updated");
+            return ResponseEntity.ok("Match deleted and player appearances updated");
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
