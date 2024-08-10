@@ -7,11 +7,13 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { Button, TextField } from '@mui/material';
 import dayjs from 'dayjs';
+import { useTranslation } from 'react-i18next';
 
 const PlayersGrid = () => {
     const [rows, setRows] = useState([]);
     const [isAdmin, setIsAdmin] = useState(false);
     const navigate = useNavigate();
+    const { t } = useTranslation(); // Using the hook
 
     const calculateAge = (birthday) => {
         if (!birthday) return 0;
@@ -22,7 +24,7 @@ const PlayersGrid = () => {
     };
 
     const handleDelete = async (id) => {
-        if (window.confirm("Are you sure you want to delete this user?")) {
+        if (window.confirm("Are you sure you want to delete this user? This action will be irrevirsible.")) {
             const token = localStorage.getItem('authToken');
             if (!token) {
                 console.error('No auth token found');
@@ -186,40 +188,42 @@ const PlayersGrid = () => {
     };
 
     const columns = [
-        { field: 'username', headerName: 'Username', width: 150, editable: isAdmin },
-        { field: 'name', headerName: 'Name', width: 150, editable: isAdmin },
-        { field: 'surname', headerName: 'Surname', width: 150, editable: isAdmin },
-        { field: 'overallApps', headerName:'Apps', width: 150, editable: isAdmin },
-        { field: 'wins', headerName: 'Wins', width: 100, editable: isAdmin },
-        { field: 'losses', headerName: 'Losses', width: 100, editable: isAdmin },
-        { field: 'draws', headerName: 'Draws', width: 100, editable: isAdmin },
-        { field: 'age', headerName: 'Age', width: 100, editable: false }, // Not editable because it's calculated
-        { field: 'debutDate', headerName: 'Debut Date', width: 150, editable: isAdmin, renderCell: renderDatePicker },
-        { field: 'lastGK', headerName: 'Last GK Date', width: 150, editable: isAdmin, renderCell: renderDatePicker },
+        { field: 'username', headerName: t('username'), width: 150, editable: isAdmin },
+        { field: 'name', headerName: t('name'), width: 150, editable: isAdmin },
+        { field: 'surname', headerName: t('surname'), width: 150, editable: isAdmin },
+        { field: 'overallApps', headerName: t('apps'), width: 150, editable: isAdmin },
+        { field: 'wins', headerName: t('wins'), width: 100, editable: isAdmin },
+        { field: 'losses', headerName: t('losses'), width: 100, editable: isAdmin },
+        { field: 'draws', headerName: t('draws'), width: 100, editable: isAdmin },
+        { field: 'age', headerName: t('age'), width: 100, editable: false },
+        { field: 'debutDate', headerName: t('debutDate'), width: 150, editable: isAdmin, renderCell: renderDatePicker },
+        { field: 'lastGK', headerName: t('lastGK'), width: 150, editable: isAdmin, renderCell: renderDatePicker },
         {
             field: 'availability',
-            headerName: 'Availability',
+            headerName: t('availability'),
             width: 300,
             renderCell: renderAvailabilityCheckboxes,
         },
-        isAdmin && { field: 'communicationDetailsphoneNumber', headerName: 'Phone Number', width: 150, editable: isAdmin },
-        isAdmin && { field: 'communicationDetailsaddress', headerName: 'Address', width: 200, editable: isAdmin },
-        isAdmin && { field: 'communicationDetailsemail', headerName: 'Email', width: 200, editable: isAdmin },
-        isAdmin && { field: 'birthday', headerName: 'Birthday', width: 150, editable: isAdmin, renderCell: renderDatePicker },
-        isAdmin && { field: 'discordID', headerName: 'Discord ID', width: 150, editable: isAdmin, type: 'string' },
+        isAdmin && { field: 'communicationDetailsphoneNumber', headerName: t('phoneNumber'), width: 150, editable: isAdmin },
+        isAdmin && { field: 'communicationDetailsaddress', headerName: t('address'), width: 200, editable: isAdmin },
+        isAdmin && { field: 'communicationDetailsemail', headerName: t('email'), width: 200, editable: isAdmin },
+        isAdmin && { field: 'birthday', headerName: t('birthday'), width: 150, editable: isAdmin, renderCell: renderDatePicker },
+        isAdmin && { field: 'discordID', headerName: t('discordID'), width: 150, editable: isAdmin, type: 'string' },
         isAdmin && {
             field: 'actions',
-            headerName: 'Actions',
+            headerName: t('actions'),
             width: 150,
-            renderCell: (params) =>
-            {
-                return( <Button
+            renderCell: (params) => (
+                <Button
                     variant="contained"
                     color="secondary"
-                    onClick={() => handleDelete(params.id)}>
-                    Delete
-                </Button>)
-            }}].filter(Boolean); // Filter out the false values for non-admins
+                    onClick={() => handleDelete(params.id)}
+                >
+                    {t('delete')}
+                </Button>
+            ),
+        }
+    ].filter(Boolean);
 
     const [columnVisibilityModel, setColumnVisibilityModel] = React.useState({
         communicationDetailsaddress: false,
