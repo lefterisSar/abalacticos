@@ -42,9 +42,9 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authz -> authz
-                    .requestMatchers("/", "/public/**", "/api/users/register", "/api/auth/**","api/users/fetchByIds","api/matches/**").permitAll()
-                    .requestMatchers("/api/users/registerAdmin","/api/users/update/**","api").hasRole("ADMIN")
-                    .anyRequest().authenticated()
+                        .requestMatchers("/", "/public/**", "/api/users/register", "/api/auth/**", "/api/users/fetchByIds", "/api/matches/**", "/api/discord/**","/api/config/**").permitAll()
+                        .requestMatchers("/api/users/registerAdmin", "/api/users/update/**").hasRole("ADMIN")
+                        .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
                     .loginPage("/login")
@@ -52,8 +52,7 @@ public class SecurityConfig {
                     .permitAll()
                 )
                 .logout(LogoutConfigurer::permitAll)
-                .addFilterBefore(jwtAuthenticationFilter,
-                    UsernamePasswordAuthenticationFilter.class); // Add JWT filter
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class); // Add JWT filter
 
         return http.build();
     }

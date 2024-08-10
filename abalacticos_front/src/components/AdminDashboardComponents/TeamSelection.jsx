@@ -53,6 +53,41 @@ const TeamSelection = () => {
     const [columnVisibilityModel, setColumnVisibilityModel] = useState({});
     const [nextMatchDate, setNextMatchDate] = useState(new Date());
     const userId = localStorage.getItem('userName');
+    const [channelId, setChannelId] = useState('');
+
+    useEffect(() => {
+        const fetchChannelId = async () => {
+            try {
+                const response = await fetch('http://localhost:8080/api/config/channelId');
+                if (response.ok) {
+                    const id = await response.text();
+                    setChannelId(id);
+                } else {
+                    console.error('Failed to fetch channel ID');
+                }
+            } catch (error) {
+                console.error('Error fetching channel ID:', error);
+            }
+        };
+
+        fetchChannelId();
+    }, []);
+
+    const sendDiscordMessage = async (message) => {
+        const url = `http://localhost:8080/api/discord/${channelId}/send`;
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ message }),
+        });
+
+        if (!response.ok) {
+            console.error('Failed to send message');
+        }
+    };
+
 
     const handleConfirmTeams = async () => {
         const match = {
@@ -111,6 +146,7 @@ const TeamSelection = () => {
 
             alert('Teams confirmed and match recorded!');
             updateNextMatchDate();
+            await sendDiscordMessage(`Teams for ${day} have been confirmed!`);
         } catch (error) {
             console.error('Error confirming teams:', error);
         }
