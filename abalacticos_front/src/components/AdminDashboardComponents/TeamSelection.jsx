@@ -88,7 +88,11 @@ const TeamSelection = () => {
         const teamAMessage = formatTeam(teamA, 'Team A');
         const teamBMessage = formatTeam(teamB, 'Team B');
 
-        const fullMessage = `Teams for ${day} have been confirmed!\n\n${teamAMessage}\n\n${teamBMessage}\n\n@everyone`;
+        // Format the match date
+        const matchDate = format(nextMatchDate, 'MMMM do, yyyy'); // e.g., August 10th, 2024
+
+        const fullMessage = `Teams for ${day} (${matchDate}) have been confirmed!\n\n${teamAMessage}\n\n${teamBMessage}`;
+
 
         const url = `http://localhost:8080/api/discord/${channelId}/send`;
         const response = await fetch(url, {
