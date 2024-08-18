@@ -41,6 +41,7 @@ public class UserController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@RequestBody @Valid RegistrationDto registrationDto) {
         try {
@@ -84,5 +85,17 @@ public class UserController {
         return ResponseEntity.ok("Availability updated successfully");
     }
 
-    // Other CRUD operations if needed
+    @PutMapping("/{id}/absentDates")
+    public ResponseEntity<?> updateAbsentDates(@PathVariable String id, @RequestBody List<String> absentDates) {
+        try {
+            userService.updateAbsentDates(id, absentDates); // Call the service layer to handle the update
+            return ResponseEntity.ok("Absent dates updated successfully");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+
+
+        // Other CRUD operations if needed
+    }
+
 }

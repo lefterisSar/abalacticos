@@ -1,9 +1,11 @@
 package com.example.abalacticos.model;
 
+import jakarta.persistence.ElementCollection;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.List;
+import java.util.ArrayList;
 
 @Document(collection = "abalacticos_users")
 public class AbalacticosUser {
@@ -35,6 +37,10 @@ public class AbalacticosUser {
     private int wednesdayAppearances;
     private int fridayAppearances;
     private String discordID;
+
+    @ElementCollection
+    private List<String> absentDates = new ArrayList<>();
+
 
     public AbalacticosUser() {}
 
@@ -69,6 +75,7 @@ public class AbalacticosUser {
         this.losses = losses;
         this.surname =surname;
         this.name = name;
+
     }
 
 
@@ -253,5 +260,14 @@ public class AbalacticosUser {
 
     public void setLosses(int losses) {
         this.losses = losses;
+    }
+
+
+    //absentDates apo Gianni
+    public void setAbsentDates(List<String> absentDates) {
+        this.absentDates = absentDates;
+    }
+    public List<String> getAbsentDates(){
+        return absentDates;
     }
 }

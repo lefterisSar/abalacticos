@@ -6,6 +6,7 @@ import com.example.abalacticos.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import java.util.ArrayList;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -69,6 +70,7 @@ public class UserService {
         newUser.setFridayAppearances(registrationDto.getFridayAppearances());
         newUser.setWednesdayAppearances(registrationDto.getWednesdayAppearances());
         newUser.setDiscordID(registrationDto.getDiscordID());
+        newUser.setAbsentDates(new ArrayList<>());
     }
 
 
@@ -93,6 +95,8 @@ public class UserService {
         //TODO: Below line is not working
         existingUser.setCommunicationDetails(existingUser.getCommunicationDetails());
         userRepository.save(existingUser);
+        existingUser.setAbsentDates(updatedUser.getAbsentDates());
+
     }
 
     public void updateAvailability(AbalacticosUser user) {
@@ -257,6 +261,17 @@ public class UserService {
             }
         }
     }
+
+    public void updateAbsentDates(String id, List<String> absentDates) {
+        AbalacticosUser existingUser = userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
+
+        // Update the absent dates
+        existingUser.setAbsentDates(absentDates);
+
+        // Save the updated user back to the database
+        userRepository.save(existingUser);
+    }
+
 
     public List<AbalacticosUser> findUsersByIds(List<String> ids) {
         return userRepository.findAllById(ids);

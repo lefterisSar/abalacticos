@@ -46,6 +46,9 @@ function HeaderWithIcon(props) {
 
 const TeamSelection = () => {
     const [players, setPlayers] = useState([]);
+
+
+
     const [teamA, setTeamA] = useState([]);
     const [teamB, setTeamB] = useState([]);
     const navigate = useNavigate();
@@ -107,6 +110,11 @@ const TeamSelection = () => {
             console.error('Failed to send message');
         }
     };
+
+
+
+
+
 
 
     const handleConfirmTeams = async () => {
@@ -296,6 +304,9 @@ const TeamSelection = () => {
         }
         setTeam([...team, player]);
     };
+
+
+
 
     const handleRemoveFromTeam = (team, setTeam, player) => {
         setTeam(team.filter(p => p.id !== player.id));

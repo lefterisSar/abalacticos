@@ -7,6 +7,7 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { Button, TextField } from '@mui/material';
 import dayjs from 'dayjs';
+import AbsentDatesCell from './AbsentDatesCell'; // Import the new component
 
 const PlayersGrid = () => {
     const [rows, setRows] = useState([]);
@@ -68,6 +69,45 @@ const PlayersGrid = () => {
         }
     };
 
+    const handleAddAbsentDate = async (row, selectedDate) => {
+        const newAbsentDate = selectedDate ? selectedDate.format('YYYY-MM-DD') : null;
+
+        if (!newAbsentDate) {
+            console.error('No date selected');
+            return;
+        }
+
+        if (!row.absentDates.includes(newAbsentDate)) {
+            const updatedAbsentDates = [...row.absentDates, newAbsentDate];
+
+            try {
+                const token = localStorage.getItem('authToken');
+                await axios.put(
+                    `http://localhost:8080/api/users/${row.id}/absentDates`,
+                    updatedAbsentDates, // Only sending the absent dates array
+                    {
+                        headers: {
+                            Authorization: `Bearer ${token}`
+                        }
+                    }
+                );
+
+                setRows((prevRows) =>
+                    prevRows.map((r) =>
+                        r.id === row.id ? { ...r, absentDates: updatedAbsentDates } : r
+                    )
+                );
+            } catch (error) {
+                console.error('Error updating absent dates:', error);
+            }
+        } else {
+            console.error('Date already exists in absentDates');
+        }
+    };
+
+
+
+
     useEffect(() => {
         const fetchPlayers = async () => {
             const token = localStorage.getItem('authToken');
@@ -90,7 +130,8 @@ const PlayersGrid = () => {
                         ...player,
                         id: player.id || `${player.name}-${player.surname}-${player.birthday}`, // Fallback if no id field is present
                         age: calculateAge(player.birthday), // Calculate age based on birthday
-                        availability: player.availability || [] // Ensure availability is an array
+                        availability: player.availability || [], // Ensure availability is an array
+                        absentDates: player.absentDates || []
                     }));
                     setRows(playersWithIdAndAge);
                 } else {
@@ -185,6 +226,8 @@ const PlayersGrid = () => {
         );
     };
 
+
+
     const columns = [
         { field: 'username', headerName: 'Username', width: 150, editable: isAdmin },
         { field: 'name', headerName: 'Name', width: 150, editable: isAdmin },
@@ -201,6 +244,19 @@ const PlayersGrid = () => {
             headerName: 'Availability',
             width: 300,
             renderCell: renderAvailabilityCheckboxes,
+        },
+
+        {
+            field: 'absentDates',
+            headerName: 'Absent Dates',
+            width: 240,
+            renderCell: (params) => (
+                <AbsentDatesCell
+                    row={params.row}
+                    isAdmin={isAdmin}
+                    onAddAbsentDate={handleAddAbsentDate}
+                />
+            ),
         },
         isAdmin && { field: 'communicationDetailsphoneNumber', headerName: 'Phone Number', width: 150, editable: isAdmin },
         isAdmin && { field: 'communicationDetailsaddress', headerName: 'Address', width: 200, editable: isAdmin },
