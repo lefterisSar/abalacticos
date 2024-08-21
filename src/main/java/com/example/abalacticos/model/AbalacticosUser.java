@@ -15,6 +15,8 @@ public class AbalacticosUser {
     private String password;
     private String roles; // For simplicity, assume single role
 
+    List<String> unavailableDates;
+
     // Player attributes
     private String name;
     private String surname;
@@ -37,8 +39,6 @@ public class AbalacticosUser {
     private int wednesdayAppearances;
     private int fridayAppearances;
     private String discordID;
-
-    @ElementCollection
     private List<String> absentDates = new ArrayList<>();
 
 
@@ -262,12 +262,19 @@ public class AbalacticosUser {
         this.losses = losses;
     }
 
-
-    //absentDates apo Gianni
     public void setAbsentDates(List<String> absentDates) {
         this.absentDates = absentDates;
     }
     public List<String> getAbsentDates(){
         return absentDates;
     }
+
+    public List<String> getUnavailableDates() {
+        return unavailableDates;
+    }
+
+    public void setUnavailableDates(List<String> unavailableDates) {
+        this.unavailableDates = unavailableDates;
+    }
+
 }
