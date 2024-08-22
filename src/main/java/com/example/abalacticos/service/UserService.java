@@ -273,12 +273,16 @@ public class UserService {
     }
 
     public List<String> getAbsentDates(String id){
-        AbalacticosUser existingUser =userRepository.findById("id").orElseThrow(() -> new RuntimeException("User not found"));
+        AbalacticosUser existingUser =userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
         return existingUser.getAbsentDates();
     }
 
     public List<AbalacticosUser> findUsersByIds(List<String> ids) {
         return userRepository.findAllById(ids);
+    }
+
+    public AbalacticosUser findPlayerById(String id) {
+        return userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
     }
 
 }

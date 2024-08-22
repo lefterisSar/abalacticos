@@ -46,9 +46,6 @@ function HeaderWithIcon(props) {
 
 const TeamSelection = () => {
     const [players, setPlayers] = useState([]);
-
-
-
     const [teamA, setTeamA] = useState([]);
     const [teamB, setTeamB] = useState([]);
     const navigate = useNavigate();
@@ -113,10 +110,6 @@ const TeamSelection = () => {
 
 
 
-
-
-
-
     const handleConfirmTeams = async () => {
         const match = {
             day,
@@ -127,13 +120,15 @@ const TeamSelection = () => {
 
         try {
             const token = localStorage.getItem('authToken');
-            await axios.post('http://localhost:8080/api/matches', match, {
+
+            // Call the confirmTeamsAndNotifyPlayers endpoint
+            await axios.post('http://localhost:8080/api/matches/confirm', match, {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }
             });
 
-            // Increment day-specific appearances for teamA and teamB in frontend state
+            // After confirmation, update the frontend state
             const incrementDayAppearances = (team) => {
                 return team.map(player => {
                     switch (day) {
@@ -172,7 +167,7 @@ const TeamSelection = () => {
                 setPlayers(prevPlayers => prevPlayers.map(player => player.id === teamB[0].id ? { ...player, lastGK: new Date().toISOString().split('T')[0] } : player));
             }
 
-            alert('Teams confirmed and match recorded! Sending Discord message...');
+            alert('Teams confirmed, players notified, and match saved successfully!');
             updateNextMatchDate();
             await sendDiscordMessage(updatedTeamA, updatedTeamB);
         } catch (error) {
@@ -219,7 +214,8 @@ const TeamSelection = () => {
                     }));
 
                     // Filter players based on availability and sort by day-specific apps in descending order
-                    const filteredPlayers = playersWithId.filter(player => player.availability.includes(day));
+                    let filteredPlayers = playersWithId.filter(player => player.availability.includes(day));
+                    filteredPlayers = filteredPlayers.filter(player => !player.absentDates.includes(nextMatchDate.toISOString().split('T')[0]));
                     const sortedPlayers = filteredPlayers.sort((a, b) => {
                         switch (day) {
                             case "Tuesday":

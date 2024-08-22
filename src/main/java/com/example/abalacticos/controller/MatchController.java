@@ -1,6 +1,8 @@
 package com.example.abalacticos.controller;
 
+import com.example.abalacticos.model.AbalacticosUser;
 import com.example.abalacticos.model.Match;
+import com.example.abalacticos.service.DiscordBotService;
 import com.example.abalacticos.service.MatchService;
 import com.example.abalacticos.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,7 +12,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/matches")
@@ -18,33 +19,50 @@ public class MatchController {
 
     private final MatchService matchService;
     private final UserService userService;
+    private final DiscordBotService discordBotService;
 
     @Autowired
-    public MatchController(MatchService matchService, UserService userService) {
+    public MatchController(MatchService matchService, UserService userService, DiscordBotService discordBotService) {
         this.matchService = matchService;
         this.userService = userService;
+        this.discordBotService = discordBotService;
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @PostMapping
-    public ResponseEntity<?> saveMatch(@RequestBody Match match) {
+    @PostMapping("/confirm")
+    public ResponseEntity<?> confirmTeamsAndNotifyPlayers(@RequestBody Match match) {
+        // Save the match
         Match savedMatch = matchService.saveMatch(match);
-        userService.incrementDayAppearances(match.getTeamA(), match.getDay());
-        userService.incrementDayAppearances(match.getTeamB(), match.getDay());
+
+        // Increment day-specific appearances for Team A and Team B
+        userService.incrementDayAppearances(savedMatch.getTeamA(), savedMatch.getDay());
+        userService.incrementDayAppearances(savedMatch.getTeamB(), savedMatch.getDay());
 
         // Increment overallApps for all players in the match
-        userService.incrementOverallApps(match.getTeamA());
-        userService.incrementOverallApps(match.getTeamB());
+        userService.incrementOverallApps(savedMatch.getTeamA());
+        userService.incrementOverallApps(savedMatch.getTeamB());
 
         // Update the lastGK date for the player in the GK position
-        if (!match.getTeamA().isEmpty()) {
-            userService.updateLastGK(Collections.singletonList(match.getTeamA().get(0)), match.getDatePlayed());
+        if (!savedMatch.getTeamA().isEmpty()) {
+            userService.updateLastGK(Collections.singletonList(savedMatch.getTeamA().get(0)), savedMatch.getDatePlayed());
         }
-        if (!match.getTeamB().isEmpty()) {
-            userService.updateLastGK(Collections.singletonList(match.getTeamB().get(0)), match.getDatePlayed());
+        if (!savedMatch.getTeamB().isEmpty()) {
+            userService.updateLastGK(Collections.singletonList(savedMatch.getTeamB().get(0)), savedMatch.getDatePlayed());
         }
 
-        return ResponseEntity.ok("Match recorded and player appearances updated");
+        // Notify players in Team A
+        for (String playerID : savedMatch.getTeamA()) {
+            AbalacticosUser player = userService.findPlayerById(playerID);
+            discordBotService.sendAvailabilityButtons(player, savedMatch.getDatePlayed().toString());
+        }
+
+        // Notify players in Team B
+        for (String playerID : savedMatch.getTeamB()) {
+            AbalacticosUser player = userService.findPlayerById(playerID);
+            discordBotService.sendAvailabilityButtons(player, savedMatch.getDatePlayed().toString());
+        }
+
+        return ResponseEntity.ok("Teams confirmed, players notified, and match saved successfully.");
     }
 
     //TODO This should instead delete the win/loss/draw from the players'

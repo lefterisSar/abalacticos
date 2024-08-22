@@ -1,12 +1,16 @@
 package com.example.abalacticos.service;
 
+import com.example.abalacticos.model.AbalacticosUser;
 import io.github.cdimascio.dotenv.Dotenv;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.interactions.components.ActionRow;
+import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
@@ -47,4 +51,57 @@ public class DiscordBotService extends ListenerAdapter {
             channel.sendMessage(message).queue();
         }
     }
+    public void sendAvailabilityButtons(AbalacticosUser user, String matchDate) {
+        String discordId = user.getDiscordID();
+        if (discordId == null || discordId.isEmpty()) {
+            System.err.println("User " + user.getUsername() + " does not have a valid Discord ID.");
+            return;
+        }
+
+        // Get the Discord user by their ID
+        User discordUser = jda.retrieveUserById(discordId).complete();
+
+        if (discordUser != null) {
+            // Open a private channel (DM) with the user
+            discordUser.openPrivateChannel().queue((privateChannel) -> {
+                // Send the message with buttons in the private channel
+                privateChannel.sendMessage("Are you available for the match on " + matchDate + "?")
+                    .setActionRows(
+                        ActionRow.of(
+                            Button.primary("available:" + user.getDiscordID(), "Available"),
+                            Button.danger("not-available:" + user.getDiscordID(), "Not Available")
+                        )
+                    ).queue();
+            }, failure -> {
+                System.err.println("Failed to open private channel with user " + user.getUsername() + ".");
+            });
+        } else {
+            System.err.println("Failed to retrieve Discord user for ID: " + discordId);
+        }
+    }
+
+        // Listen for button interactions
+        @Override
+        public void onButtonInteraction(ButtonInteractionEvent event) {
+            String[] split = event.getComponentId().split(":");
+            String action = split[0];
+            String userId = split[1];
+
+            if (event.getUser().getId().equals(userId)) {
+                switch (action) {
+                    case "available":
+                        event.reply("Thank you! You are marked as available.").queue();
+                        // Handle marking the user as available in your system.
+                        break;
+                    case "not-available":
+                        event.reply("Thank you! You are marked as not available.").queue();
+                        // Handle marking the user as not available in your system.
+                        break;
+                }
+            } else {
+                event.reply("This button is not for you!").setEphemeral(true).queue();
+            }
+        }
+
+
 }
