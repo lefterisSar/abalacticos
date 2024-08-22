@@ -295,7 +295,8 @@ const TeamSelection = () => {
         setNextMatchDate(getNextMatchDate(day));
     };
 
-    const filteredPlayers = players.filter(player => player.availability.includes(day));
+    let filteredPlayers = players.filter(player => player.availability.includes(day));
+    filteredPlayers = filteredPlayers.filter(player => !player.absentDates.includes(nextMatchDate.toISOString().split('T')[0]));
 
     const handleAddToTeam = (team, setTeam, player) => {
         if (team.length >= 8) {

@@ -22,7 +22,6 @@ const App = () => (
             <Route path="/team-selection" element={<PrivateRoute role="ADMIN"><TeamSelection /></PrivateRoute>} />
             <Route path="/admin-dashboard" element={<PrivateRoute role="ADMIN"><AdminDashboard /></PrivateRoute>} />
             <Route path="/availability" element={<AvailabilityCalendar />} />
-            <Route path="/team-selection" element={<PrivateRoute role="ADMIN"><AdminDashboard /></PrivateRoute>} />
             <Route path="/team-selection/:day" element={<PrivateRoute role="ADMIN"><TeamSelection /></PrivateRoute>} />
             <Route path="/matches" element={<MatchesGrid/>} />
             <Route path="/" element={<Navigate to="/players" />} />
