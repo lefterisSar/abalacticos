@@ -70,28 +70,27 @@ const PlayersGrid = () => {
     };
 
     const handleAddAbsentDates = async (row, selectedDates) => {
-
-            try {
-                const token = localStorage.getItem('authToken');
-                await axios.put(
-                    `http://localhost:8080/api/users/${row.id}/absentDates`,
-                    selectedDates, // Only sending the absent dates array
-                    {
-                        headers: {
-                            Authorization: `Bearer ${token}`
-                        }
+        try {
+            const token = localStorage.getItem('authToken');
+            await axios.put(
+                `http://localhost:8080/api/users/${row.id}/absentDates`,
+                selectedDates, // Only sending the absent dates array
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`
                     }
-                );
+                }
+            );
 
-                setRows((prevRows) =>
-                    prevRows.map((r) =>
-                        r.id === row.id ? { ...r, absentDates: selectedDates } : r
-                    )
-                );
-                alert('Absent dates updated successfully!');
-            } catch (error) {
-                console.error('Error updating absent dates:', error);
-            }
+            setRows((prevRows) =>
+                prevRows.map((r) =>
+                    r.id === row.id ? { ...r, absentDates: selectedDates } : r
+                )
+            );
+            alert('Absent dates updated successfully!');
+        } catch (error) {
+            console.error('Error updating absent dates:', error);
+        }
     };
 
 
@@ -214,8 +213,6 @@ const PlayersGrid = () => {
             </LocalizationProvider>
         );
     };
-
-
 
     const columns = [
         { field: 'username', headerName: 'Username', width: 150, editable: isAdmin },
