@@ -1,54 +1,51 @@
-import React, { useState } from 'react';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import { Button, TextField } from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import MultiDatePicker from 'react-multi-date-picker';
+import { Button, Box } from '@mui/material';
 import dayjs from 'dayjs';
 
-const AbsentDatesCell = ({ row, isAdmin, onAddAbsentDate }) => {
-    const [selectedDate, setSelectedDate] = useState(null);
+const AbsentDatesCell = ({ row, isAdmin, onAddAbsentDates }) => {
+    // Initialize selectedDates with the dates coming from the backend
+    const initialDates = row.absentDates.map(date => dayjs(date).toDate());
+    const [selectedDates, setSelectedDates] = useState(initialDates);
 
-    // Get the current logged-in username
-    const loggedInUsername = localStorage.getItem('userName');
-
-    // Check if the current row corresponds to the logged-in user or if the user is an admin
-    const canEdit = isAdmin || row.username === loggedInUsername;
-
-    const handleAddAbsentDate = () => {
-        if (selectedDate) {
-            onAddAbsentDate(row, selectedDate); // Call parent function to update backend
-            setSelectedDate(null); // Reset date picker after adding
+    const handleAddAbsentDates = () => {
+        if (selectedDates.length > 0) {
+            const formattedDates = selectedDates.map(date => dayjs(date).format('YYYY-MM-DD'));
+            console.log("Formatted Dates:", formattedDates);
+            onAddAbsentDates(row, formattedDates);
         } else {
-            console.error('No date selected');
+            // If the selectedDates is empty, we update the backend with an empty array
+            onAddAbsentDates(row, []);
+        }
+    };
+
+    const handleKeyDown = (event) => {
+        if (event.key === 'Enter') {
+            handleAddAbsentDates();
         }
     };
 
     return (
         <div>
-            {/* Display existing absent dates */}
-            {row.absentDates && row.absentDates.map((date, index) => (
-                <div key={index}>{dayjs(date).format('YYYY-MM-DD')}</div>
-            ))}
-
-            {/* Allow editing only if the user is admin or the row belongs to the logged-in user */}
-            {canEdit && (
+            {/* Admin or self date picker and add button */}
+            {(isAdmin || row.username === localStorage.getItem('userName')) && (
                 <>
-                    <LocalizationProvider dateAdapter={AdapterDayjs}>
-                        <DatePicker
-                            label="Select Absent Date"
-                            value={selectedDate}
-                            onChange={(newDate) => setSelectedDate(newDate)}
-                            renderInput={(params) => <TextField {...params} size="small" />}
-                        />
-                    </LocalizationProvider>
-                    <Button
-                        onClick={handleAddAbsentDate}
-                        variant="contained"
-                        size="small"
-                        color="primary"
-                        sx={{ mt: 1 }}
-                    >
-                        Add Absent Date
+                    <MultiDatePicker
+                        value={selectedDates}
+                        onChange={setSelectedDates}
+                        multiple
+                        format="YYYY-MM-DD"
+                        placeholder="Select multiple dates"
+                        onKeyDown={handleKeyDown}
+                    />
+                        <Button
+                            onClick={handleAddAbsentDates}
+                            variant="contained"
+                            size="small"
+                            color="primary"
+                            sx={{ mt: 1 }}
+                        >
+                            Confirm Absent Dates
                     </Button>
                 </>
             )}

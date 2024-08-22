@@ -93,9 +93,13 @@ public class UserController {
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
-
-
-        // Other CRUD operations if needed
     }
 
+    @GetMapping("/{id}/absentDates")
+    public ResponseEntity<List<String>> getAbsentDates(@PathVariable String id) {
+        List<String> absentDates = userService.getAbsentDates(id);
+        return ResponseEntity.ok(absentDates);
+    }
+
+// Other CRUD operations if needed
 }

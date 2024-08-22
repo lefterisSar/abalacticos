@@ -7,7 +7,7 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { Button, TextField } from '@mui/material';
 import dayjs from 'dayjs';
-import AbsentDatesCell from './AbsentDatesCell'; // Import the new component
+import AbsentDatesCell from './AbsentDatesCell';
 
 const PlayersGrid = () => {
     const [rows, setRows] = useState([]);
@@ -69,22 +69,13 @@ const PlayersGrid = () => {
         }
     };
 
-    const handleAddAbsentDate = async (row, selectedDate) => {
-        const newAbsentDate = selectedDate ? selectedDate.format('YYYY-MM-DD') : null;
-
-        if (!newAbsentDate) {
-            console.error('No date selected');
-            return;
-        }
-
-        if (!row.absentDates.includes(newAbsentDate)) {
-            const updatedAbsentDates = [...row.absentDates, newAbsentDate];
+    const handleAddAbsentDates = async (row, selectedDates) => {
 
             try {
                 const token = localStorage.getItem('authToken');
                 await axios.put(
                     `http://localhost:8080/api/users/${row.id}/absentDates`,
-                    updatedAbsentDates, // Only sending the absent dates array
+                    selectedDates, // Only sending the absent dates array
                     {
                         headers: {
                             Authorization: `Bearer ${token}`
@@ -94,15 +85,13 @@ const PlayersGrid = () => {
 
                 setRows((prevRows) =>
                     prevRows.map((r) =>
-                        r.id === row.id ? { ...r, absentDates: updatedAbsentDates } : r
+                        r.id === row.id ? { ...r, absentDates: selectedDates } : r
                     )
                 );
+                alert('Absent dates updated successfully!');
             } catch (error) {
                 console.error('Error updating absent dates:', error);
             }
-        } else {
-            console.error('Date already exists in absentDates');
-        }
     };
 
 
@@ -249,12 +238,12 @@ const PlayersGrid = () => {
         {
             field: 'absentDates',
             headerName: 'Absent Dates',
-            width: 240,
+            width: 430,
             renderCell: (params) => (
                 <AbsentDatesCell
                     row={params.row}
                     isAdmin={isAdmin}
-                    onAddAbsentDate={handleAddAbsentDate}
+                    onAddAbsentDates={handleAddAbsentDates}
                 />
             ),
         },
@@ -286,7 +275,7 @@ const PlayersGrid = () => {
 
 
     return (
-        <div style={{ height: 600, width: '100%' }}>
+        <div style={{ height: '100%', width: '100%' }}>
             <DataGrid
                 rows={rows}
                 columns={columns}

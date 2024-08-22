@@ -272,6 +272,10 @@ public class UserService {
         userRepository.save(existingUser);
     }
 
+    public List<String> getAbsentDates(String id){
+        AbalacticosUser existingUser =userRepository.findById("id").orElseThrow(() -> new RuntimeException("User not found"));
+        return existingUser.getAbsentDates();
+    }
 
     public List<AbalacticosUser> findUsersByIds(List<String> ids) {
         return userRepository.findAllById(ids);
