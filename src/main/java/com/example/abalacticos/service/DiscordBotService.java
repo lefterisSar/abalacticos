@@ -11,6 +11,7 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
@@ -19,6 +20,14 @@ import javax.annotation.PostConstruct;
 public class DiscordBotService extends ListenerAdapter {
 
     private JDA jda;
+
+
+    private final MatchService matchService;
+
+    @Autowired
+    public DiscordBotService(MatchService matchService) {
+        this.matchService = matchService;
+    }
 
     @PostConstruct
     public void startBot() throws Exception {
@@ -51,7 +60,8 @@ public class DiscordBotService extends ListenerAdapter {
             channel.sendMessage(message).queue();
         }
     }
-    public void sendAvailabilityButtons(AbalacticosUser user, String matchDate) {
+
+    public void sendAvailabilityButtons(AbalacticosUser user, String matchDate, String matchID) {
         String discordId = user.getDiscordID();
         if (discordId == null || discordId.isEmpty()) {
             System.err.println("User " + user.getUsername() + " does not have a valid Discord ID.");
@@ -68,8 +78,8 @@ public class DiscordBotService extends ListenerAdapter {
                 privateChannel.sendMessage("Are you available for the match on " + matchDate + "?")
                     .setActionRows(
                         ActionRow.of(
-                            Button.primary("available:" + user.getDiscordID(), "Available"),
-                            Button.danger("not-available:" + user.getDiscordID(), "Not Available")
+                            Button.primary("available:" + user.getDiscordID() + ":" + matchID, "Available"),
+                            Button.danger("not-available:" + user.getDiscordID() + ":" + matchID, "Not Available")
                         )
                     ).queue();
             }, failure -> {
@@ -86,11 +96,13 @@ public class DiscordBotService extends ListenerAdapter {
             String[] split = event.getComponentId().split(":");
             String action = split[0];
             String userId = split[1];
+            String matchID = split[2];
 
             if (event.getUser().getId().equals(userId)) {
                 switch (action) {
                     case "available":
                         event.reply("Thank you! You are marked as available.").queue();
+                        //TODO: matchService.getMatchById(matchID).addPlayerAvailable(userId)
                         // Handle marking the user as available in your system.
                         break;
                     case "not-available":

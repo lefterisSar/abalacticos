@@ -53,13 +53,13 @@ public class MatchController {
         // Notify players in Team A
         for (String playerID : savedMatch.getTeamA()) {
             AbalacticosUser player = userService.findPlayerById(playerID);
-            discordBotService.sendAvailabilityButtons(player, savedMatch.getDatePlayed().toString());
+            discordBotService.sendAvailabilityButtons(player, savedMatch.getDatePlayed().toString(), match.getId());
         }
 
         // Notify players in Team B
         for (String playerID : savedMatch.getTeamB()) {
             AbalacticosUser player = userService.findPlayerById(playerID);
-            discordBotService.sendAvailabilityButtons(player, savedMatch.getDatePlayed().toString());
+            discordBotService.sendAvailabilityButtons(player, savedMatch.getDatePlayed().toString(), match.getId());
         }
 
         return ResponseEntity.ok("Teams confirmed, players notified, and match saved successfully.");
