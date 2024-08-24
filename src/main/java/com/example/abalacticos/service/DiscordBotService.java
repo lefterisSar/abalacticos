@@ -78,8 +78,8 @@ public class DiscordBotService extends ListenerAdapter {
                 privateChannel.sendMessage("Are you available for the match on " + matchDate + "?")
                     .setActionRows(
                         ActionRow.of(
-                            Button.primary("available:" + user.getId() + ":" + matchID + ":" + user.getDiscordID(), "Available"),
-                            Button.danger("not-available:" + user.getId() + ":" + matchID + ":" + user.getDiscordID(), "Not Available")
+                            Button.primary("available:" + user.getId() + ":" + matchID + ":" + user.getDiscordID(), "Available \uD83D\uDE00"),
+                            Button.danger("not-available:" + user.getId() + ":" + matchID + ":" + user.getDiscordID(), "Not Available \uD83D\uDE41")
                         )
                     ).queue();
             }, failure -> {
@@ -101,11 +101,13 @@ public class DiscordBotService extends ListenerAdapter {
 
             if (event.getUser().getId().equals(discordID)) {
                 switch (action) {
+                    // Handle marking the user as available in your system.
                     case "available":
                         event.reply("Thank you! You are marked as available.").queue();
                         matchService.updatePlayerStatus(matchID, playerId, "available");
                         // Handle marking the user as available in your system.
                         break;
+                    // Handle marking the user as not-available in your system.
                     case "not-available":
                         event.reply("Thank you! You are marked as not available.").queue();
                         matchService.updatePlayerStatus(matchID, playerId, "not-available");
@@ -113,7 +115,6 @@ public class DiscordBotService extends ListenerAdapter {
                         break;
                     case "TBD":
                         matchService.updatePlayerStatus(matchID, playerId, "TBD");
-                        // Handle confirming the match in your system.
                         break;
                 }
             } else {
