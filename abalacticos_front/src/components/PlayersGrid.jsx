@@ -215,6 +215,7 @@ const PlayersGrid = () => {
     };
 
     const columns = [
+        { field: "id", headerName: "ID", width: 150, editable: false},
         { field: 'username', headerName: 'Username', width: 150, editable: isAdmin },
         { field: 'name', headerName: 'Name', width: 150, editable: isAdmin },
         { field: 'surname', headerName: 'Surname', width: 150, editable: isAdmin },
@@ -267,6 +268,7 @@ const PlayersGrid = () => {
         communicationDetailsaddress: false,
         communicationDetailsemail: false,
         communicationDetailsphoneNumber: false,
+        id: false,
         birthday: false
     });
 

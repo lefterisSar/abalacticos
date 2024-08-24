@@ -41,8 +41,6 @@ const MatchesGrid = () => {
         }
     };
 
-
-
     useEffect(() => {
         const fetchMatchesAndPlayers = async () => {
             const token = localStorage.getItem('authToken');
@@ -61,7 +59,10 @@ const MatchesGrid = () => {
                 const matches = matchesResponse.data;
                 setMatches(matches);
 
-                const playerIds = [...new Set(matches.flatMap(match => [...match.teamA, ...match.teamB]))];
+                const playerIds = [...new Set(matches.flatMap(match => [
+                    ...Object.keys(match.teamA.reduce((acc, obj) => ({ ...acc, ...obj }), {})),
+                    ...Object.keys(match.teamB.reduce((acc, obj) => ({ ...acc, ...obj }), {}))
+                ]))];
 
                 const playersResponse = await axios.post('http://localhost:8080/api/users/fetchByIds', playerIds, {
                     headers: {
@@ -84,6 +85,19 @@ const MatchesGrid = () => {
         fetchMatchesAndPlayers();
     }, []);
 
+    const formatTeamDisplay = (team) => {
+        return team.map(playerStatusMap => {
+            const playerId = Object.keys(playerStatusMap)[0];
+            const status = playerStatusMap[playerId];
+            const player = players[playerId];
+            if (player) {
+                return `${player.name} ${player.surname} (${status})`;
+            } else {
+                return `Unknown Player (${status})`;
+            }
+        }).join(', ');
+    };
+
     const columns = [
         { field: 'datePlayed', headerName: 'Date Played', flex: 1 },
         { field: 'day', headerName: 'Day', width: 150 },
@@ -91,17 +105,13 @@ const MatchesGrid = () => {
             field: 'teamA',
             headerName: 'Team A',
             flex: 1,
-            valueGetter: (value,row) => row.teamA
-                .map(id => players[id] ? `${players[id].name} ${players[id].surname}` : 'Unknown Player')
-                .join(', ')
+            valueGetter: (value,row) => formatTeamDisplay(row.teamA)
         },
         {
             field: 'teamB',
             headerName: 'Team B',
             flex: 1,
-            valueGetter: (value,row) => row.teamB
-                .map(id => players[id] ? `${players[id].name} ${players[id].surname}` : 'Unknown Player')
-                .join(', ')
+            valueGetter: (value,row) => formatTeamDisplay(row.teamB)
         },
         { field: 'result', headerName: 'Result', width: 80 },
         role === 'ADMIN' && {

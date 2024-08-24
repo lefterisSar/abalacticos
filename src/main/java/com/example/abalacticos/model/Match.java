@@ -6,14 +6,15 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 @Document(collection = "matches")
 public class Match {
     @Id
     private String id;
     private LocalDate datePlayed;
-    private List<String> teamA;
-    private List<String> teamB;
+    private List<Map<String,String>> teamA;
+    private List<Map<String,String>> teamB;
     private String day;
     private String result;
 
@@ -42,19 +43,19 @@ public class Match {
         this.datePlayed = datePlayed;
     }
 
-    public List<String> getTeamA() {
+    public List<Map<String,String>> getTeamA() {
         return teamA;
     }
 
-    public void setTeamA(List<String> teamA) {
+    public void setTeamA(List<Map<String,String>> teamA) {
         this.teamA = teamA;
     }
 
-    public List<String> getTeamB() {
+    public List<Map<String,String>> getTeamB() {
         return teamB;
     }
 
-    public void setTeamB(List<String> teamB) {
+    public void setTeamB(List<Map<String,String>> teamB) {
         this.teamB = teamB;
     }
 

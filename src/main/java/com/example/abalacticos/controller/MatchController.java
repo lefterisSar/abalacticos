@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/matches")
@@ -31,34 +32,36 @@ public class MatchController {
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/confirm")
     public ResponseEntity<?> confirmTeamsAndNotifyPlayers(@RequestBody Match match) {
-        // Save the match
-        Match savedMatch = matchService.saveMatch(match);
+        // Save the match with initial "TBD" status for all players
+        Match savedMatch = matchService.saveMatch(match, extractPlayerIds(match.getTeamA()), extractPlayerIds(match.getTeamB()));
 
         // Increment day-specific appearances for Team A and Team B
-        userService.incrementDayAppearances(savedMatch.getTeamA(), savedMatch.getDay());
-        userService.incrementDayAppearances(savedMatch.getTeamB(), savedMatch.getDay());
+        userService.incrementDayAppearances(extractPlayerIds(savedMatch.getTeamA()), savedMatch.getDay());
+        userService.incrementDayAppearances(extractPlayerIds(savedMatch.getTeamB()), savedMatch.getDay());
 
         // Increment overallApps for all players in the match
-        userService.incrementOverallApps(savedMatch.getTeamA());
-        userService.incrementOverallApps(savedMatch.getTeamB());
+        userService.incrementOverallApps(extractPlayerIds(savedMatch.getTeamA()));
+        userService.incrementOverallApps(extractPlayerIds(savedMatch.getTeamB()));
 
         // Update the lastGK date for the player in the GK position
         if (!savedMatch.getTeamA().isEmpty()) {
-            userService.updateLastGK(Collections.singletonList(savedMatch.getTeamA().get(0)), savedMatch.getDatePlayed());
+            userService.updateLastGK(Collections.singletonList(getFirstPlayerId(savedMatch.getTeamA())), savedMatch.getDatePlayed());
         }
         if (!savedMatch.getTeamB().isEmpty()) {
-            userService.updateLastGK(Collections.singletonList(savedMatch.getTeamB().get(0)), savedMatch.getDatePlayed());
+            userService.updateLastGK(Collections.singletonList(getFirstPlayerId(savedMatch.getTeamB())), savedMatch.getDatePlayed());
         }
 
         // Notify players in Team A
-        for (String playerID : savedMatch.getTeamA()) {
-            AbalacticosUser player = userService.findPlayerById(playerID);
+        for (Map<String, String> playerStatus : savedMatch.getTeamA()) {
+            String playerId = playerStatus.keySet().iterator().next();
+            AbalacticosUser player = userService.findPlayerById(playerId);
             discordBotService.sendAvailabilityButtons(player, savedMatch.getDatePlayed().toString(), match.getId());
         }
 
         // Notify players in Team B
-        for (String playerID : savedMatch.getTeamB()) {
-            AbalacticosUser player = userService.findPlayerById(playerID);
+        for (Map<String, String> playerStatus : savedMatch.getTeamB()) {
+            String playerId = playerStatus.keySet().iterator().next();
+            AbalacticosUser player = userService.findPlayerById(playerId);
             discordBotService.sendAvailabilityButtons(player, savedMatch.getDatePlayed().toString(), match.getId());
         }
 
@@ -73,12 +76,12 @@ public class MatchController {
         try {
             Match match = matchService.getMatchById(id);
 
-            userService.decrementDayAppearances(match.getTeamA(), match.getDay());
-            userService.decrementDayAppearances(match.getTeamB(), match.getDay());
+            userService.decrementDayAppearances(extractPlayerIds(match.getTeamA()), match.getDay());
+            userService.decrementDayAppearances(extractPlayerIds(match.getTeamB()), match.getDay());
 
             // Decrement overallApps for all players in the match
-            userService.decrementOverallApps(match.getTeamA());
-            userService.decrementOverallApps(match.getTeamB());
+            userService.decrementOverallApps(extractPlayerIds(match.getTeamA()));
+            userService.decrementOverallApps(extractPlayerIds(match.getTeamB()));
             matchService.deleteMatch(id);
             return ResponseEntity.ok("Match deleted and player appearances updated");
         } catch (RuntimeException e) {
@@ -108,5 +111,17 @@ public class MatchController {
     @GetMapping
     public List<Match> getAllMatches() {
         return matchService.getAllMatches();
+    }
+
+    // Helper method to extract player IDs from team lists
+    private List<String> extractPlayerIds(List<Map<String, String>> team) {
+        return team.stream()
+                .map(playerStatus -> playerStatus.keySet().iterator().next())
+                .toList();
+    }
+
+    // Helper method to get the first player's ID from the team list
+    private String getFirstPlayerId(List<Map<String, String>> team) {
+        return team.get(0).keySet().iterator().next();
     }
 }

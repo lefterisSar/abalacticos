@@ -111,11 +111,16 @@ const TeamSelection = () => {
 
 
     const handleConfirmTeams = async () => {
+        const formatTeamForBackend = (team) => {
+            return team.map(player => ({
+                [player.id]: "TBD"  // Default status when confirming teams
+            }));
+        };
         const match = {
             day,
             datePlayed: nextMatchDate.toISOString(),
-            teamA: teamA.map(player => player.id),
-            teamB: teamB.map(player => player.id),
+            teamA: formatTeamForBackend(teamA),
+            teamB: formatTeamForBackend(teamB),
         };
 
         try {

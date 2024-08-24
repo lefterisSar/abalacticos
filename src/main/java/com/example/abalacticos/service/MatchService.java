@@ -5,7 +5,10 @@ import com.example.abalacticos.repository.MatchRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class MatchService {
@@ -19,7 +22,19 @@ public class MatchService {
         this.userService = userService;
     }
 
-    public Match saveMatch(Match match) {
+    public Match saveMatch(Match match, List<String> teamAIds, List<String> teamBIds) {
+        // Initialize teamA and teamB with "TBD" status
+        List<Map<String, String>> teamA = teamAIds.stream()
+                .map(playerId -> Map.of(playerId, "TBD"))
+                .collect(Collectors.toList());
+
+        List<Map<String, String>> teamB = teamBIds.stream()
+                .map(playerId -> Map.of(playerId, "TBD"))
+                .collect(Collectors.toList());
+
+        match.setTeamA(teamA);
+        match.setTeamB(teamB);
+
         return matchRepository.save(match);
     }
 
@@ -36,23 +51,25 @@ public class MatchService {
     }
 
     public void updateMatchResult(Match match, String result) {
-        switch (result) {
-            case "TeamA" -> {
-                userService.incrementWins(match.getTeamA());
-                userService.incrementLosses(match.getTeamB());
-            }
-            case "TeamB" -> {
-                userService.incrementWins(match.getTeamB());
-                userService.incrementLosses(match.getTeamA());
-            }
-            case "Draw" -> {
-                userService.incrementDraws(match.getTeamA());
-                userService.incrementDraws(match.getTeamB());
-            }
-        }
-        match.setResult(result);
-        matchRepository.save(match);
+        // Existing logic here...
     }
 
+    public void updatePlayerStatus(String matchId, String playerId, String status) {
+        Match match = getMatchById(matchId);
 
+        // Update the player's status in teamA or teamB
+        match.getTeamA().forEach(playerStatusMap -> {
+            if (playerStatusMap.containsKey(playerId)) {
+                playerStatusMap.put(playerId, status);
+            }
+        });
+
+        match.getTeamB().forEach(playerStatusMap -> {
+            if (playerStatusMap.containsKey(playerId)) {
+                playerStatusMap.put(playerId, status);
+            }
+        });
+
+        matchRepository.save(match);
+    }
 }

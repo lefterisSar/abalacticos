@@ -78,8 +78,8 @@ public class DiscordBotService extends ListenerAdapter {
                 privateChannel.sendMessage("Are you available for the match on " + matchDate + "?")
                     .setActionRows(
                         ActionRow.of(
-                            Button.primary("available:" + user.getDiscordID() + ":" + matchID, "Available"),
-                            Button.danger("not-available:" + user.getDiscordID() + ":" + matchID, "Not Available")
+                            Button.primary("available:" + user.getId() + ":" + matchID + ":" + user.getDiscordID(), "Available"),
+                            Button.danger("not-available:" + user.getId() + ":" + matchID + ":" + user.getDiscordID(), "Not Available")
                         )
                     ).queue();
             }, failure -> {
@@ -95,19 +95,25 @@ public class DiscordBotService extends ListenerAdapter {
         public void onButtonInteraction(ButtonInteractionEvent event) {
             String[] split = event.getComponentId().split(":");
             String action = split[0];
-            String userId = split[1];
+            String playerId = split[1];
             String matchID = split[2];
+            String discordID = split[3];
 
-            if (event.getUser().getId().equals(userId)) {
+            if (event.getUser().getId().equals(discordID)) {
                 switch (action) {
                     case "available":
                         event.reply("Thank you! You are marked as available.").queue();
-                        //TODO: matchService.getMatchById(matchID).addPlayerAvailable(userId)
+                        matchService.updatePlayerStatus(matchID, playerId, "available");
                         // Handle marking the user as available in your system.
                         break;
                     case "not-available":
                         event.reply("Thank you! You are marked as not available.").queue();
+                        matchService.updatePlayerStatus(matchID, playerId, "not-available");
                         // Handle marking the user as not available in your system.
+                        break;
+                    case "TBD":
+                        matchService.updatePlayerStatus(matchID, playerId, "TBD");
+                        // Handle confirming the match in your system.
                         break;
                 }
             } else {

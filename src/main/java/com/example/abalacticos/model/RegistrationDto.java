@@ -7,31 +7,32 @@ import java.util.List;
 
 public class RegistrationDto {
 
-        @NotEmpty
-        private String username;
-        @NotEmpty
-        private String password;
-        @NotEmpty
-        private String email;
-        private String role;
-        // Player attributes
-        private String name;
-        private String surname;
-        private String debutDate;
-        private String lastGK;
-        private int wins;
-        private int losses;
-        private int draws;
-        private String invitationFriend;
-        private String favClub;
-        private String sn;
-        private String birthday;
-        private int overallApps;
-        private List<String> availability;
-        private int tuesdayAppearances;
-        private int wednesdayAppearances;
-        private int fridayAppearances;
-        private String discordID;
+    @NotEmpty
+    private String username;
+    @NotEmpty
+    private String password;
+    @NotEmpty
+    private String email;
+    private String role;
+    // Player attributes
+    private String name;
+    private String surname;
+    private String debutDate;
+    private String lastGK;
+    private int wins;
+    private int losses;
+    private int draws;
+    private String invitationFriend;
+    private String favClub;
+    private String sn;
+    private String birthday;
+    private int overallApps;
+    private List<String> availability;
+    private int tuesdayAppearances;
+    private int wednesdayAppearances;
+    private int fridayAppearances;
+    private String discordID;
+    private CommunicationDetails communicationDetails;
 
     public int getTuesdayAppearances() {
         return tuesdayAppearances;
@@ -65,7 +66,6 @@ public class RegistrationDto {
         this.overallApps = overallApps;
     }
 
-
     public String getEmail() {
         return email;
     }
@@ -97,7 +97,6 @@ public class RegistrationDto {
     public void setSurname(String surname) {
         this.surname = surname;
     }
-
 
     public String getDebutDate() {
         return debutDate;
@@ -154,12 +153,7 @@ public class RegistrationDto {
     public void setCommunicationDetails(CommunicationDetails communicationDetails) {
         this.communicationDetails = communicationDetails;
     }
-
-    private CommunicationDetails communicationDetails;
-
-        // Getters and Setters
-
-
+    
     // Getters and Setters
     public String getUsername() {
         return username;
