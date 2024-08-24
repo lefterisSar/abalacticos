@@ -34,6 +34,18 @@ const HeaderWithIconRoot = styled('div')(({ theme }) => ({
     },
 }));
 
+const teamPositions = ['GK', 'DL', 'DC', 'DR', 'ML', 'MC', 'MR', 'FC'];
+
+const renderTeam = (team) => (
+    <ul style={{ padding: '0 20px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+        {teamPositions.map((position, index) => (
+            <li key={index} style={{ listStyleType: 'none', padding: '5px 0' }}>
+                {position}: {team[index] ? `${team[index].name} ${team[index].surname}` : 'N/A'}
+            </li>
+        ))}
+    </ul>
+);
+
 function HeaderWithIcon(props) {
     const { icon, ...params } = props;
 
@@ -107,8 +119,6 @@ const TeamSelection = () => {
             console.error('Failed to send message');
         }
     };
-
-
 
     const handleConfirmTeams = async () => {
         const formatTeamForBackend = (team) => {
@@ -194,69 +204,88 @@ const TeamSelection = () => {
         return savedModel ? JSON.parse(savedModel) : {};
     };
 
-    // Fetch players data
-    useEffect(() => {
-        const fetchPlayers = async () => {
-            const token = localStorage.getItem('authToken');
-            if (!token) {
-                console.error('No auth token found');
-                navigate('/login'); // Redirect to login if not authenticated
-                return;
+    const fetchMatch = async () => {
+        const token = localStorage.getItem('authToken');
+        if (!token) {
+            console.error('No auth token found');
+            navigate('/login');
+            return;
+        }
+
+        try {
+            const response = await axios.get('http://localhost:8080/api/matches/byDayAndDate', {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                },
+                params: { day, datePlayed: nextMatchDate.toISOString().split('T')[0] }
+            });
+
+            if (response.status === 200 && response.data) {
+                const match = response.data;
+                setTeamA(Object.entries(match.teamA).map(([playerId, status]) => players.find(p => p.id === playerId)));
+                setTeamB(Object.entries(match.teamB).map(([playerId, status]) => players.find(p => p.id === playerId)));
             }
-            try {
-                const response = await axios.get('http://localhost:8080/api/users', {
-                    headers: {
-                        Authorization: `Bearer ${token}`
-                    }
-                });
-
-                if (response.data && Array.isArray(response.data)) {
-                    const playersWithId = response.data.map(player => ({
-                        ...player,
-                        id: player.id || `${player.name}-${player.surname}-${player.age}`, // Fallback if no id field is present
-                        availability: player.availability || [], // Ensure availability is an array
-                        discordUserId: player.discordUserId // Ensure discordUserId is included
-                    }));
-
-                    // Filter players based on availability and sort by day-specific apps in descending order
-                    let filteredPlayers = playersWithId.filter(player => player.availability.includes(day));
-                    filteredPlayers = filteredPlayers.filter(player => !player.absentDates.includes(nextMatchDate.toISOString().split('T')[0]));
-                    const sortedPlayers = filteredPlayers.sort((a, b) => {
-                        switch (day) {
-                            case "Tuesday":
-                                return (b.tuesdayAppearances || 0) - (a.tuesdayAppearances || 0);
-                            case "Wednesday":
-                                return (b.wednesdayAppearances || 0) - (a.wednesdayAppearances || 0);
-                            case "Friday":
-                                return (b.fridayAppearances || 0) - (a.fridayAppearances || 0);
-                            default:
-                                return 0;
-                        }
-                    });
-
-                    // Prepopulate teams
-                    const prepopulatedTeamA = sortedPlayers.slice(0, 8);
-                    const prepopulatedTeamB = sortedPlayers.slice(8, 16);
-
-                    setPlayers(playersWithId);
-                    setTeamA(prepopulatedTeamA);
-                    setTeamB(prepopulatedTeamB);
+        }
+        catch (error)
+        {
+            if (error.response && error.response.status === 404) {
+                const errorData = error.response.data;
+                if (errorData && errorData.type === "NO_MATCH_FOUND") {
+                    console.log("No match found, using next match date.");
+                    setTeamA([]); // Explicitly set teams to empty if no match found
+                    setTeamB([]);
                     setNextMatchDate(getNextMatchDate(day));
                 } else {
-                    console.error('Unexpected response format:', response.data);
+                    console.error('Unexpected error fetching match:', error);
+                    // Handle unexpected errors or navigate to an error page
+                    navigate('/error');
                 }
-            } catch (error) {
-                console.error('There was an error fetching the players!', error);
-                if (error.response && error.response.status === 401) {
-                    navigate('/login'); // Redirect to log in if unauthorized
-                } else if (error.response && error.response.status === 403) {
-                    navigate('/forbidden'); // Redirect to a forbidden page if access is denied
-                }
+            } else {
+                console.error('Error fetching match:', error);
+                // Handle unexpected errors or navigate to an error page
+                navigate('/error');
             }
-        };
-        // Load column visibility preferences
-        const savedVisibilityModel = loadColumnVisibility(userId);
-        setColumnVisibilityModel(savedVisibilityModel);
+        }
+    };
+
+    const fetchPlayers = async () => {
+        const token = localStorage.getItem('authToken');
+        if (!token) {
+            console.error('No auth token found');
+            navigate('/login'); // Redirect to login if not authenticated
+            return;
+        }
+        try {
+            const response = await axios.get('http://localhost:8080/api/users', {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+
+            if (response.data && Array.isArray(response.data)) {
+                const playersWithId = response.data.map(player => ({
+                    ...player,
+                    id: player.id || `${player.name}-${player.surname}-${player.age}`, // Fallback if no id field is present
+                    availability: player.availability || [], // Ensure availability is an array
+                    discordUserId: player.discordUserId // Ensure discordUserId is included
+                }));
+
+                setPlayers(playersWithId);
+                await fetchMatch(); // Fetch the match after loading players
+            } else {
+                console.error('Unexpected response format:', response.data);
+            }
+        } catch (error) {
+            console.error('There was an error fetching the players!', error);
+            if (error.response && error.response.status === 401) {
+                navigate('/login'); // Redirect to log in if unauthorized
+            } else if (error.response && error.response.status === 403) {
+                navigate('/forbidden'); // Redirect to a forbidden page if access is denied
+            }
+        }
+    };
+
+    useEffect(() => {
         fetchPlayers();
     }, [navigate, userId, day]);
 
@@ -307,9 +336,6 @@ const TeamSelection = () => {
         setTeam([...team, player]);
     };
 
-
-
-
     const handleRemoveFromTeam = (team, setTeam, player) => {
         setTeam(team.filter(p => p.id !== player.id));
     };
@@ -347,63 +373,57 @@ const TeamSelection = () => {
             field: 'actions',
             headerName: 'Actions',
             width: 300,
-            renderCell: (params) => (
-                <div>
-                    {teamA.some(player => player.id === params.row.id) ? (
-                        <Button
-                            variant="contained"
-                            color="secondary"
-                            onClick={() => handleRemoveFromTeam(teamA, setTeamA, params.row)}
-                        >
-                            Remove from Team A
-                        </Button>
-                    ) : (
-                        <Button
-                            variant="contained"
-                            color="primary"
-                            onClick={() => handleAddToTeam(teamA, setTeamA, params.row)}
-                            disabled={teamB.some(player => player.id === params.row.id)}
-                        >
-                            Add to Team A
-                        </Button>
-                    )}
-                    {teamB.some(player => player.id === params.row.id) ? (
-                        <Button
-                            variant="contained"
-                            color="secondary"
-                            onClick={() => handleRemoveFromTeam(teamB, setTeamB, params.row)}
-                        >
-                            Remove from Team B
-                        </Button>
-                    ) : (
-                        <Button
-                            variant="contained"
-                            color="primary"
-                            onClick={() => handleAddToTeam(teamB, setTeamB, params.row)}
-                            disabled={teamA.some(player => player.id === params.row.id)}
-                        >
-                            Add to Team B
-                        </Button>
-                    )}
-                </div>
-            ),
+            renderCell: (params) => {
+                const player = params.row;
+                if (!player || !player.id) {
+                    return <span>Loading...</span>; // Or you can return a placeholder, e.g., <span>Loading...</span>
+                }
+                return (
+                    <div>
+                        {teamA && teamA.some(p => p && p.id === player.id) ? (
+                            <Button
+                                variant="contained"
+                                color="secondary"
+                                onClick={() => handleRemoveFromTeam(teamA, setTeamA, player)}
+                            >
+                                Remove from Team A
+                            </Button>
+                        ) : (
+                            <Button
+                                variant="contained"
+                                color="primary"
+                                onClick={() => handleAddToTeam(teamA, setTeamA, player)}
+                                disabled={teamA && teamA.some(p => p && p.id === player.id)}
+                            >
+                                Add to Team A
+                            </Button>
+                        )}
+                        {teamB && teamB.some(p => p && p.id === player.id) ? (
+                            <Button
+                                variant="contained"
+                                color="secondary"
+                                onClick={() => handleRemoveFromTeam(teamB, setTeamB, player)}
+                            >
+                                Remove from Team B
+                            </Button>
+                        ) : (
+                            <Button
+                                variant="contained"
+                                color="primary"
+                                onClick={() => handleAddToTeam(teamB, setTeamB, player)}
+                                disabled={teamB && teamB.some(p => p && p.id === player.id)}
+                            >
+                                Add to Team B
+                            </Button>
+                        )}
+                    </div>
+                );
+            }
         },
         { field: 'wins', headerName: 'Wins', flex: 1,renderCell: (params) => <span style={{ whiteSpace: 'nowrap' }}>{params.value}</span>},
         { field: 'losses', headerName: 'Losses', flex: 1, renderCell: (params) => <span style={{ whiteSpace: 'nowrap' }}>{params.value}</span>},
         { field: 'draws', headerName: 'Draws', flex: 1, renderCell: (params) => <span style={{ whiteSpace: 'nowrap' }}>{params.value}</span>},
     ];
-
-    const teamPositions = ['GK', 'DL', 'DC', 'DR', 'ML', 'MC', 'MR', 'FC'];
-
-    const renderTeam = (team) => (
-        <ul style={{ padding: '0 20px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-            {teamPositions.map((position, index) => (
-                <li key={index} style={{ listStyleType: 'none', padding: '5px 0' }}>
-                    {position}: {team[index] ? `${team[index].name} ${team[index].surname}` : 'N/A'}
-                </li>
-            ))}
-        </ul>
-    );
 
     return (
         <div>

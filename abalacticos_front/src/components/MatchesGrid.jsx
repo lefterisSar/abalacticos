@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { DataGrid } from '@mui/x-data-grid';
 import axios from 'axios';
-import {Button} from "@mui/material";
+import { Button } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 
 const MatchesGrid = () => {
     const [matches, setMatches] = useState([]);
     const [players, setPlayers] = useState({});
     const [loading, setLoading] = useState(true);
     const role = localStorage.getItem('userRole');
+    const navigate = useNavigate();
 
     const handleDeleteMatch = async (id) => {
         if (window.confirm("Are you sure you want to delete this match?")) {
@@ -98,7 +100,23 @@ const MatchesGrid = () => {
         }).join(', ');
     };
 
+    const handleNavigateToTeamSelection = (day, datePlayed) => {
+        navigate(`/team-selection/${day}?date=${datePlayed}`);
+    };
+
     const columns = [
+        {
+            field: 'id',
+            headerName: 'Match ID',
+            width: 150,
+            renderCell: (params) => (
+                <Button
+                    onClick={() => handleNavigateToTeamSelection(params.row.day, params.row.datePlayed)}
+                >
+                    {params.value}
+                </Button>
+            ),
+        },
         { field: 'datePlayed', headerName: 'Date Played', flex: 1 },
         { field: 'day', headerName: 'Day', width: 150 },
         {

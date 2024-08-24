@@ -5,6 +5,7 @@ import com.example.abalacticos.repository.MatchRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -72,4 +73,10 @@ public class MatchService {
 
         matchRepository.save(match);
     }
+
+    public Match getMatchByDayAndDate(String day, String datePlayed) {
+        return matchRepository.findByDayAndDatePlayed(day, LocalDate.parse(datePlayed))
+                .orElse(null);
+    }
+
 }

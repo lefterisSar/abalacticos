@@ -6,6 +6,8 @@ import com.example.abalacticos.service.DiscordBotService;
 import com.example.abalacticos.service.MatchService;
 import com.example.abalacticos.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -106,7 +108,16 @@ public class MatchController {
     }
 
 
-
+    @GetMapping("/byDayAndDate")
+    public ResponseEntity<?> getMatchByDayAndDate(@RequestParam String day, @RequestParam String datePlayed) {
+        Match match = matchService.getMatchByDayAndDate(day, (datePlayed));
+        if (match == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .header(HttpHeaders.CONTENT_TYPE, "application/json")
+                    .body(Map.of("error", "Match not found", "type", "NO_MATCH_FOUND"));
+        }
+        return ResponseEntity.ok(match);
+    }
 
     @GetMapping
     public List<Match> getAllMatches() {
