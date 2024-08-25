@@ -67,6 +67,91 @@ const TeamSelection = () => {
     const [nextMatchDate, setNextMatchDate] = useState(new Date());
     const userId = localStorage.getItem('userName');
     const [channelId, setChannelId] = useState('');
+    const [buttonLabel, setButtonLabel] = useState("Save New Match");
+    const [matchId, setMatchId] = useState(null);
+
+    const fetchMatch = async () => {
+        const token = localStorage.getItem('authToken');
+        if (!token) {
+            console.error('No auth token found');
+            navigate('/login');
+            return;
+        }
+
+        const params = new URLSearchParams(location.search); // Get query parameters
+        const dateFromParams = params.get('date');
+        const matchId = params.get('matchId'); // Get matchId from query params
+        if (matchId) {
+            setMatchId(matchId);
+        }
+
+        try {
+            if(matchId!==null)
+            {
+                const response = await axios.get('http://localhost:8080/api/matches/byDayDateAndId', {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    },
+                    params: { day, datePlayed: dateFromParams || nextMatchDate.toISOString().split('T')[0], matchId }
+                });
+
+                if (response.status === 200 && response.data) {
+                    const match = response.data;
+                    setNextMatchDate(new Date(match.datePlayed)); // Fix the date based on the match
+
+                    if (match.id) {
+                        setMatchId(match.id);
+                        setButtonLabel("Update Match");
+                    }
+
+                    // Fetch player details for Team A
+                    const teamAPlayerDetails = await Promise.all(Object.values(match.teamA).map(playerObj =>
+                        axios.get(`http://localhost:8080/api/users/${Object.keys(playerObj)[0]}`, {
+                            headers: {
+                                Authorization: `Bearer ${token}`
+                            }
+                        }).then(res => ({
+                            ...res.data,
+                            status: playerObj[Object.keys(playerObj)[0]]  // Add the availability status
+                        }))
+                    ));
+
+                    const teamBPlayerDetails = await Promise.all(Object.values(match.teamB).map(playerObj =>
+                        axios.get(`http://localhost:8080/api/users/${Object.keys(playerObj)[0]}`, {
+                            headers: {
+                                Authorization: `Bearer ${token}`
+                            }
+                        }).then(res => ({
+                            ...res.data,
+                            status: playerObj[Object.keys(playerObj)[0]]  // Add the availability status
+                        }))
+                    ));
+
+                    setTeamA(teamAPlayerDetails);
+                    setTeamB(teamBPlayerDetails);
+                }
+            }
+        }
+        catch (error)
+        {
+            if (error.response && error.response.status === 404) {
+                const errorData = error.response.data;
+                if (errorData && errorData.type === "NO_MATCH_FOUND") {
+                    console.log("No match found, using next match date.");
+                    setTeamA([]); // Explicitly set teams to empty if no match found
+                    setTeamB([]);
+                    setButtonLabel("Save New Match");
+                    setNextMatchDate(dateFromParams ? new Date(dateFromParams) : getNextMatchDate(day));
+                } else {
+                    console.error('Unexpected error fetching match:', error);
+                    navigate('/error');
+                }
+            } else {
+                console.error('Error fetching match:', error);
+                navigate('/error');
+            }
+        }
+    };
 
     const fetchChannelId = async () => {
         try {
@@ -127,8 +212,6 @@ const TeamSelection = () => {
             }));
         };
 
-
-
         try {
             const token = localStorage.getItem('authToken');
             const matchId = new URLSearchParams(location.search).get('matchId');
@@ -169,79 +252,7 @@ const TeamSelection = () => {
         return savedModel ? JSON.parse(savedModel) : {};
     };
 
-    const fetchMatch = async () => {
-        const token = localStorage.getItem('authToken');
-        if (!token) {
-            console.error('No auth token found');
-            navigate('/login');
-            return;
-        }
 
-        const params = new URLSearchParams(location.search); // Get query parameters
-        const dateFromParams = params.get('date');
-        const matchId = params.get('matchId'); // Get matchId from query params
-
-        try {
-            if(matchId!==null)
-            {
-                const response = await axios.get('http://localhost:8080/api/matches/byDayDateAndId', {
-                    headers: {
-                        Authorization: `Bearer ${token}`
-                    },
-                    params: { day, datePlayed: dateFromParams || nextMatchDate.toISOString().split('T')[0], matchId }
-                });
-
-                if (response.status === 200 && response.data) {
-                    const match = response.data;
-                    setNextMatchDate(new Date(match.datePlayed)); // Fix the date based on the match
-
-                    // Fetch player details for Team A
-                    const teamAPlayerDetails = await Promise.all(Object.values(match.teamA).map(playerObj =>
-                        axios.get(`http://localhost:8080/api/users/${Object.keys(playerObj)[0]}`, {
-                            headers: {
-                                Authorization: `Bearer ${token}`
-                            }
-                        }).then(res => ({
-                            ...res.data,
-                            status: playerObj[Object.keys(playerObj)[0]]  // Add the availability status
-                        }))
-                    ));
-
-                    const teamBPlayerDetails = await Promise.all(Object.values(match.teamB).map(playerObj =>
-                        axios.get(`http://localhost:8080/api/users/${Object.keys(playerObj)[0]}`, {
-                            headers: {
-                                Authorization: `Bearer ${token}`
-                            }
-                        }).then(res => ({
-                            ...res.data,
-                            status: playerObj[Object.keys(playerObj)[0]]  // Add the availability status
-                        }))
-                    ));
-
-                    setTeamA(teamAPlayerDetails);
-                    setTeamB(teamBPlayerDetails);
-                }
-            }
-        }
-        catch (error)
-        {
-            if (error.response && error.response.status === 404) {
-                const errorData = error.response.data;
-                if (errorData && errorData.type === "NO_MATCH_FOUND") {
-                    console.log("No match found, using next match date.");
-                    setTeamA([]); // Explicitly set teams to empty if no match found
-                    setTeamB([]);
-                    setNextMatchDate(dateFromParams ? new Date(dateFromParams) : getNextMatchDate(day));
-                } else {
-                    console.error('Unexpected error fetching match:', error);
-                    navigate('/error');
-                }
-            } else {
-                console.error('Error fetching match:', error);
-                navigate('/error');
-            }
-        }
-    };
 
 
     const fetchPlayers = async () => {
@@ -435,7 +446,7 @@ const TeamSelection = () => {
             {localStorage.getItem('userRole') === "ADMIN" && (
                 <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
                     <Button variant="contained" color="primary" onClick={handleConfirmTeams} disabled={teamA.length === 0 && teamB.length === 0}>
-                        Confirm Teams
+                        {buttonLabel}
                     </Button>
                 </div>
             )}
