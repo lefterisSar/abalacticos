@@ -108,9 +108,9 @@ public class MatchController {
     }
 
 
-    @GetMapping("/byDayAndDate")
-    public ResponseEntity<?> getMatchByDayAndDate(@RequestParam String day, @RequestParam String datePlayed) {
-        Match match = matchService.getMatchByDayAndDate(day, (datePlayed));
+    @GetMapping("/byDayDateAndId")
+    public ResponseEntity<?> getMatchByDayDateAndId(@RequestParam String day, @RequestParam String datePlayed, @RequestParam String matchId) {
+        Match match = matchService.getMatchByDayDateAndId(day, datePlayed, matchId);
         if (match == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .header(HttpHeaders.CONTENT_TYPE, "application/json")

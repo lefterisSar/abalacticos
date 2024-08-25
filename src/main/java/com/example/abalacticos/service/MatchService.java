@@ -74,8 +74,8 @@ public class MatchService {
         matchRepository.save(match);
     }
 
-    public Match getMatchByDayAndDate(String day, String datePlayed) {
-        return matchRepository.findByDayAndDatePlayed(day, LocalDate.parse(datePlayed))
+    public Match getMatchByDayDateAndId(String day, String datePlayed, String matchId) {
+        return matchRepository.findByDayAndDatePlayedAndId(day, LocalDate.parse(datePlayed), matchId)
                 .orElse(null);
     }
 

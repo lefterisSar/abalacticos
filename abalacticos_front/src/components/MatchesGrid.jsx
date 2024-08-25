@@ -100,8 +100,8 @@ const MatchesGrid = () => {
         }).join(', ');
     };
 
-    const handleNavigateToTeamSelection = (day, datePlayed) => {
-        navigate(`/team-selection/${day}?date=${datePlayed}`);
+    const handleNavigateToTeamSelection = (day, datePlayed, matchId) => {
+        navigate(`/team-selection/${day}?date=${datePlayed}&matchId=${matchId}`);
     };
 
     const columns = [
@@ -111,7 +111,7 @@ const MatchesGrid = () => {
             width: 150,
             renderCell: (params) => (
                 <Button
-                    onClick={() => handleNavigateToTeamSelection(params.row.day, params.row.datePlayed)}
+                    onClick={() => handleNavigateToTeamSelection(params.row.day, params.row.datePlayed, params.row.id)}
                 >
                     {params.value}
                 </Button>

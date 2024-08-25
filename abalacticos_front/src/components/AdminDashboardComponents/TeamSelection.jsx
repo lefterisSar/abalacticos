@@ -214,13 +214,14 @@ const TeamSelection = () => {
 
         const params = new URLSearchParams(location.search); // Get query parameters
         const dateFromParams = params.get('date');
+        const matchId = params.get('matchId'); // Get matchId from query params
 
         try {
-            const response = await axios.get('http://localhost:8080/api/matches/byDayAndDate', {
+            const response = await axios.get('http://localhost:8080/api/matches/byDayDateAndId', {
                 headers: {
                     Authorization: `Bearer ${token}`
                 },
-                params: { day, datePlayed: dateFromParams || nextMatchDate.toISOString().split('T')[0] }
+                params: { day, datePlayed: dateFromParams || nextMatchDate.toISOString().split('T')[0], matchId }
             });
 
             if (response.status === 200 && response.data) {
@@ -250,7 +251,6 @@ const TeamSelection = () => {
                         status: playerObj[Object.keys(playerObj)[0]]  // Add the availability status
                     }))
                 ));
-
 
                 setTeamA(teamAPlayerDetails);
                 setTeamB(teamBPlayerDetails);

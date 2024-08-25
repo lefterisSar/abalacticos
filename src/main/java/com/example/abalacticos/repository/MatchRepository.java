@@ -9,6 +9,5 @@ import java.util.Optional;
 
 @Repository
 public interface MatchRepository extends MongoRepository<Match, String> {
-    Optional<Match> findByDayAndDatePlayed(String day, LocalDate datePlayed);
-
+    Optional<Match> findByDayAndDatePlayedAndId(String day, LocalDate datePlayed, String id);
 }
