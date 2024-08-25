@@ -24,18 +24,33 @@ public class MatchService {
     }
 
     public Match updateMatch(Match existingMatch, List<String> teamAIds, List<String> teamBIds) {
-        // Update teamA and teamB with new player IDs and statuses
-        List<Map<String, String>> teamA = teamAIds.stream()
-                .map(playerId -> Map.of(playerId, "TBD"))  // Or maintain the existing status if needed
+        // Create a map to easily look up existing statuses by player ID
+        Map<String, String> existingTeamAStatus = existingMatch.getTeamA().stream()
+                .collect(Collectors.toMap(map -> map.keySet().iterator().next(), map -> map.values().iterator().next()));
+
+        Map<String, String> existingTeamBStatus = existingMatch.getTeamB().stream()
+                .collect(Collectors.toMap(map -> map.keySet().iterator().next(), map -> map.values().iterator().next()));
+
+        // Update teamA and teamB with new player IDs, maintaining existing statuses where available
+        List<Map<String, String>> updatedTeamA = teamAIds.stream()
+                .map(playerId -> {
+                    String status = existingTeamAStatus.getOrDefault(playerId, "TBD");
+                    return Map.of(playerId, status);
+                })
                 .collect(Collectors.toList());
 
-        List<Map<String, String>> teamB = teamBIds.stream()
-                .map(playerId -> Map.of(playerId, "TBD"))
+        List<Map<String, String>> updatedTeamB = teamBIds.stream()
+                .map(playerId -> {
+                    String status = existingTeamBStatus.getOrDefault(playerId, "TBD");
+                    return Map.of(playerId, status);
+                })
                 .collect(Collectors.toList());
 
-        existingMatch.setTeamA(teamA);
-        existingMatch.setTeamB(teamB);
+        // Set the updated teams in the existing match
+        existingMatch.setTeamA(updatedTeamA);
+        existingMatch.setTeamB(updatedTeamB);
 
+        // Save and return the updated match
         return matchRepository.save(existingMatch);
     }
 
