@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -15,15 +14,13 @@ import java.util.stream.Collectors;
 public class MatchService {
 
     private final MatchRepository matchRepository;
-    private final UserService userService;
 
     @Autowired
     public MatchService(MatchRepository matchRepository, UserService userService) {
         this.matchRepository = matchRepository;
-        this.userService = userService;
     }
 
-    public Match updateMatch(Match existingMatch, List<String> teamAIds, List<String> teamBIds) {
+    public void updateMatch(Match existingMatch, List<String> teamAIds, List<String> teamBIds) {
         // Create a map to easily look up existing statuses by player ID
         Map<String, String> existingTeamAStatus = existingMatch.getTeamA().stream()
                 .collect(Collectors.toMap(map -> map.keySet().iterator().next(), map -> map.values().iterator().next()));
@@ -51,7 +48,7 @@ public class MatchService {
         existingMatch.setTeamB(updatedTeamB);
 
         // Save and return the updated match
-        return matchRepository.save(existingMatch);
+        matchRepository.save(existingMatch);
     }
 
     public Match saveMatch(Match match, List<String> teamAIds, List<String> teamBIds) {
@@ -70,6 +67,11 @@ public class MatchService {
         return matchRepository.save(match);
     }
 
+    public void saveMatch(Match match) {
+        matchRepository.save(match);
+    }
+
+
     public void deleteMatch(String id) {
         matchRepository.deleteById(id);
     }
@@ -83,7 +85,23 @@ public class MatchService {
     }
 
     public void updateMatchResult(Match match, String result) {
-        // Existing logic here...
+//        TODO: Update this to match the new Map isntead of simple List of players
+//        switch (result) {
+//            case "TeamA" -> {
+//                userService.incrementWins(match.getTeamA());
+//                userService.incrementLosses(match.getTeamB());
+//            }
+//            case "TeamB" -> {
+//                userService.incrementWins(match.getTeamB());
+//                userService.incrementLosses(match.getTeamA());
+//            }
+//            case "Draw" -> {
+//                userService.incrementDraws(match.getTeamA());
+//                userService.incrementDraws(match.getTeamB());
+//            }
+//        }
+//        match.setResult(result);
+//        matchRepository.save(match);
     }
 
     public void updatePlayerStatus(String matchId, String playerId, String status) {
@@ -108,6 +126,14 @@ public class MatchService {
     public Match getMatchByDayDateAndId(String day, String datePlayed, String matchId) {
         return matchRepository.findByDayAndDatePlayedAndId(day, LocalDate.parse(datePlayed), matchId)
                 .orElse(null);
+    }
+
+    public Match updateMatchConfirmation(String matchId, boolean confirmed) {
+        Match match = matchRepository.findById(matchId)
+                .orElseThrow(() -> new RuntimeException("Match not found"));
+
+        match.setConfirmed(confirmed);
+        return matchRepository.save(match);
     }
 
 }

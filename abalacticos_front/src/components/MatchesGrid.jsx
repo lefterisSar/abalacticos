@@ -10,6 +10,7 @@ const MatchesGrid = () => {
     const [loading, setLoading] = useState(true);
     const role = localStorage.getItem('userRole');
     const navigate = useNavigate();
+    const [isConfirmed, setIsConfirmed] = useState(false);
 
     const handleDeleteMatch = async (id) => {
         if (window.confirm("Are you sure you want to delete this match?")) {
@@ -104,6 +105,40 @@ const MatchesGrid = () => {
         navigate(`/team-selection/${day}?date=${datePlayed}&matchId=${matchId}`);
     };
 
+    const handleConfirmTeams = async (matchId, day, datePlayed, isConfirmed, result ,teamB, teamA) => {
+        try {
+            setIsConfirmed(true)
+            const token = localStorage.getItem('authToken');
+            const match = {
+                id: matchId,
+                result: result,
+                teamB: teamB,
+                teamA: teamA,
+                datePlayed: datePlayed,
+                day: day,
+                confirmed: isConfirmed
+            };
+            const url = 'http://localhost:8080/api/matches/confirm';
+
+            await axios.post(url, match, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+
+            // Update the state directly
+            setMatches(prevMatches =>
+                prevMatches.map(m =>
+                    m.id === matchId ? { ...m, confirmed: isConfirmed } : m
+                )
+            );
+
+            alert(isConfirmed ? 'Confirmed match' : 'Match confirmation is deleted!');
+        } catch (error) {
+            console.error('Error confirming match:', error);
+        }
+    };
+
     const columns = [
         {
             field: 'id',
@@ -132,12 +167,20 @@ const MatchesGrid = () => {
             valueGetter: (value,row) => formatTeamDisplay(row.teamB)
         },
         { field: 'result', headerName: 'Result', width: 80 },
+        { field: 'confirmed', headerName: 'Confirmed',width: 80},
         role === 'ADMIN' && {
             field: 'actions',
             headerName: 'Actions',
             flex: 1,
             renderCell: (params) => (
                 <div>
+
+                    <Button variant="contained" color="primary"
+                            onClick={() =>
+                                handleConfirmTeams(params.row.id, params.row.day,params.row.datePlayed,
+                                !params.row.confirmed, params.row.result ,params.row.teamB, params.row.teamA)}>
+                        {!params.row.confirmed? "Confirm Match": "Stop Confirmation"}
+                    </Button>
                     <Button
                         variant="contained"
                         color="primary"

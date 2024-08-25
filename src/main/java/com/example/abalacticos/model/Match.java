@@ -17,6 +17,15 @@ public class Match {
     private List<Map<String,String>> teamB;
     private String day;
     private String result;
+    private boolean confirmed;
+
+    public boolean isConfirmed() {
+        return confirmed;
+    }
+
+    public void setConfirmed(boolean confirmed) {
+        this.confirmed = confirmed;
+    }
 
     public String getResult() {
         return result;

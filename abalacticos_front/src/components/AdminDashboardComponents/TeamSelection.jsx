@@ -222,7 +222,7 @@ const TeamSelection = () => {
                 teamB: formatTeamForBackend(teamB),
                 id: matchId
             };
-            const url = 'http://localhost:8080/api/matches/confirm';
+            const url = 'http://localhost:8080/api/matches/save';
 
             await axios.post(url, match, {
                 headers: {

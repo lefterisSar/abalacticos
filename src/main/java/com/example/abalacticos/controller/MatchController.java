@@ -32,7 +32,13 @@ public class MatchController {
     }
 
 
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping("/confirm")
     public void confirmTeams(@RequestBody Match match) {
+        matchService.saveMatch(match);
+    }
+
+    public void saveNewMatch(Match match) {
         // Save the match with initial "TBD" status for all players
         Match savedMatch = matchService.saveMatch(match, extractPlayerIds(match.getTeamA()), extractPlayerIds(match.getTeamB()));
 
@@ -68,8 +74,8 @@ public class MatchController {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @PostMapping("/confirm")
-    public ResponseEntity<?> confirmTeamsAndNotifyPlayers(@RequestBody Match match) {
+    @PostMapping("/save")
+    public ResponseEntity<?> saveTeamsAndNotifyPlayers(@RequestBody Match match) {
         Match existingMatch = matchService.getMatchByDayDateAndId(match.getDay(), match.getDatePlayed().toString(),match.getId());
 
         if (existingMatch != null) {
@@ -78,8 +84,8 @@ public class MatchController {
             return ResponseEntity.ok("Teams updated and players notified for the existing match.");
         } else {
             // If the match does not exist, create a new one
-            this.confirmTeams(match);
-            return ResponseEntity.ok("Teams confirmed, players notified, and new match saved successfully.");
+            this.saveNewMatch(match);
+            return ResponseEntity.ok("Teams saved, players notified, and new match saved successfully.");
         }
     }
 
