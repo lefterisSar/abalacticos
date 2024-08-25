@@ -31,9 +31,8 @@ public class MatchController {
         this.discordBotService = discordBotService;
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
-    @PostMapping("/confirm")
-    public ResponseEntity<?> confirmTeamsAndNotifyPlayers(@RequestBody Match match) {
+
+    public void confirmTeams(@RequestBody Match match) {
         // Save the match with initial "TBD" status for all players
         Match savedMatch = matchService.saveMatch(match, extractPlayerIds(match.getTeamA()), extractPlayerIds(match.getTeamB()));
 
@@ -66,8 +65,22 @@ public class MatchController {
             AbalacticosUser player = userService.findPlayerById(playerId);
             discordBotService.sendAvailabilityButtons(player, savedMatch.getDatePlayed().toString(), match.getId());
         }
+    }
 
-        return ResponseEntity.ok("Teams confirmed, players notified, and match saved successfully.");
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping("/confirm")
+    public ResponseEntity<?> confirmTeamsAndNotifyPlayers(@RequestBody Match match) {
+        Match existingMatch = matchService.getMatchByDayDateAndId(match.getDay(), match.getDatePlayed().toString(),match.getId());
+
+        if (existingMatch != null) {
+            // If the match exists, update it with the new teams
+            matchService.updateMatch(existingMatch, extractPlayerIds(match.getTeamA()), extractPlayerIds(match.getTeamB()));
+            return ResponseEntity.ok("Teams updated and players notified for the existing match.");
+        } else {
+            // If the match does not exist, create a new one
+            this.confirmTeams(match);
+            return ResponseEntity.ok("Teams confirmed, players notified, and new match saved successfully.");
+        }
     }
 
     //TODO This should instead delete the win/loss/draw from the players'

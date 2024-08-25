@@ -123,70 +123,35 @@ const TeamSelection = () => {
     const handleConfirmTeams = async () => {
         const formatTeamForBackend = (team) => {
             return team.map(player => ({
-                [player.id]: "TBD"  // Default status when confirming teams
+                [player.id]: player.status || "TBD"  // Keep existing status or use "TBD"
             }));
         };
-        const match = {
-            day,
-            datePlayed: nextMatchDate.toISOString(),
-            teamA: formatTeamForBackend(teamA),
-            teamB: formatTeamForBackend(teamB),
-        };
+
+
 
         try {
             const token = localStorage.getItem('authToken');
+            const matchId = new URLSearchParams(location.search).get('matchId');
+            const match = {
+                day,
+                datePlayed: nextMatchDate.toISOString(),
+                teamA: formatTeamForBackend(teamA),
+                teamB: formatTeamForBackend(teamB),
+                id: matchId
+            };
+            const url = 'http://localhost:8080/api/matches/confirm';
 
-            // Call the confirmTeamsAndNotifyPlayers endpoint
-            await axios.post('http://localhost:8080/api/matches/confirm', match, {
+            await axios.post(url, match, {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }
             });
 
-            // After confirmation, update the frontend state
-            const incrementDayAppearances = (team) => {
-                return team.map(player => {
-                    switch (day) {
-                        case "Tuesday":
-                            return { ...player, tuesdayAppearances: player.tuesdayAppearances + 1 };
-                        case "Wednesday":
-                            return { ...player, wednesdayAppearances: player.wednesdayAppearances + 1 };
-                        case "Friday":
-                            return { ...player, fridayAppearances: player.fridayAppearances + 1 };
-                        default:
-                            return player;
-                    }
-                });
-            };
-
-            const updatedTeamA = incrementDayAppearances(teamA);
-            const updatedTeamB = incrementDayAppearances(teamB);
-
-            setTeamA(updatedTeamA);
-            setTeamB(updatedTeamB);
-
-            // Update players with the new appearances
-            setPlayers(players.map(player => {
-                const updatedPlayerA = updatedTeamA.find(p => p.id === player.id);
-                const updatedPlayerB = updatedTeamB.find(p => p.id === player.id);
-                if (updatedPlayerA) return updatedPlayerA;
-                if (updatedPlayerB) return updatedPlayerB;
-                return player;
-            }));
-
-            // Update lastGK date for players in GK position (assuming the first player is the GK)
-            if (teamA.length > 0) {
-                setPlayers(prevPlayers => prevPlayers.map(player => player.id === teamA[0].id ? { ...player, lastGK: new Date().toISOString().split('T')[0] } : player));
-            }
-            if (teamB.length > 0) {
-                setPlayers(prevPlayers => prevPlayers.map(player => player.id === teamB[0].id ? { ...player, lastGK: new Date().toISOString().split('T')[0] } : player));
-            }
-
-            alert('Teams confirmed, players notified, and match saved successfully!');
+            alert('Teams updated/saved successfully!');
             updateNextMatchDate();
-            await sendDiscordMessage(updatedTeamA, updatedTeamB);
+            await sendDiscordMessage(teamA, teamB);
         } catch (error) {
-            console.error('Error confirming teams:', error);
+            console.error('Error saving/updating teams:', error);
         }
     };
 
@@ -217,45 +182,49 @@ const TeamSelection = () => {
         const matchId = params.get('matchId'); // Get matchId from query params
 
         try {
-            const response = await axios.get('http://localhost:8080/api/matches/byDayDateAndId', {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                },
-                params: { day, datePlayed: dateFromParams || nextMatchDate.toISOString().split('T')[0], matchId }
-            });
+            if(matchId!==null)
+            {
+                const response = await axios.get('http://localhost:8080/api/matches/byDayDateAndId', {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    },
+                    params: { day, datePlayed: dateFromParams || nextMatchDate.toISOString().split('T')[0], matchId }
+                });
 
-            if (response.status === 200 && response.data) {
-                const match = response.data;
-                setNextMatchDate(new Date(match.datePlayed)); // Fix the date based on the match
+                if (response.status === 200 && response.data) {
+                    const match = response.data;
+                    setNextMatchDate(new Date(match.datePlayed)); // Fix the date based on the match
 
-                // Fetch player details for Team A
-                const teamAPlayerDetails = await Promise.all(Object.values(match.teamA).map(playerObj =>
-                    axios.get(`http://localhost:8080/api/users/${Object.keys(playerObj)[0]}`, {
-                        headers: {
-                            Authorization: `Bearer ${token}`
-                        }
-                    }).then(res => ({
-                        ...res.data,
-                        status: playerObj[Object.keys(playerObj)[0]]  // Add the availability status
-                    }))
-                ));
+                    // Fetch player details for Team A
+                    const teamAPlayerDetails = await Promise.all(Object.values(match.teamA).map(playerObj =>
+                        axios.get(`http://localhost:8080/api/users/${Object.keys(playerObj)[0]}`, {
+                            headers: {
+                                Authorization: `Bearer ${token}`
+                            }
+                        }).then(res => ({
+                            ...res.data,
+                            status: playerObj[Object.keys(playerObj)[0]]  // Add the availability status
+                        }))
+                    ));
 
-                // Fetch player details for Team B
-                const teamBPlayerDetails = await Promise.all(Object.values(match.teamB).map(playerObj =>
-                    axios.get(`http://localhost:8080/api/users/${Object.keys(playerObj)[0]}`, {
-                        headers: {
-                            Authorization: `Bearer ${token}`
-                        }
-                    }).then(res => ({
-                        ...res.data,
-                        status: playerObj[Object.keys(playerObj)[0]]  // Add the availability status
-                    }))
-                ));
+                    const teamBPlayerDetails = await Promise.all(Object.values(match.teamB).map(playerObj =>
+                        axios.get(`http://localhost:8080/api/users/${Object.keys(playerObj)[0]}`, {
+                            headers: {
+                                Authorization: `Bearer ${token}`
+                            }
+                        }).then(res => ({
+                            ...res.data,
+                            status: playerObj[Object.keys(playerObj)[0]]  // Add the availability status
+                        }))
+                    ));
 
-                setTeamA(teamAPlayerDetails);
-                setTeamB(teamBPlayerDetails);
+                    setTeamA(teamAPlayerDetails);
+                    setTeamB(teamBPlayerDetails);
+                }
             }
-        } catch (error) {
+        }
+        catch (error)
+        {
             if (error.response && error.response.status === 404) {
                 const errorData = error.response.data;
                 if (errorData && errorData.type === "NO_MATCH_FOUND") {

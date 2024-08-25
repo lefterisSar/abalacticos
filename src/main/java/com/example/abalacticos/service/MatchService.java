@@ -23,6 +23,22 @@ public class MatchService {
         this.userService = userService;
     }
 
+    public Match updateMatch(Match existingMatch, List<String> teamAIds, List<String> teamBIds) {
+        // Update teamA and teamB with new player IDs and statuses
+        List<Map<String, String>> teamA = teamAIds.stream()
+                .map(playerId -> Map.of(playerId, "TBD"))  // Or maintain the existing status if needed
+                .collect(Collectors.toList());
+
+        List<Map<String, String>> teamB = teamBIds.stream()
+                .map(playerId -> Map.of(playerId, "TBD"))
+                .collect(Collectors.toList());
+
+        existingMatch.setTeamA(teamA);
+        existingMatch.setTeamB(teamB);
+
+        return matchRepository.save(existingMatch);
+    }
+
     public Match saveMatch(Match match, List<String> teamAIds, List<String> teamBIds) {
         // Initialize teamA and teamB with "TBD" status
         List<Map<String, String>> teamA = teamAIds.stream()
