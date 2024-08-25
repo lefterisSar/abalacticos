@@ -101,5 +101,10 @@ public class UserController {
         return ResponseEntity.ok(absentDates);
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<AbalacticosUser> getPlayer(@PathVariable String id) {
+        return ResponseEntity.ok(userService.findPlayerById(id));
+    }
+
 // Other CRUD operations if needed
 }

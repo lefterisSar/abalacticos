@@ -42,7 +42,8 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authz -> authz
-                        .requestMatchers("/", "/public/**", "/api/users/register", "/api/auth/**", "/api/users/fetchByIds", "/api/matches/**", "/api/discord/**","/api/config/**").permitAll()
+                .requestMatchers("/", "/public/**", "/api/users/register", "/api/auth/**", "/api/users/fetchByIds",
+                                "/api/matches/**", "/api/discord/**","/api/config/**", "/api/users/*").permitAll()
                         .requestMatchers("/api/users/registerAdmin", "/api/users/update/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )

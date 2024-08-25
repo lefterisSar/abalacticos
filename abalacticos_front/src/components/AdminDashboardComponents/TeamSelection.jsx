@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { DataGrid } from '@mui/x-data-grid';
 import axios from 'axios';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { Button, styled } from '@mui/material';
 import PersonIcon from '@mui/icons-material/Person';
 import Calculator from '@mui/icons-material/QueryStats';
@@ -40,7 +40,7 @@ const renderTeam = (team) => (
     <ul style={{ padding: '0 20px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
         {teamPositions.map((position, index) => (
             <li key={index} style={{ listStyleType: 'none', padding: '5px 0' }}>
-                {position}: {team[index] ? `${team[index].name} ${team[index].surname}` : 'N/A'}
+                {position}: {team[index] ? `${team[index].name} ${team[index].surname} (${team[index].status})` : 'N/A'}
             </li>
         ))}
     </ul>
@@ -62,6 +62,7 @@ const TeamSelection = () => {
     const [teamB, setTeamB] = useState([]);
     const navigate = useNavigate();
     const { day } = useParams();
+    const location = useLocation(); // New addition to get query parameters
     const [columnVisibilityModel, setColumnVisibilityModel] = useState({});
     const [nextMatchDate, setNextMatchDate] = useState(new Date());
     const userId = localStorage.getItem('userName');
@@ -69,7 +70,6 @@ const TeamSelection = () => {
 
     const fetchChannelId = async () => {
         try {
-
             const response = await fetch(`http://localhost:8080/api/config/channelId?message=${encodeURIComponent(day)}`, {
                 method: 'GET',
                 headers: {
@@ -212,41 +212,68 @@ const TeamSelection = () => {
             return;
         }
 
+        const params = new URLSearchParams(location.search); // Get query parameters
+        const dateFromParams = params.get('date');
+
         try {
             const response = await axios.get('http://localhost:8080/api/matches/byDayAndDate', {
                 headers: {
                     Authorization: `Bearer ${token}`
                 },
-                params: { day, datePlayed: nextMatchDate.toISOString().split('T')[0] }
+                params: { day, datePlayed: dateFromParams || nextMatchDate.toISOString().split('T')[0] }
             });
 
             if (response.status === 200 && response.data) {
                 const match = response.data;
-                setTeamA(Object.entries(match.teamA).map(([playerId, status]) => players.find(p => p.id === playerId)));
-                setTeamB(Object.entries(match.teamB).map(([playerId, status]) => players.find(p => p.id === playerId)));
+                setNextMatchDate(new Date(match.datePlayed)); // Fix the date based on the match
+
+                // Fetch player details for Team A
+                const teamAPlayerDetails = await Promise.all(Object.values(match.teamA).map(playerObj =>
+                    axios.get(`http://localhost:8080/api/users/${Object.keys(playerObj)[0]}`, {
+                        headers: {
+                            Authorization: `Bearer ${token}`
+                        }
+                    }).then(res => ({
+                        ...res.data,
+                        status: playerObj[Object.keys(playerObj)[0]]  // Add the availability status
+                    }))
+                ));
+
+                // Fetch player details for Team B
+                const teamBPlayerDetails = await Promise.all(Object.values(match.teamB).map(playerObj =>
+                    axios.get(`http://localhost:8080/api/users/${Object.keys(playerObj)[0]}`, {
+                        headers: {
+                            Authorization: `Bearer ${token}`
+                        }
+                    }).then(res => ({
+                        ...res.data,
+                        status: playerObj[Object.keys(playerObj)[0]]  // Add the availability status
+                    }))
+                ));
+
+
+                setTeamA(teamAPlayerDetails);
+                setTeamB(teamBPlayerDetails);
             }
-        }
-        catch (error)
-        {
+        } catch (error) {
             if (error.response && error.response.status === 404) {
                 const errorData = error.response.data;
                 if (errorData && errorData.type === "NO_MATCH_FOUND") {
                     console.log("No match found, using next match date.");
                     setTeamA([]); // Explicitly set teams to empty if no match found
                     setTeamB([]);
-                    setNextMatchDate(getNextMatchDate(day));
+                    setNextMatchDate(dateFromParams ? new Date(dateFromParams) : getNextMatchDate(day));
                 } else {
                     console.error('Unexpected error fetching match:', error);
-                    // Handle unexpected errors or navigate to an error page
                     navigate('/error');
                 }
             } else {
                 console.error('Error fetching match:', error);
-                // Handle unexpected errors or navigate to an error page
                 navigate('/error');
             }
         }
     };
+
 
     const fetchPlayers = async () => {
         const token = localStorage.getItem('authToken');
@@ -317,8 +344,6 @@ const TeamSelection = () => {
             // Otherwise, schedule for this week
             return nextDay(today, matchDay);
         }
-
-
     };
 
     const updateNextMatchDate = () => {
