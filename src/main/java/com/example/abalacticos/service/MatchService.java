@@ -23,25 +23,29 @@ public class MatchService {
     public void updateMatch(Match existingMatch, List<String> teamAIds, List<String> teamBIds) {
         // Create a map to easily look up existing statuses by player ID
         Map<String, String> existingTeamAStatus = existingMatch.getTeamA().stream()
-                .collect(Collectors.toMap(map -> map.keySet().iterator().next(), map -> map.values().iterator().next()));
+            .collect(Collectors.toMap(
+                map -> map.keySet().iterator().next(),
+                map -> map.values().iterator().next()));
 
         Map<String, String> existingTeamBStatus = existingMatch.getTeamB().stream()
-                .collect(Collectors.toMap(map -> map.keySet().iterator().next(), map -> map.values().iterator().next()));
+            .collect(Collectors.toMap(
+                map -> map.keySet().iterator().next(),
+                map -> map.values().iterator().next()));
 
         // Update teamA and teamB with new player IDs, maintaining existing statuses where available
         List<Map<String, String>> updatedTeamA = teamAIds.stream()
-                .map(playerId -> {
-                    String status = existingTeamAStatus.getOrDefault(playerId, "TBD");
-                    return Map.of(playerId, status);
-                })
-                .collect(Collectors.toList());
+            .map(playerId -> {
+                String status = existingTeamAStatus.getOrDefault(playerId, "TBD");
+                return Map.of(playerId, status);
+            })
+            .collect(Collectors.toList());
 
         List<Map<String, String>> updatedTeamB = teamBIds.stream()
-                .map(playerId -> {
-                    String status = existingTeamBStatus.getOrDefault(playerId, "TBD");
-                    return Map.of(playerId, status);
-                })
-                .collect(Collectors.toList());
+            .map(playerId -> {
+                String status = existingTeamBStatus.getOrDefault(playerId, "TBD");
+                return Map.of(playerId, status);
+            })
+            .collect(Collectors.toList());
 
         // Set the updated teams in the existing match
         existingMatch.setTeamA(updatedTeamA);
