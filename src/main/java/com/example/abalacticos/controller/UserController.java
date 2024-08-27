@@ -6,10 +6,13 @@ import com.example.abalacticos.model.RegistrationDto;
 import com.example.abalacticos.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+import java.security.Principal;
+import java.util.Collections;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -104,6 +107,15 @@ public class UserController {
     @GetMapping("/{id}")
     public ResponseEntity<AbalacticosUser> getPlayer(@PathVariable String id) {
         return ResponseEntity.ok(userService.findPlayerById(id));
+    }
+
+    @GetMapping("/profile")
+    public ResponseEntity<?> getUserProfile(Principal principal) {
+        if (principal != null) {
+            AbalacticosUser user = userService.getUserProfile(principal.getName());
+            return ResponseEntity.ok(user);  // Ensure the user object includes all required fields
+        }
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not authenticated");
     }
 
 // Other CRUD operations if needed

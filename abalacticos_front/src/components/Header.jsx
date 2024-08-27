@@ -48,6 +48,9 @@ const Header = () => {
                             {location.pathname !== '/matches' && (
                                 <li><Link to="/matches">Matches</Link></li>
                             )}
+                            {location.pathname !== '/profile' && (
+                                <li><Link to="/profile">Profile</Link></li>
+                            )}
                         </>
                     )}
                     {!token && location.pathname !== '/login' && (

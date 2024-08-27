@@ -11,6 +11,7 @@ import Header from './components/Header';
 import PageNotFound from './components/PageNotFound';
 import AvailabilityCalendar from "./components/AvailabilityCalendar";
 import MatchesGrid from "./components/MatchesGrid";
+import UserProfile from "./components/UserProfile";
 
 const App = () => (
     <Router>
@@ -26,6 +27,7 @@ const App = () => (
             <Route path="/matches" element={<MatchesGrid/>} />
             <Route path="/" element={<Navigate to="/players" />} />
             <Route path="*" element={<PageNotFound />} />
+            <Route path="/profile" element={<UserProfile />} />
         </Routes>
     </Router>
 );
