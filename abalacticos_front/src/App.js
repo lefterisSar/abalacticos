@@ -27,7 +27,7 @@ const App = () => (
             <Route path="/matches" element={<MatchesGrid/>} />
             <Route path="/" element={<Navigate to="/players" />} />
             <Route path="*" element={<PageNotFound />} />
-            <Route path="/profile" element={<UserProfile />} />
+            <Route path="/profile" element={<UserProfile/>} />
         </Routes>
     </Router>
 );

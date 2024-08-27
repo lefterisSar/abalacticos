@@ -43,7 +43,7 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authz -> authz
                 .requestMatchers("/", "/public/**", "/api/users/register", "/api/auth/**", "/api/users/fetchByIds",
-                                "/api/matches/**", "/api/discord/**","/api/config/**", "/api/users/*", "/api/users/profile").permitAll()
+                                "/api/matches/**", "/api/discord/**","/api/config/**", "/api/users/*","/api/users/profile").permitAll()
                         .requestMatchers("/api/users/registerAdmin", "/api/users/update/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )

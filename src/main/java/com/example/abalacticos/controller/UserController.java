@@ -120,6 +120,5 @@ public class UserController {
     }
 
 
-
 // Other CRUD operations if needed
 }
