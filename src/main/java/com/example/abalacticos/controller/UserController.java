@@ -16,6 +16,7 @@ import java.util.Collections;
 
 import javax.validation.Valid;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/users")
@@ -117,6 +118,8 @@ public class UserController {
         }
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not authenticated");
     }
+
+
 
 // Other CRUD operations if needed
 }

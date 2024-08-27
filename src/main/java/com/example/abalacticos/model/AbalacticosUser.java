@@ -41,6 +41,10 @@ public class AbalacticosUser {
     private String discordID;
     private List<String> absentDates = new ArrayList<>();
 
+    private boolean available = false;
+    private boolean absent = false;
+    private boolean injured = false;
+
 
     public AbalacticosUser() {}
 
@@ -275,6 +279,30 @@ public class AbalacticosUser {
 
     public void setUnavailableDates(List<String> unavailableDates) {
         this.unavailableDates = unavailableDates;
+    }
+
+    public boolean isAvailable() {
+        return available;
+    }
+
+    public void setAvailable(boolean available) {
+        this.available = available;
+    }
+
+    public boolean isAbsent() {
+        return absent;
+    }
+
+    public void setAbsent(boolean absent) {
+        this.absent = absent;
+    }
+
+    public boolean isInjured() {
+        return injured;
+    }
+
+    public void setInjured(boolean injured) {
+        this.injured = injured;
     }
 
 }

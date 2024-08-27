@@ -28,6 +28,7 @@ const UserProfile = () => {
                     }
                 });
 
+                console.log(response.data);
                 setUserData(response.data); // Store the full user data in state
             } catch (error) {
                 // Handle the error (e.g., invalid token or server error)
@@ -45,6 +46,26 @@ const UserProfile = () => {
 
         fetchUserProfile();
     }, [navigate]);
+
+    const handleCheckboxChange = async (field, value) => {
+        if (!userData) return;
+
+        const updatedUserData = { ...userData, [field]: value };
+
+        try {
+            const token = localStorage.getItem('authToken'); // Retrieve token from localStorage
+            await axios.put(`/api/users/${userData.id}`, updatedUserData, {
+                headers: {
+                    Authorization: `Bearer ${token}` // Attach the token to the Authorization header
+                }
+            });
+
+            setUserData(updatedUserData); // Optimistically update the UI
+        } catch (error) {
+            console.error(`Error updating ${field}`, error);
+            setError(`Failed to update ${field}`);
+        }
+    };
 
     if (loading) {
         return <p>Loading...</p>; // Show loading message while waiting for the profile data
@@ -69,8 +90,40 @@ const UserProfile = () => {
                     <p>Tuesday Appearances: {userData.tuesdayAppearances}</p>
                     <p>Wednesday Appearances: {userData.wednesdayAppearances}</p>
                     <p>Friday Appearances: {userData.fridayAppearances}</p>
-                    <p>apousies: {userData.absentDates}</p>
-                    {/* Add more fields as necessary */}
+                    <p>apousies: {userData.absentDates && userData.absentDates.join(', ')}</p>
+
+                    <div>
+                        <label>
+                            <input
+                                type="checkbox"
+                                checked={userData.absent}
+                                onChange={(e) => handleCheckboxChange('absent', e.target.checked)}
+                            />
+                            Absent
+                        </label>
+                    </div>
+
+                    <div>
+                        <label>
+                            <input
+                                type="checkbox"
+                                checked={userData.injured}
+                                onChange={(e) => handleCheckboxChange('injured', e.target.checked)}
+                            />
+                            Injured
+                        </label>
+                    </div>
+
+                    <div>
+                        <label>
+                            <input
+                                type="checkbox"
+                                checked={userData.available}
+                                onChange={(e) => handleCheckboxChange('available', e.target.checked)}
+                            />
+                            Available
+                        </label>
+                    </div>
                 </div>
             ) : (
                 <p>No user data available</p>

@@ -34,6 +34,10 @@ public class RegistrationDto {
     private String discordID;
     private CommunicationDetails communicationDetails;
 
+    private boolean available = false;
+    private boolean absent = false;
+    private boolean injured = false;
+
     public int getTuesdayAppearances() {
         return tuesdayAppearances;
     }
@@ -205,5 +209,29 @@ public class RegistrationDto {
 
     public String getDiscordID() {
         return this.discordID;
+    }
+
+    public boolean isAvailable() {
+        return available;
+    }
+
+    public void setAvailable(boolean available) {
+        this.available = available;
+    }
+
+    public boolean isAbsent() {
+        return absent;
+    }
+
+    public void setAbsent(boolean absent) {
+        this.absent = absent;
+    }
+
+    public boolean isInjured() {
+        return injured;
+    }
+
+    public void setInjured(boolean injured) {
+        this.injured = injured;
     }
 }

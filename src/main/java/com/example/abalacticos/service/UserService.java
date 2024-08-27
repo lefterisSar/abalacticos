@@ -10,6 +10,7 @@ import java.util.ArrayList;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -71,6 +72,11 @@ public class UserService {
         newUser.setWednesdayAppearances(registrationDto.getWednesdayAppearances());
         newUser.setDiscordID(registrationDto.getDiscordID());
         newUser.setAbsentDates(new ArrayList<>());
+
+        newUser.setAvailable(false);
+        newUser.setInjured(false);
+        newUser.setAbsent(false);
+
     }
 
 
@@ -94,9 +100,14 @@ public class UserService {
         existingUser.setDebutDate(updatedUser.getDebutDate());
         //TODO: Below line is not working
         existingUser.setCommunicationDetails(existingUser.getCommunicationDetails());
-        userRepository.save(existingUser);
+
         existingUser.setAbsentDates(updatedUser.getAbsentDates());
 
+        existingUser.setAvailable(updatedUser.isAvailable());
+        existingUser.setAbsent(updatedUser.isAbsent());
+        existingUser.setInjured(updatedUser.isInjured());
+
+        userRepository.save(existingUser);
     }
 
     public void updateAvailability(AbalacticosUser user) {
@@ -288,6 +299,10 @@ public class UserService {
     public AbalacticosUser getUserProfile(String username) {
         return userRepository.findByUsername(username);
     }
+
+
+
+
 
 
 }
