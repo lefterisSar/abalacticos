@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import java.security.Principal;
@@ -62,6 +63,7 @@ public class UserController {
         return ResponseEntity.ok(users);
     }
 
+    /*
     // New endpoint for updating user details
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
@@ -69,6 +71,41 @@ public class UserController {
         System.out.println("Updating user: " + updatedUser.getUsername());
         userService.updateUser(id, updatedUser);
         return ResponseEntity.ok("User updated successfully");
+    }
+    */
+
+
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateUser(@PathVariable String id, @RequestBody AbalacticosUser updatedUser, Principal principal) {
+        AbalacticosUser existingUser = userService.findPlayerById(id);
+
+        // Check if the authenticated user is an admin
+        boolean isAdmin = SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
+                .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_ADMIN"));
+
+        // Check if the authenticated user is the same as the user being updated
+        boolean isOwner = principal.getName().equals(existingUser.getUsername());
+
+        // If the user is an admin, allow them to update any field
+        if (isAdmin) {
+            userService.updateUser(id, updatedUser);
+            return ResponseEntity.ok("User updated successfully (Admin).");
+        }
+
+        // If the user is not an admin but is the owner, restrict them to updating only certain fields
+        if (isOwner) {
+                existingUser.setAbsent(updatedUser.isAbsent());
+
+                existingUser.setInjured(updatedUser.isInjured());
+
+                existingUser.setAvailable(updatedUser.isAvailable());
+
+
+            userService.updateUser(id, existingUser);
+            return ResponseEntity.ok("User updated successfully (User).");
+        }
+
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You do not have permission to update this user.");
     }
 
     @GetMapping
