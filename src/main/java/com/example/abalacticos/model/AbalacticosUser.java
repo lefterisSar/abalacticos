@@ -4,8 +4,10 @@ import jakarta.persistence.ElementCollection;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Map;
 
 @Document(collection = "abalacticos_users")
 public class AbalacticosUser {
@@ -45,8 +47,10 @@ public class AbalacticosUser {
     private boolean absent = false;
     private boolean injured = false;
 
+    private Map<String, Integer> positionRatings = new HashMap<>();
 
-    public AbalacticosUser() {}
+
+
 
     // Constructors, Getters, and Setters
     public AbalacticosUser(String username, String password) {
@@ -80,6 +84,18 @@ public class AbalacticosUser {
         this.surname =surname;
         this.name = name;
 
+    }
+
+    public AbalacticosUser() {
+        this.positionRatings = new HashMap<>();
+        this.positionRatings.put("goalkeeper", 0);
+        this.positionRatings.put("rightBack", 1);
+        this.positionRatings.put("leftBack", 1);
+        this.positionRatings.put("centerBack", 1);
+        this.positionRatings.put("midfielder", 1);
+        this.positionRatings.put("rightWinger", 1);
+        this.positionRatings.put("leftWinger", 1);
+        this.positionRatings.put("centerForward", 1);
     }
 
 
@@ -303,6 +319,14 @@ public class AbalacticosUser {
 
     public void setInjured(boolean injured) {
         this.injured = injured;
+    }
+
+    public Map<String, Integer> getPositionRatings() {
+        return positionRatings;
+    }
+
+    public void setPositionRatings(Map<String, Integer> positionRatings) {
+        this.positionRatings = positionRatings;
     }
 
 }

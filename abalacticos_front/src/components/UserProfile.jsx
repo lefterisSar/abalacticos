@@ -8,6 +8,7 @@ const UserProfile = () => {
     const [error, setError] = useState(null);
     const navigate = useNavigate();
 
+
     useEffect(() => {
         const fetchUserProfile = async () => {
             const token = localStorage.getItem('authToken'); // Retrieve token from localStorage
@@ -60,11 +61,52 @@ const UserProfile = () => {
             });
 
             setUserData(updatedUserData); // Optimistically update the UI
+
+
+
         } catch (error) {
             console.error(`Error updating ${field}`, error);
             setError(`Failed to update ${field}`);
         }
     };
+
+    const handleRatingChange = (position, value) => {
+            setUserData(prevUserData => ({
+                ...prevUserData,
+                positionRatings: {
+                    ...prevUserData.positionRatings,
+                    [position]: value
+                }
+            }));
+        };
+
+    const handleSaveRatings = async () => {
+            if (!userData) return;
+
+            try {
+                const token = localStorage.getItem('authToken');
+                const updatedUserData = { ...userData };
+
+                await axios.put(`/api/users/${userData.id}`, updatedUserData, {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                });
+
+                setUserData(updatedUserData);
+            } catch (error) {
+                console.error("Error updating position ratings", error);
+                setError("Failed to update position ratings.");
+            }
+        };
+
+
+
+
+
+
+
+
 
     if (loading) {
         return <p>Loading...</p>; // Show loading message while waiting for the profile data
@@ -123,6 +165,26 @@ const UserProfile = () => {
                             Available
                         </label>
                     </div>
+
+
+
+                    <h2>Position Ratings</h2>
+                    <div>
+                        {Object.keys(userData.positionRatings).map(position => (
+                            <div key={position}>
+                                <label>{position.charAt(0).toUpperCase() + position.slice(1)}:</label>
+                                <input
+                                    type="number"
+                                    value={userData.positionRatings[position]}
+                                    min="0"
+                                    max="10"
+                                    onChange={(e) => handleRatingChange(position, parseInt(e.target.value))}
+                                />
+                            </div>
+                        ))}
+                    </div>
+
+                    <button onClick={handleSaveRatings}>Save Ratings</button>
                 </div>
             ) : (
                 <p>No user data available</p>

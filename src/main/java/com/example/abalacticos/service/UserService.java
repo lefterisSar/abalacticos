@@ -6,12 +6,10 @@ import com.example.abalacticos.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import java.util.ArrayList;
+
+import java.util.*;
 
 import java.time.LocalDate;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 
 @Service
 public class UserService {
@@ -76,6 +74,7 @@ public class UserService {
         newUser.setAvailable(false);
         newUser.setInjured(false);
         newUser.setAbsent(false);
+        newUser.setPositionRatings(new HashMap<>());
 
     }
 
@@ -106,6 +105,7 @@ public class UserService {
         existingUser.setAvailable(updatedUser.isAvailable());
         existingUser.setAbsent(updatedUser.isAbsent());
         existingUser.setInjured(updatedUser.isInjured());
+        existingUser.setPositionRatings(updatedUser.getPositionRatings());
 
         userRepository.save(existingUser);
     }
@@ -299,6 +299,8 @@ public class UserService {
     public AbalacticosUser getUserProfile(String username) {
         return userRepository.findByUsername(username);
     }
+
+
 
 
 }

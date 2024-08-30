@@ -100,9 +100,11 @@ public class UserController {
 
                 existingUser.setAvailable(updatedUser.isAvailable());
 
+                existingUser.setPositionRatings(updatedUser.getPositionRatings());
+
 
             userService.updateUser(id, existingUser);
-            return ResponseEntity.ok("User updated successfully (User).");
+            return ResponseEntity.ok("User updated successfully - Absent,Injured,Available, Positions (User).");
         }
 
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You do not have permission to update this user.");
