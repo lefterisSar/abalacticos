@@ -32,11 +32,18 @@ public class UserController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
     private ClubRepository clubRepository;
 
     @Autowired
-    public UserController(UserService userService, ClubRepository clubRepository) {
+    public UserController(UserService userService) {
         this.userService = userService;
+
+    }
+
+    @Autowired
+    public UserController(ClubRepository clubRepository){
         this.clubRepository = clubRepository;
     }
 
