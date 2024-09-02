@@ -1,7 +1,9 @@
 package com.example.abalacticos.service;
 
 import com.example.abalacticos.model.AbalacticosUser;
+import com.example.abalacticos.model.Club;
 import com.example.abalacticos.model.RegistrationDto;
+import com.example.abalacticos.repository.ClubRepository;
 import com.example.abalacticos.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -16,12 +18,14 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final ClubRepository clubRepository;
 
 
     @Autowired
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, ClubRepository clubRepository) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.clubRepository = clubRepository;
     }
 
     public AbalacticosUser registerUserAdmin(RegistrationDto registrationDto)
@@ -59,7 +63,6 @@ public class UserService {
         newUser.setLosses(registrationDto.getLosses());
         newUser.setDraws(registrationDto.getDraws());
         newUser.setInvitationFriend(registrationDto.getInvitationFriend());
-        newUser.setFavClub(registrationDto.getFavClub());
         newUser.setSn(registrationDto.getSn());
         newUser.setBirthday(registrationDto.getBirthday());
         newUser.setCommunicationDetails(registrationDto.getCommunicationDetails());
@@ -75,6 +78,8 @@ public class UserService {
         newUser.setInjured(false);
         newUser.setAbsent(false);
         newUser.setPositionRatings(new HashMap<>());
+
+        newUser.setFavClub(new Club("defaultId", "Abalacticos", "defaultIconUrl"));
 
     }
 
@@ -106,6 +111,14 @@ public class UserService {
         existingUser.setAbsent(updatedUser.isAbsent());
         existingUser.setInjured(updatedUser.isInjured());
         existingUser.setPositionRatings(updatedUser.getPositionRatings());
+
+
+        if (updatedUser.getFavClub() != null && updatedUser.getFavClub().getId() != null) {
+            Club favClub = clubRepository.findById(updatedUser.getFavClub().getId())
+                    .orElseThrow(() -> new RuntimeException("Club not found"));
+            existingUser.setFavClub(favClub);
+        }
+
 
         userRepository.save(existingUser);
     }
