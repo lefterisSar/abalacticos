@@ -20,6 +20,12 @@ public class Club {
         this.iconUrl = iconUrl;
     }
 
+    public Club(String id, String clubName, String iconUrl) {
+        this.id = id;
+        this.clubName = clubName;
+        this.iconUrl = iconUrl;
+
+    }
     // Getters and Setters
     public String getId() {
         return id;

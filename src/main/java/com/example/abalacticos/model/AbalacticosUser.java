@@ -32,7 +32,7 @@ public class AbalacticosUser {
     private int overallApps;
 
     private String invitationFriend;
-    private String favClub;
+
     private String sn;
     private String birthday;
     private CommunicationDetails communicationDetails;
@@ -48,6 +48,10 @@ public class AbalacticosUser {
     private boolean injured = false;
 
     private Map<String, Integer> positionRatings = new HashMap<>();
+
+
+
+    private Club FavClub  = new Club("Abalacticos", ".");
 
 
 
@@ -176,13 +180,6 @@ public class AbalacticosUser {
         this.invitationFriend = invitationFriend;
     }
 
-    public String getFavClub() {
-        return favClub;
-    }
-
-    public void setFavClub(String favClub) {
-        this.favClub = favClub;
-    }
 
     public String getSn() {
         return sn;
@@ -327,6 +324,14 @@ public class AbalacticosUser {
 
     public void setPositionRatings(Map<String, Integer> positionRatings) {
         this.positionRatings = positionRatings;
+    }
+
+    public Club getFavClub() {
+        return FavClub;
+    }
+
+    public void setFavClub(Club favClub) {
+        FavClub = favClub;
     }
 
 }

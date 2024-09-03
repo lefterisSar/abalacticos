@@ -1,9 +1,11 @@
 package com.example.abalacticos.controller;
 
 import com.example.abalacticos.model.AbalacticosUser;
+import com.example.abalacticos.model.Club;
 import com.example.abalacticos.model.Match;
 import com.example.abalacticos.model.RegistrationDto;
 import com.example.abalacticos.service.UserService;
+import com.example.abalacticos.repository.ClubRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
@@ -32,8 +34,15 @@ public class UserController {
     private UserService userService;
 
     @Autowired
+    private ClubRepository clubRepository;
+
+    @Autowired
     public UserController(UserService userService) {
         this.userService = userService;
+    }
+
+    public UserController(ClubRepository clubRepository) {
+        this.clubRepository = clubRepository;
     }
 
     @PreAuthorize("hasRole('ADMIN')")
@@ -102,6 +111,11 @@ public class UserController {
 
                 existingUser.setPositionRatings(updatedUser.getPositionRatings());
 
+            if (updatedUser.getFavClub() != null && updatedUser.getFavClub().getId() != null) {
+                Club favClub = clubRepository.findById(updatedUser.getFavClub().getId())
+                        .orElseThrow(() -> new RuntimeException("Club not found"));
+                existingUser.setFavClub(updatedUser.getFavClub());
+            }
 
             userService.updateUser(id, existingUser);
             return ResponseEntity.ok("User updated successfully - Absent,Injured,Available, Positions (User).");

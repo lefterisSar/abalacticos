@@ -4,10 +4,10 @@ import { useNavigate } from 'react-router-dom'; // To navigate to the login page
 
 const UserProfile = () => {
     const [userData, setUserData] = useState(null); // Store the whole user object instead of just username
+    const [clubs, setClubs] = useState([]); // Initialize as an empty array
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const navigate = useNavigate();
-
 
     useEffect(() => {
         const fetchUserProfile = async () => {
@@ -44,7 +44,27 @@ const UserProfile = () => {
             }
         };
 
+        const fetchClubs = async () => {
+            try {
+                const token = localStorage.getItem('authToken'); // Retrieve token from localStorage
+                if (!token) {
+                                navigate('/login');
+                                return;
+                            }
+
+                const response = await axios.get('/api/clubs', {
+                            headers: {
+                                Authorization: `Bearer ${token}` // Attach the token to the Authorization header
+                            }
+                        });
+                        setClubs(response.data || []); // Ensure that we handle any case where data might not be an array
+                    } catch (error) {
+                        console.error('Error fetching clubs', error);
+                    }
+                };
+
         fetchUserProfile();
+        fetchClubs();
     }, [navigate]);
 
     const handleCheckboxChange = async (field, value) => {
@@ -62,8 +82,6 @@ const UserProfile = () => {
 
             setUserData(updatedUserData); // Optimistically update the UI
 
-
-
         } catch (error) {
             console.error(`Error updating ${field}`, error);
             setError(`Failed to update ${field}`);
@@ -71,42 +89,61 @@ const UserProfile = () => {
     };
 
     const handleRatingChange = (position, value) => {
-            setUserData(prevUserData => ({
-                ...prevUserData,
-                positionRatings: {
-                    ...prevUserData.positionRatings,
-                    [position]: value
-                }
-            }));
-        };
+        setUserData(prevUserData => ({
+            ...prevUserData,
+            positionRatings: {
+                ...prevUserData.positionRatings,
+                [position]: value
+            }
+        }));
+    };
 
     const handleSaveRatings = async () => {
-            if (!userData) return;
+        if (!userData) return;
 
-            try {
-                const token = localStorage.getItem('authToken');
-                const updatedUserData = { ...userData };
+        try {
+            const token = localStorage.getItem('authToken');
+            const updatedUserData = { ...userData };
 
-                await axios.put(`/api/users/${userData.id}`, updatedUserData, {
-                    headers: {
-                        Authorization: `Bearer ${token}`
-                    }
-                });
+            await axios.put(`/api/users/${userData.id}`, updatedUserData, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
 
-                setUserData(updatedUserData);
-            } catch (error) {
-                console.error("Error updating position ratings", error);
-                setError("Failed to update position ratings.");
-            }
+            setUserData(updatedUserData);
+        } catch (error) {
+            console.error("Error updating position ratings", error);
+            setError("Failed to update position ratings.");
+        }
+    };
+
+    const handleFavClubChange = async (event) => {
+        const selectedClubId = event.target.value;
+        const selectedClub = clubs.find(club => club.id === selectedClubId);
+
+        const updatedUserData = {
+            ...userData,
+            favClub: selectedClub,
         };
 
+        try {
+            const token = localStorage.getItem('authToken');
+            if (!token) {
+                            navigate('/login');
+                            return;
+                        }
 
+            await axios.put(`/api/users/${userData.id}`, updatedUserData, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
 
-
-
-
-
-
+            setUserData(updatedUserData);
+        } catch (error) {
+            console.error('Error updating favorite club', error);
+            setError('Failed to update favorite club.');
+        }
+    };
 
     if (loading) {
         return <p>Loading...</p>; // Show loading message while waiting for the profile data
@@ -131,7 +168,7 @@ const UserProfile = () => {
                     <p>Tuesday Appearances: {userData.tuesdayAppearances}</p>
                     <p>Wednesday Appearances: {userData.wednesdayAppearances}</p>
                     <p>Friday Appearances: {userData.fridayAppearances}</p>
-                    <p>apousies: {userData.absentDates && userData.absentDates.join(', ')}</p>
+                    <p>Absences: {userData.absentDates && userData.absentDates.join(', ')}</p>
 
                     <div>
                         <label>
@@ -166,7 +203,22 @@ const UserProfile = () => {
                         </label>
                     </div>
 
-
+                    <h2>Favorite Club</h2>
+                    {clubs.length > 0 ? (
+                        <select
+                            value={userData.favClub?.id || ''}
+                            onChange={handleFavClubChange}
+                        >
+                            <option value="" disabled>Select your favorite club</option>
+                            {clubs.map(club => (
+                                <option key={club.id} value={club.id}>
+                                    {club.clubName}
+                                </option>
+                            ))}
+                        </select>
+                    ) : (
+                        <p>No clubs available</p>
+                    )}
 
                     <h2>Position Ratings</h2>
                     <div>

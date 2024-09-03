@@ -1,6 +1,7 @@
 package com.example.abalacticos.service;
 
 import com.example.abalacticos.model.AbalacticosUser;
+import com.example.abalacticos.model.Club;
 import com.example.abalacticos.model.RegistrationDto;
 import com.example.abalacticos.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,7 +60,6 @@ public class UserService {
         newUser.setLosses(registrationDto.getLosses());
         newUser.setDraws(registrationDto.getDraws());
         newUser.setInvitationFriend(registrationDto.getInvitationFriend());
-        newUser.setFavClub(registrationDto.getFavClub());
         newUser.setSn(registrationDto.getSn());
         newUser.setBirthday(registrationDto.getBirthday());
         newUser.setCommunicationDetails(registrationDto.getCommunicationDetails());
@@ -75,6 +75,8 @@ public class UserService {
         newUser.setInjured(false);
         newUser.setAbsent(false);
         newUser.setPositionRatings(new HashMap<>());
+
+        newUser.setFavClub(new Club());
 
     }
 
@@ -106,6 +108,8 @@ public class UserService {
         existingUser.setAbsent(updatedUser.isAbsent());
         existingUser.setInjured(updatedUser.isInjured());
         existingUser.setPositionRatings(updatedUser.getPositionRatings());
+
+        existingUser.setFavClub(updatedUser.getFavClub());
 
         userRepository.save(existingUser);
     }
