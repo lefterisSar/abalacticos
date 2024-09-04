@@ -3,6 +3,8 @@ package com.example.abalacticos.service;
 import com.example.abalacticos.model.AbalacticosUser;
 import com.example.abalacticos.model.Club;
 import com.example.abalacticos.model.RegistrationDto;
+import com.example.abalacticos.repository.InventoryRepository;
+import com.example.abalacticos.model.Inventory;
 import com.example.abalacticos.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -17,6 +19,8 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+
+    private InventoryRepository inventoryRepository;
 
 
     @Autowired
@@ -304,7 +308,40 @@ public class UserService {
         return userRepository.findByUsername(username);
     }
 
+    public void assignItemToUser(String userId, String inventoryItemId) {
+        AbalacticosUser user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
+        // Check if the user is allowed to hold items
+        if (!user.getCanHoldItems()) {
+            throw new RuntimeException("User is not allowed to hold items.");
+        }
+
+        Inventory item = inventoryRepository.findById(inventoryItemId)
+                .orElseThrow(() -> new RuntimeException("Item not found"));
+
+
+        // Assign item to user
+        item.setCurrentHolderId(user.getId());
+        inventoryRepository.save(item);
+
+        // Add item to user's list of owned items
+        user.getOwnedItems().add(item);
+        userRepository.save(user);
+    }
+
+    public void setCanHoldItemsForUser(String userId, boolean canHoldItems) {
+        AbalacticosUser user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (!user.getCanHoldItems()) {
+            throw new RuntimeException("User is not allowed to hold items.");
+        }
+
+        // Set the user's ability to hold items
+        user.setCanHoldItems(canHoldItems);
+        userRepository.save(user);
+    }
 
 
 }

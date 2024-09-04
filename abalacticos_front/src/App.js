@@ -13,6 +13,7 @@ import AvailabilityCalendar from "./components/AvailabilityCalendar";
 import MatchesGrid from "./components/MatchesGrid";
 import UserProfile from "./components/UserProfile";
 import ClubForm from './components/AdminDashboardComponents/ClubForm';
+import HandleItemsForm from './components/AdminDashboardComponents/HandleItemsForm';
 
 const App = () => (
     <Router>
@@ -30,6 +31,8 @@ const App = () => (
             <Route path="*" element={<PageNotFound />} />
             <Route path="/profile" element={<UserProfile/>} />
             <Route path="/add-club" element={<PrivateRoute role="ADMIN"><ClubForm /></PrivateRoute>} />
+            <Route path="/inventory" element={<PrivateRoute role="ADMIN"><HandleItemsForm /></PrivateRoute>} />
+
         </Routes>
     </Router>
 );

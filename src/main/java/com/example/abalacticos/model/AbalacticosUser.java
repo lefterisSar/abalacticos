@@ -51,7 +51,8 @@ public class AbalacticosUser {
     private Club FavClub  = new Club("66d70e6d9a9e7e27c2d1c634","Abalacticos", ".");
 
     //04092024 mplouzakia, mpales, gantia, tameio/tameia, pontoi, xwrisma omadwn se paikti, teamrating
-
+    private List<Inventory> ownedItems;
+    private boolean canHoldItems = false;
 
 
 
@@ -339,8 +340,21 @@ public class AbalacticosUser {
 
 
     // Getters and Setters gia ola ta variables 04092024
+    public List<Inventory> getOwnedItems() {
+        return ownedItems;
+    }
 
+    public void setOwnedItems(List<Inventory> ownedItems) {
+        this.ownedItems = ownedItems;
+    }
 
+    public boolean getCanHoldItems() {
+        return canHoldItems;
+    }
+
+    public void setCanHoldItems(boolean canHoldItems) {
+        this.canHoldItems = canHoldItems;
+    }
 
 
 }
