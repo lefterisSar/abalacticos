@@ -4,10 +4,7 @@ import jakarta.persistence.ElementCollection;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Map;
+import java.util.*;
 
 @Document(collection = "abalacticos_users")
 public class AbalacticosUser {
@@ -51,7 +48,11 @@ public class AbalacticosUser {
 
 
 
-    private Club FavClub  = new Club("Abalacticos", ".");
+    private Club FavClub  = new Club("66d70e6d9a9e7e27c2d1c634","Abalacticos", ".");
+
+    //04092024 mplouzakia, mpales, gantia, tameio/tameia, pontoi, xwrisma omadwn se paikti, teamrating
+
+
 
 
 
@@ -333,5 +334,13 @@ public class AbalacticosUser {
     public void setFavClub(Club favClub) {
         FavClub = favClub;
     }
+
+
+
+
+    // Getters and Setters gia ola ta variables 04092024
+
+
+
 
 }

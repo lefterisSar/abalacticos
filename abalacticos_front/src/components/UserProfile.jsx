@@ -145,6 +145,34 @@ const UserProfile = () => {
         }
     };
 
+    const handleAvailability = async (day) => {
+            if (!userData) return;
+
+            let updatedAvailability;
+            if (userData.availability.includes(day)) {
+                updatedAvailability = userData.availability.filter(d => d !== day);
+            } else {
+                updatedAvailability = [...userData.availability, day];
+            }
+
+            const updatedUserData = { ...userData, availability: updatedAvailability };
+
+            try {
+                const token = localStorage.getItem('authToken'); // Retrieve token from localStorage
+                await axios.put(`/api/users/${userData.id}`, updatedUserData, {
+                    headers: {
+                        Authorization: `Bearer ${token}` // Attach the token to the Authorization header
+                    }
+                });
+
+                setUserData(updatedUserData); // Optimistically update the UI
+
+            } catch (error) {
+                console.error(`Error updating availability`, error);
+                setError(`Failed to update availability`);
+            }
+        };
+
     if (loading) {
         return <p>Loading...</p>; // Show loading message while waiting for the profile data
     }
@@ -152,6 +180,8 @@ const UserProfile = () => {
     if (error) {
         return <p>{error}</p>; // Show error message if there was an issue
     }
+
+    const daysOfWeek = ["Tuesday", "Wednesday", "Friday"];
 
     return (
         <div>
@@ -219,6 +249,22 @@ const UserProfile = () => {
                     ) : (
                         <p>No clubs available</p>
                     )}
+
+                    <h2>Availability</h2>
+                    <div>
+                        {daysOfWeek.map(day => (
+                            <div key={day}>
+                                <label>
+                                    <input
+                                        type="checkbox"
+                                        checked={userData.availability.includes(day)}
+                                        onChange={() => handleAvailability(day)}
+                                    />
+                                    {day}
+                                </label>
+                            </div>
+                        ))}
+                    </div>
 
                     <h2>Position Ratings</h2>
                     <div>
