@@ -24,23 +24,39 @@ const HandleItemsForm = () => {
 
     // Fetch all items for viewing
     const fetchItems = async () => {
+        const token = localStorage.getItem('authToken'); // Adjust this based on where you store your token
         try {
-            const token = getAuthToken();
-            const response = await axios.get('/api/inventory', {
+
+
+            console.log('Fetching items...');
+
+            console.log('Token:', token);
+            if (!token) {
+                        console.error('No token found, exiting function.');
+                        return;
+                    }
+            const response = await axios.get('/api/inventory/all', {
                 headers: {
-                    Authorization: token,
-                },
+                                    'Authorization': `Bearer ${token}`,
+                                },
             });
+            console.log('Response:', response);  // Log the response
             setItems(response.data);
         } catch (err) {
-            setError('Error fetching items.');
+
+        if (err.response && err.response.status === 401) {
+                    // Token is expired or invalid, redirect to login or handle it
+                    console.error('Token expired or invalid. Please log in again.');
+                } else {
+                setError('Error fetching items.');
+            }
         }
     };
 
     // Handle form submission for adding/updating
     const handleSubmit = async (e) => {
         e.preventDefault();
-        const token = getAuthToken();
+        const token = localStorage.getItem('authToken'); // Adjust this based on where you store your token
         if (!token) {
                 setError('Authorization token missing. Please log in.');
                 return;
@@ -48,7 +64,7 @@ const HandleItemsForm = () => {
         const newItem = {
             itemName,
             itemType,
-            iconUrl,
+            iconUrl: iconUrl || null,
             currentHolderId: currentHolderId || null,
         };
 
@@ -56,15 +72,15 @@ const HandleItemsForm = () => {
             if (view === 'add') {
                 const response = await axios.post('/api/inventory/add', newItem, {
                     headers: {
-                        Authorization: token,
-                    },
+                                        'Authorization': `Bearer ${token}`,
+                                    },
                 });
                 setMessage('Item added successfully!');
             } else if (view === 'update' && itemIdToUpdate) {
                 await axios.put(`/api/inventory/update/${itemIdToUpdate}`, newItem, {
                     headers: {
-                        Authorization: token,
-                    },
+                                        'Authorization': `Bearer ${token}`,
+                                    },
                 });
                 setMessage('Item updated successfully!');
             }
@@ -79,12 +95,12 @@ const HandleItemsForm = () => {
 
     // Handle item deletion
     const handleDelete = async (id) => {
-        const token = getAuthToken();
+        const token = localStorage.getItem('authToken'); // Adjust this based on where you store your token
         try {
             await axios.delete(`/api/inventory/delete/${id}`, {
                 headers: {
-                    Authorization: token,
-                },
+                                    'Authorization': `Bearer ${token}`,
+                                },
             });
             setMessage('Item deleted successfully!');
             fetchItems(); // Reload the items

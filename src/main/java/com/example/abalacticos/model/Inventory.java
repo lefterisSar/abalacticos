@@ -3,7 +3,7 @@ package com.example.abalacticos.model;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-@Document(collection = "team_inventory")
+@Document(collection = "inventory")
 public class Inventory {
 
     @Id
