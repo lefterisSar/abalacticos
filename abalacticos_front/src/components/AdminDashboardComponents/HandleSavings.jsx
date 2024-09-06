@@ -6,9 +6,12 @@ const HandleSavings = () => {
     const [teamSavings, setTeamSavings] = useState(0); // Total team savings
     const [allSavings, setAllSavings] = useState([]); // All users with savings > 0
     const [newSavingsAmount, setNewSavingsAmount] = useState(''); // Admin's input for new savings
+    const [history, setHistory] = useState([]);
     const [error, setError] = useState(null);
     const [message, setMessage] = useState(null);
     const [showTable, setShowTable] = useState(false); // Show or hide the table
+    const [showHistory, setShowHistory] = useState(false);
+
 
     // Fetch savings data for the logged-in admin
     const fetchSavingsData = async () => {
@@ -47,6 +50,12 @@ const HandleSavings = () => {
                 },
             });
             setAllSavings(allSavingsResponse.data); // List of all users with savings
+
+            const historyResponse = await axios.get('/api/savings/savingsHistory', {
+                            headers: { 'Authorization': `Bearer ${token}` },
+                        });
+                        setHistory(historyResponse.data);
+
         } catch (err) {
             setError('Error fetching savings data.');
         }
@@ -71,7 +80,7 @@ const HandleSavings = () => {
 
             // Update the savings for this admin (send both userId and userName)
             await axios.put(`/api/savings/update/${userId}`, {
-                adminsSavings: updatedSavings,
+                adminsSavings: parseFloat(newSavingsAmount),
                 userName: userName, // Send the userName along with the savings
             }, {
                 headers: {
@@ -84,6 +93,20 @@ const HandleSavings = () => {
             fetchSavingsData(); // Refresh data
         } catch (err) {
             setError('Error updating savings.');
+        }
+    };
+
+    const fetchSavingsHistory = async () => {
+        const token = localStorage.getItem('authToken');
+        try {
+            const historyResponse = await axios.get('/api/savings/savingsHistory', {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                },
+            });
+            setHistory(historyResponse.data);
+        } catch (err) {
+            setError('Error fetching history.');
         }
     };
 
@@ -142,6 +165,33 @@ const HandleSavings = () => {
                         </tbody>
                     </table>
                 </div>
+            )}
+
+            <button onClick={() => setShowHistory(!showHistory)}>
+                {showHistory ? 'Hide History' : 'Show Savings History'}
+            </button>
+
+            {showHistory && Array.isArray(history) && history.length > 0 ? (
+                <table>
+                    <thead>
+                        <tr>
+                            <th>User Name</th>
+                            <th>Amount</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {history.map((entry, index) => (
+                            <tr key={index}>
+                                <td>{entry.userName}</td>
+                                <td>{entry.amount}</td>
+                                <td>{new Date(entry.date).toLocaleString()}</td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            ) : (
+                <p>No history available.</p>
             )}
 
             {message && <p>{message}</p>}

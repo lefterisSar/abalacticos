@@ -65,6 +65,14 @@ public class SavingsController {
 
         return ResponseEntity.ok(adminSavingsList);
     }
+
+    @GetMapping("/savingsHistory")
+    public ResponseEntity<List<Savings.SavingsHistory>> getSavingsHistory() {
+        Savings savings = savingsService.getTeamSavingsObject();
+        return ResponseEntity.ok(savings.getSavingsHistory());
+    }
+
+
 }
 
 
