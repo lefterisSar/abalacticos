@@ -3,6 +3,7 @@ package com.example.abalacticos.model;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+
 @Document(collection = "inventory")
 public class Inventory {
 
@@ -12,9 +13,9 @@ public class Inventory {
     private String itemName;      // Name of the item, e.g., "Nike Match Ball"
     private String itemType;      // Type of item, e.g., "ball", "gloves", "shirt"
     private String iconUrl;       // URL for the icon/image of the item
+
     private String currentHolderId;  // ID of the AbalacticosUser who holds the item, null if not assigned
 
-    private float teamSavings;    // Team's savings (can be handled in multiple Inventory records if needed)
 
     // Constructors, Getters, and Setters
 
@@ -24,6 +25,8 @@ public class Inventory {
         this.iconUrl = iconUrl;
         this.currentHolderId = null;  // Initially no one owns it
     }
+
+
 
     public String getId() {
         return id;
@@ -65,11 +68,4 @@ public class Inventory {
         this.currentHolderId = currentHolderId;
     }
 
-    public float getTeamSavings() {
-        return teamSavings;
-    }
-
-    public void setTeamSavings(float teamSavings) {
-        this.teamSavings = teamSavings;
-    }
 }

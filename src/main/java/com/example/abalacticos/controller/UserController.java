@@ -2,10 +2,13 @@ package com.example.abalacticos.controller;
 
 import com.example.abalacticos.model.AbalacticosUser;
 import com.example.abalacticos.model.Club;
+
+
 import com.example.abalacticos.model.Match;
 import com.example.abalacticos.model.RegistrationDto;
 import com.example.abalacticos.service.UserService;
 import com.example.abalacticos.repository.ClubRepository;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
@@ -35,6 +38,7 @@ public class UserController {
 
     @Autowired
     private ClubRepository clubRepository;
+
 
     @Autowired
     public UserController(UserService userService) {
@@ -194,6 +198,7 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
+
 
 // Other CRUD operations if needed
 }
