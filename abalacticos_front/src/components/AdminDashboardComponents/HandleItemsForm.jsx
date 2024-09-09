@@ -46,17 +46,30 @@ const HandleItemsForm = () => {
                                 },
             });
             console.log('Response:', response);  // Log the response
-            setItems(response.data);
-        } catch (err) {
-
-        if (err.response && err.response.status === 401) {
-                    // Token is expired or invalid, redirect to login or handle it
+            const itemsWithUsernames = await Promise.all(
+                    response.data.map(async (item) => {
+                        if (item.currentHolderId) {
+                            const userResponse = await axios.get(`/api/users/${item.currentHolderId}`, {
+                                headers: {
+                                    'Authorization': `Bearer ${token}`,
+                                },
+                            });
+                            item.currentHolderName = userResponse.data.username;
+                        } else {
+                            item.currentHolderName = 'No Holder';
+                        }
+                        return item;
+                    })
+                );
+                setItems(itemsWithUsernames);
+            } catch (err) {
+                if (err.response && err.response.status === 401) {
                     console.error('Token expired or invalid. Please log in again.');
                 } else {
-                setError('Error fetching items.');
+                    setError('Error fetching items.');
+                }
             }
-        }
-    };
+        };
 
     // Handle form submission for adding/updating
     const handleSubmit = async (e) => {
@@ -255,6 +268,7 @@ const HandleItemsForm = () => {
                             <th>Name</th>
                             <th>Type</th>
                             <th>Icon URL</th>
+                            <th>Prouxon</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -264,6 +278,7 @@ const HandleItemsForm = () => {
                                 <td>{item.itemName}</td>
                                 <td>{item.itemType}</td>
                                 <td>{item.iconUrl}</td>
+                                <td>{item.currentHolderName}</td>
                                 <td>
                                     <button onClick={() => { setItemIdToUpdate(item.id); handleViewChange('update'); }}>
                                         Edit
