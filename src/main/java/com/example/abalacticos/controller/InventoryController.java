@@ -55,5 +55,11 @@ public class InventoryController {
         return ResponseEntity.ok("Item deleted successfully");
     }
 
+    // New endpoint to assign an item to a user
+    @PutMapping("/assign/{itemId}/{userId}")
+    public ResponseEntity<String> assignItemToUser(@PathVariable String itemId, @PathVariable String userId) {
+        inventoryService.assignItemToUser(itemId, userId);
+        return ResponseEntity.ok("Item assigned to user successfully");
+    }
 }
 

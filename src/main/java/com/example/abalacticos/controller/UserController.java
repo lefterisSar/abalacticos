@@ -180,28 +180,23 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not authenticated");
     }
 
+    @GetMapping("/search")
+    public ResponseEntity<List<AbalacticosUser>> searchUsers(@RequestParam(value = "query", required = false) String query) {
+        List<AbalacticosUser> users;
 
-    //Admin authorization gia paiktes pou mporoun/den mporoun na exoun items stin katoxi tous
-    @PreAuthorize("hasRole('ADMIN')")
-    @PutMapping("/{id}/canHoldItems")
-    public ResponseEntity<String> setCanHoldItemsForUser(@PathVariable String id, @RequestParam boolean canHoldItems) {
-        try {
-            userService.setCanHoldItemsForUser(id, canHoldItems);
-            return ResponseEntity.ok("User's ability to hold items updated successfully.");
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        if (query != null && !query.isEmpty()) {
+            users = userService.searchUsersByUsername(query);
+        } else {
+            users = userService.getAllUsers();
         }
+
+        return ResponseEntity.ok(users);
     }
 
-    @PutMapping("/{id}/selectItem")
-    public ResponseEntity<String> selectItemForUser(@PathVariable String userId, @RequestParam String inventoryItemId) {
-        try {
-            userService.assignItemToUser(userId, inventoryItemId);
-            return ResponseEntity.ok("Item selected successfully.");
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-        }
-    }
+
+
+
+
 
 
 // Other CRUD operations if needed
