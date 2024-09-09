@@ -115,11 +115,15 @@ public class UserController {
 
                 existingUser.setPositionRatings(updatedUser.getPositionRatings());
 
+                existingUser.setOwnedShirts(updatedUser.getOwnedShirts());
+
+
             if (updatedUser.getFavClub() != null && updatedUser.getFavClub().getId() != null) {
                 Club favClub = clubRepository.findById(updatedUser.getFavClub().getId())
                         .orElseThrow(() -> new RuntimeException("Club not found"));
                 existingUser.setFavClub(updatedUser.getFavClub());
             }
+
 
             userService.updateUser(id, existingUser);
             return ResponseEntity.ok("User updated successfully - Absent,Injured,Available, Positions (User).");

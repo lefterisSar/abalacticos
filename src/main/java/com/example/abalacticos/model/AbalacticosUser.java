@@ -54,6 +54,8 @@ public class AbalacticosUser {
     private List<Inventory> ownedItems;
     private boolean canHoldItems = false;
 
+    private Set<String> ownedShirts = new HashSet<>(); // Use Set<String> to store shirt colors
+
 
 
 
@@ -102,6 +104,11 @@ public class AbalacticosUser {
         this.positionRatings.put("rightWinger", 1);
         this.positionRatings.put("leftWinger", 1);
         this.positionRatings.put("centerForward", 1);
+    }
+
+    public AbalacticosUser(String username) {
+        this.username = username;
+        this.ownedShirts = new HashSet<>();
     }
 
 
@@ -356,5 +363,23 @@ public class AbalacticosUser {
         this.canHoldItems = canHoldItems;
     }
 
+
+    public Set<String> getOwnedShirts() {
+        return ownedShirts;
+    }
+
+    public void setOwnedShirts(Set<String> ownedShirts) {
+        this.ownedShirts = ownedShirts;
+    }
+
+    // Add a shirt to the user's collection
+    public void addShirt(String shirtColor) {
+        this.ownedShirts.add(shirtColor);
+    }
+
+    // Remove a shirt from the user's collection
+    public void removeShirt(String shirtColor) {
+        this.ownedShirts.remove(shirtColor);
+    }
 
 }

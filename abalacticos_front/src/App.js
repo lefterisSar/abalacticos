@@ -15,6 +15,7 @@ import UserProfile from "./components/UserProfile";
 import ClubForm from './components/AdminDashboardComponents/ClubForm';
 import HandleItemsForm from './components/AdminDashboardComponents/HandleItemsForm';
 import HandleSavings from './components/AdminDashboardComponents/HandleSavings';
+import HandleTeamShirts from './components/AdminDashboardComponents/HandleTeamShirts';
 
 const App = () => (
     <Router>
@@ -34,6 +35,7 @@ const App = () => (
             <Route path="/add-club" element={<PrivateRoute role="ADMIN"><ClubForm /></PrivateRoute>} />
             <Route path="/inventory" element={<PrivateRoute role="ADMIN"><HandleItemsForm /></PrivateRoute>} />
             <Route path="/savings" element={<PrivateRoute role="ADMIN"><HandleSavings /></PrivateRoute>} />
+            <Route path="/team-shirts" element={<PrivateRoute role="ADMIN"><HandleTeamShirts /></PrivateRoute>} />
 
         </Routes>
     </Router>

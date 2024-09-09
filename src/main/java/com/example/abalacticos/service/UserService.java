@@ -82,6 +82,10 @@ public class UserService {
 
         newUser.setFavClub(new Club());
 
+        newUser.setCanHoldItems(false);
+
+        newUser.setOwnedShirts(new HashSet<>());
+
     }
 
 
@@ -114,6 +118,10 @@ public class UserService {
         existingUser.setPositionRatings(updatedUser.getPositionRatings());
 
         existingUser.setFavClub(updatedUser.getFavClub());
+
+        existingUser.setCanHoldItems(updatedUser.getCanHoldItems());
+
+        existingUser.setOwnedShirts(updatedUser.getOwnedShirts());
 
         userRepository.save(existingUser);
     }
@@ -342,6 +350,18 @@ public class UserService {
         user.setCanHoldItems(canHoldItems);
         userRepository.save(user);
     }
+
+    // Fetch the user's owned shirts
+    public Set<String> getOwnedShirts(String userId) {
+        Optional<AbalacticosUser> userOptional = userRepository.findById(userId);
+        if (userOptional.isPresent()) {
+            AbalacticosUser user = userOptional.get();
+            return user.getOwnedShirts();  // Ensure this getter exists in AbalacticosUser
+        } else {
+            throw new RuntimeException("User not found"); // Handle user not found case
+        }
+    }
+    
 
 
 }

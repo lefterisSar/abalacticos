@@ -7,6 +7,7 @@ const UserProfile = () => {
     const [clubs, setClubs] = useState([]); // Initialize as an empty array
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [availableShirts, setAvailableShirts] = useState([]); // Store available shirt colors
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -62,9 +63,23 @@ const UserProfile = () => {
                         console.error('Error fetching clubs', error);
                     }
                 };
+        const fetchAvailableShirts = async () => {
+                    try {
+                        const token = localStorage.getItem('authToken');
+                        const response = await axios.get('/api/team-shirts/all', {
+                            headers: { Authorization: `Bearer ${token}` }
+                        });
+                        setAvailableShirts(response.data);
+                    } catch (error) {
+                        console.error('Error fetching shirts', error);
+                    }
+                };
+
+
 
         fetchUserProfile();
         fetchClubs();
+        fetchAvailableShirts();
     }, [navigate]);
 
     const handleCheckboxChange = async (field, value) => {
@@ -173,6 +188,31 @@ const UserProfile = () => {
             }
         };
 
+     const handleShirtChange = async (shirtColor) => {
+            if (!userData) return;
+
+            let updatedOwnedShirts;
+            if (userData.ownedShirts.includes(shirtColor)) {
+                updatedOwnedShirts = userData.ownedShirts.filter(color => color !== shirtColor);
+            } else {
+                updatedOwnedShirts = [...userData.ownedShirts, shirtColor];
+            }
+
+            const updatedUserData = { ...userData, ownedShirts: updatedOwnedShirts };
+
+            try {
+                const token = localStorage.getItem('authToken');
+                await axios.put(`/api/users/${userData.id}`, updatedUserData, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                setUserData(updatedUserData);
+            } catch (error) {
+                console.error('Error updating shirts', error);
+                setError('Failed to update shirts.');
+            }
+        };
+
+
     if (loading) {
         return <p>Loading...</p>; // Show loading message while waiting for the profile data
     }
@@ -266,6 +306,20 @@ const UserProfile = () => {
                         ))}
                     </div>
 
+                    <h2>Mplouzakia</h2>
+                    <div>
+                        {availableShirts.map(shirt => (
+                            <label key={shirt.color}>
+                                <input
+                                    type="checkbox"
+                                    checked={userData.ownedShirts.includes(shirt.color)}
+                                    onChange={() => handleShirtChange(shirt.color)}
+                                />
+                                {shirt.color.charAt(0).toUpperCase() + shirt.color.slice(1)}
+                            </label>
+                        ))}
+                    </div>
+
                     <h2>Position Ratings</h2>
                     <div>
                         {Object.keys(userData.positionRatings).map(position => (
@@ -281,6 +335,8 @@ const UserProfile = () => {
                             </div>
                         ))}
                     </div>
+
+
 
                     <button onClick={handleSaveRatings}>Save Ratings</button>
                 </div>

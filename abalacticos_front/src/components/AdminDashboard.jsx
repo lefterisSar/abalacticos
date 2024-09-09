@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import AddClubForm from './AdminDashboardComponents/ClubForm';
 import HandleItemsForm from './AdminDashboardComponents/HandleItemsForm';
 import HandleSavings from './AdminDashboardComponents/HandleSavings';
+import HandleTeamShirts from './AdminDashboardComponents/HandleTeamShirts';
 
 const AdminDashboard = () => {
     const navigate = useNavigate();
@@ -23,6 +24,8 @@ const AdminDashboard = () => {
             <button onClick={() => handleNavigate('Tuesday')}>Tuesday</button>
             <button onClick={() => handleNavigate('Wednesday')}>Wednesday</button>
             <button onClick={() => handleNavigate('Friday')}>Friday</button>
+            <h2>Mplouzakia</h2>
+            <button onClick={() => navigate('/team-shirts')}>TeamShirts</button>
 
         </div>
     );
