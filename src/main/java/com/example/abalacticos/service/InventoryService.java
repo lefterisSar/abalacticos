@@ -75,6 +75,14 @@ public class InventoryService {
         userRepository.save(user); // Save the user with updated items
     }
 
+    // Method to retrieve all items assigned to a specific user
+    public List<Inventory> getItemsByUserId(String userId) {
+        // Query the inventory by currentHolderId
+        return inventoryRepository.findListByCurrentHolderId(userId);
+    }
+
+
+
 
 }
 

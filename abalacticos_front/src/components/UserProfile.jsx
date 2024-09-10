@@ -8,6 +8,7 @@ const UserProfile = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [availableShirts, setAvailableShirts] = useState([]); // Store available shirt colors
+    const [userItems, setUserItems] = useState([]); // store the user's items
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -31,6 +32,7 @@ const UserProfile = () => {
                 });
 
                 setUserData(response.data); // Store the full user data in state
+                setUserItems(response.data.ownedItems || []);
             } catch (error) {
                 // Handle the error (e.g., invalid token or server error)
                 console.error("Error fetching the user profile", error);
@@ -63,6 +65,7 @@ const UserProfile = () => {
                         console.error('Error fetching clubs', error);
                     }
                 };
+
         const fetchAvailableShirts = async () => {
                     try {
                         const token = localStorage.getItem('authToken');
@@ -76,11 +79,34 @@ const UserProfile = () => {
                 };
 
 
-
         fetchUserProfile();
         fetchClubs();
         fetchAvailableShirts();
     }, [navigate]);
+
+    useEffect(() => {
+        const fetchUserItems = async () => {
+            const token = localStorage.getItem('authToken');
+            if (!token) {
+                navigate('/login');
+                return;
+            }
+
+            if (userData && userData.id) {
+                try {
+
+                    const response = await axios.get(`/api/inventory/user/${userData.id}/items`, {
+                        headers: { Authorization: `Bearer ${token}` }
+                    });
+                    setUserItems(response.data); // Store the fetched items in the state
+                } catch (error) {
+                    console.error('Error fetching user items', error);
+                }
+            }
+        };
+
+        fetchUserItems();
+    }, [userData, navigate]); // Run this effect when userData is available
 
     const handleCheckboxChange = async (field, value) => {
         if (!userData) return;
@@ -203,7 +229,9 @@ const UserProfile = () => {
             try {
                 const token = localStorage.getItem('authToken');
                 await axios.put(`/api/users/${userData.id}`, updatedUserData, {
-                    headers: { Authorization: `Bearer ${token}` }
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
                 });
                 setUserData(updatedUserData);
             } catch (error) {
@@ -290,6 +318,48 @@ const UserProfile = () => {
                         <p>No clubs available</p>
                     )}
 
+                    <h2>Items Handled by User</h2>
+                    {Array.isArray(userItems) && userItems.length > 0 ? (
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
+                        {userItems.map(item => (
+                          <div
+                            key={item._id}
+                            style={{
+                              border: '1px solid #ccc',
+                              borderRadius: '5px',
+                              padding: '10px',
+                              width: '150px',
+                              textAlign: 'center',
+                              boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.1)',
+                            }}
+                          >
+                            {/* Display the item icon */}
+                            {item.iconUrl && (
+                              <img
+                                src={item.iconUrl}
+                                alt={`${item.itemName} icon`}
+                                style={{
+                                  width: '50px',
+                                  height: '50px',
+                                  objectFit: 'cover',
+                                  marginBottom: '10px',
+                                }}
+                              />
+                            )}
+
+                            {/* Item name and type */}
+                            <h4 style={{ margin: '5px 0', fontSize: '14px' }}>{item.itemName}</h4>
+                            <p style={{ margin: '5px 0', fontSize: '12px', color: '#555' }}>{item.itemType}</p>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p>No items assigned to this user.</p>
+                    )}
+
+
+
+
                     <h2>Availability</h2>
                     <div>
                         {daysOfWeek.map(day => (
@@ -320,6 +390,8 @@ const UserProfile = () => {
                         ))}
                     </div>
 
+
+
                     <h2>Position Ratings</h2>
                     <div>
                         {Object.keys(userData.positionRatings).map(position => (
@@ -335,8 +407,6 @@ const UserProfile = () => {
                             </div>
                         ))}
                     </div>
-
-
 
                     <button onClick={handleSaveRatings}>Save Ratings</button>
                 </div>

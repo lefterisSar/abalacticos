@@ -8,4 +8,7 @@ import java.util.List;
 public interface InventoryRepository extends MongoRepository<Inventory, String> {
 
     Optional<Inventory> findByCurrentHolderId(String userId);
+
+    // Return multiple items
+    List<Inventory> findListByCurrentHolderId(String userId);
 }

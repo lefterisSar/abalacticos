@@ -1,11 +1,8 @@
 package com.example.abalacticos.controller;
 
-import com.example.abalacticos.model.AbalacticosUser;
-import com.example.abalacticos.model.Club;
+import com.example.abalacticos.model.*;
 
 
-import com.example.abalacticos.model.Match;
-import com.example.abalacticos.model.RegistrationDto;
 import com.example.abalacticos.service.UserService;
 import com.example.abalacticos.repository.ClubRepository;
 

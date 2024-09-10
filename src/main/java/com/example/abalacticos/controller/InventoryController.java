@@ -61,5 +61,14 @@ public class InventoryController {
         inventoryService.assignItemToUser(itemId, userId);
         return ResponseEntity.ok("Item assigned to user successfully");
     }
+
+    // New endpoint to fetch items assigned to a specific user
+    @GetMapping("/user/{userId}/items")
+    public ResponseEntity<List<Inventory>> getUserItems(@PathVariable String userId) {
+        List<Inventory> items = inventoryService.getItemsByUserId(userId);
+        return ResponseEntity.ok(items);
+    }
+
+
 }
 
