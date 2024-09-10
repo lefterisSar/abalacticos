@@ -175,12 +175,24 @@ const HandleItemsForm = () => {
     };
 
     // Handle which view to show (add, update, view, etc.)
-    const handleViewChange = (newView) => {
+    const handleViewChange = (newView, item = null) => {
         setView(newView);
         setMessage(null);
         setError(null);
-        if (newView === 'view') fetchItems(); // Fetch items when viewing
-        clearForm();
+
+        if (newView === 'view') {
+            fetchItems(); // Fetch items when viewing
+        } else if (newView === 'update' && item) {
+            // Set the form state to the item's current values when editing
+            setItemIdToUpdate(item.id);
+            setItemName(item.itemName);
+            setItemType(item.itemType);
+            setIconUrl(item.iconUrl || '');
+            setCurrentHolderId(item.currentHolderId || '');
+        } else {
+            // Clear the form when switching to add view
+            clearForm();
+        }
     };
 
         // Render the assign modal
@@ -268,7 +280,7 @@ const HandleItemsForm = () => {
                             <th>Name</th>
                             <th>Type</th>
                             <th>Icon URL</th>
-                            <th>Prouxon</th>
+                            <th>Prouxontes</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -280,7 +292,7 @@ const HandleItemsForm = () => {
                                 <td>{item.iconUrl}</td>
                                 <td>{item.currentHolderName}</td>
                                 <td>
-                                    <button onClick={() => { setItemIdToUpdate(item.id); handleViewChange('update'); }}>
+                                    <button onClick={() => handleViewChange('update', item)}>
                                         Edit
                                     </button>
                                     <button onClick={() => assignItemToUser(item.id)}>Assign to User</button>
