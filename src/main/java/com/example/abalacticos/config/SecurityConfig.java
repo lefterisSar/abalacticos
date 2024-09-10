@@ -49,9 +49,10 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authz -> authz
                 .requestMatchers("/", "/public/**", "/api/users/register", "/api/auth/**", "/api/users/fetchByIds",
-                                "/api/matches/**", "/api/discord/**","/api/config/**", "/api/users/*","/api/users/profile", "/api/users/{id}", "/api/clubs/**",
+                                "/api/matches/**", "/api/discord/**","/api/config/**", "/api/users/*", "/api/users/profile", "/api/users/{id}", "/api/clubs/**",
                                 "/api/team-shirts/all", "/api/inventory/user/{userId}/items").permitAll()
-                        .requestMatchers("api/team-shirts/**", "/api/inventory/**", "/api/users/**", "/api/users/registerAdmin", "/api/users/update/**").hasRole("ADMIN")
+                                .requestMatchers("/api/users/update-username", "/api/users/update-password").authenticated()
+                                .requestMatchers("api/team-shirts/**", "/api/inventory/**", "/api/users/**", "/api/users/registerAdmin", "/api/users/update/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom'; // To navigate to the login page if not authorized
+import UpdateCredentialsForm from './UserProfileComponents/UpdateCredentialsForm';
 
 const UserProfile = () => {
     const [userData, setUserData] = useState(null); // Store the whole user object instead of just username
@@ -9,6 +10,7 @@ const UserProfile = () => {
     const [error, setError] = useState(null);
     const [availableShirts, setAvailableShirts] = useState([]); // Store available shirt colors
     const [userItems, setUserItems] = useState([]); // store the user's items
+    const [showUpdateCredentials, setShowUpdateCredentials] = useState(false); // State to toggle the form visibility
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -406,9 +408,19 @@ const UserProfile = () => {
                                 />
                             </div>
                         ))}
+                        <button onClick={handleSaveRatings}>Save Ratings</button>
                     </div>
 
-                    <button onClick={handleSaveRatings}>Save Ratings</button>
+
+
+                    <h2>Allagi credentials</h2>
+                    <button onClick={() => setShowUpdateCredentials(!showUpdateCredentials)}>
+                        {showUpdateCredentials ? 'Hide Update Credentials' : 'Update Username/Password'}
+                    </button>
+                    {showUpdateCredentials && <UpdateCredentialsForm />}
+
+
+
                 </div>
             ) : (
                 <p>No user data available</p>

@@ -38,6 +38,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             String authHeader = request.getHeader("Authorization");
             if (authHeader != null && authHeader.startsWith("Bearer ")) {
                 String token = authHeader.substring(7); // Extract token by removing "Bearer "
+                logger.debug("Extracted JWT Token: {}", token);
                 // Continue processing token...
             } else {
                 logger.warn("Authorization header is missing or invalid.");
@@ -56,7 +57,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 logger.debug("Authenticated user: {} with roles: {}", username, userDetails.getAuthorities());
 
                 SecurityContextHolder.getContext().setAuthentication(authentication);
-            }
+            } else {
+                    logger.warn("JWT Token is invalid or empty.");
+                }
+
         } catch (Exception ex) {
             logger.error("Could not set user authentication in security context", ex);
         }

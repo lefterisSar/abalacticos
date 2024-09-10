@@ -3,6 +3,8 @@ package com.example.abalacticos.controller;
 import com.example.abalacticos.model.*;
 
 
+import com.example.abalacticos.model.UpdateDtos.UpdatePasswordDto;
+import com.example.abalacticos.model.UpdateDtos.UpdateUsernameDto;
 import com.example.abalacticos.service.UserService;
 import com.example.abalacticos.repository.ClubRepository;
 
@@ -11,6 +13,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
@@ -190,11 +193,28 @@ public class UserController {
         return ResponseEntity.ok(users);
     }
 
+    @PutMapping("/update-username")
+    public ResponseEntity<?> updateUsername(@RequestBody UpdateUsernameDto updateRequest, Authentication authentication) {
+        // Fetch the current username from the Authentication object
+        String currentUsername = authentication.getName();
+        // Look up the user from the database using the current username
+        AbalacticosUser user = userService.findUserByUsername(currentUsername);
+
+        // Now update the username as per your service logic
+        return userService.updateUsername(user, updateRequest);
+    }
 
 
+    @PutMapping("/update-password")
+    public ResponseEntity<?> updatePassword(@RequestBody UpdatePasswordDto updateRequest, Authentication authentication) {
+        // Fetch the current username from the Authentication object
+        String currentUsername = authentication.getName();
+        // Fetch the user using the username
+        AbalacticosUser user = userService.findUserByUsername(currentUsername);
 
-
-
+        //update password
+        return userService.updatePassword(user, updateRequest);
+    }
 
 // Other CRUD operations if needed
 }

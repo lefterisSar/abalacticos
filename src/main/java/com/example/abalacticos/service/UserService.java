@@ -3,10 +3,13 @@ package com.example.abalacticos.service;
 import com.example.abalacticos.model.AbalacticosUser;
 import com.example.abalacticos.model.Club;
 import com.example.abalacticos.model.RegistrationDto;
+import com.example.abalacticos.model.UpdateDtos.UpdatePasswordDto;
+import com.example.abalacticos.model.UpdateDtos.UpdateUsernameDto;
 import com.example.abalacticos.repository.InventoryRepository;
 import com.example.abalacticos.model.Inventory;
 import com.example.abalacticos.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -329,6 +332,36 @@ public class UserService {
 
     public List<AbalacticosUser> searchUsersByUsername(String query) {
         return userRepository.findByUsernameContainingIgnoreCase(query); // Assuming a method exists in your repository
+    }
+
+    public AbalacticosUser findUserByUsername(String username) {
+        return userRepository.findOptionalByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found with username: " + username));
+    }
+
+
+    public ResponseEntity<?> updateUsername(AbalacticosUser user, UpdateUsernameDto updateRequest) {
+        if (userRepository.existsByUsername(updateRequest.getNewUsername())) {
+            return ResponseEntity.badRequest().body("Username is already taken");
+        }
+
+        user.setUsername(updateRequest.getNewUsername());
+        userRepository.save(user);
+        return ResponseEntity.ok("Username updated successfully");
+    }
+
+    public ResponseEntity<?> updatePassword(AbalacticosUser user, UpdatePasswordDto updateRequest) {
+        if (!passwordEncoder.matches(updateRequest.getCurrentPassword(), user.getPassword())) {
+            return ResponseEntity.badRequest().body("Current password is incorrect");
+        }
+
+        if (!updateRequest.getNewPassword().equals(updateRequest.getConfirmNewPassword())) {
+            return ResponseEntity.badRequest().body("New passwords do not match");
+        }
+
+        user.setPassword(passwordEncoder.encode(updateRequest.getNewPassword()));
+        userRepository.save(user);
+        return ResponseEntity.ok("Password updated successfully");
     }
 
 
