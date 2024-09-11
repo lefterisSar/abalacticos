@@ -1,4 +1,4 @@
-package com.example.abalacticos.model.UpdateDtos;
+package com.example.abalacticos.model.Dtos;
 
 public class UpdatePasswordDto {
     private String currentPassword;

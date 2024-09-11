@@ -16,6 +16,8 @@ import ClubForm from './components/AdminDashboardComponents/ClubForm';
 import HandleItemsForm from './components/AdminDashboardComponents/HandleItemsForm';
 import HandleSavings from './components/AdminDashboardComponents/HandleSavings';
 import HandleTeamShirts from './components/AdminDashboardComponents/HandleTeamShirts';
+import BanUser from './components/AdminDashboardComponents/BanUser';
+import Court from './components/AdminDashboardComponents/Court';
 
 const App = () => (
     <Router>
@@ -36,6 +38,8 @@ const App = () => (
             <Route path="/inventory" element={<PrivateRoute role="ADMIN"><HandleItemsForm /></PrivateRoute>} />
             <Route path="/savings" element={<PrivateRoute role="ADMIN"><HandleSavings /></PrivateRoute>} />
             <Route path="/team-shirts" element={<PrivateRoute role="ADMIN"><HandleTeamShirts /></PrivateRoute>} />
+            <Route path="/BanUser" element={<PrivateRoute role="ADMIN"><BanUser /></PrivateRoute>} />
+            <Route path="/Court" element={<PrivateRoute role="ADMIN"><Court /></PrivateRoute>} />
 
 
         </Routes>

@@ -2,17 +2,20 @@ package com.example.abalacticos.service;
 
 import com.example.abalacticos.model.AbalacticosUser;
 import com.example.abalacticos.model.Club;
+import com.example.abalacticos.model.Dtos.BanHistoryDto;
+import com.example.abalacticos.model.Dtos.BanRequestDto;
 import com.example.abalacticos.model.RegistrationDto;
-import com.example.abalacticos.model.UpdateDtos.UpdatePasswordDto;
-import com.example.abalacticos.model.UpdateDtos.UpdateUsernameDto;
+import com.example.abalacticos.model.Dtos.UpdatePasswordDto;
+import com.example.abalacticos.model.Dtos.UpdateUsernameDto;
 import com.example.abalacticos.repository.InventoryRepository;
-import com.example.abalacticos.model.Inventory;
 import com.example.abalacticos.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.*;
 
 import java.time.LocalDate;
@@ -363,6 +366,100 @@ public class UserService {
         userRepository.save(user);
         return ResponseEntity.ok("Password updated successfully");
     }
+
+    public void banUser(String userId, BanRequestDto banRequest) {
+        AbalacticosUser user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // Set the ban start date to now if it's not provided
+        LocalDateTime banStartDate = banRequest.getBanStartDate() != null ? banRequest.getBanStartDate() : LocalDateTime.now();
+        user.setBanStartDate(banStartDate);
+
+        // Allow banEndDate to remain null for indefinite bans
+        user.setBanEndDate(banRequest.getBanEndDate());
+        user.setBanReason(banRequest.getBanReason() != null ? banRequest.getBanReason() : "No reason provided");
+
+        user.setBanned(true);
+        user.setBanCount(user.getBanCount() + 1);
+        userRepository.save(user);
+    }
+
+    // Method to automatically unban a user after the ban period ends
+    public void checkForBanExpiry() {
+        List<AbalacticosUser> bannedUsers = userRepository.findAllByIsBannedTrue();
+        for (AbalacticosUser user : bannedUsers) {
+            if (user.getBanEndDate() != null && user.getBanEndDate().isBefore(LocalDateTime.now())) {
+                user.setBanned(false);
+                user.setBanStartDate(null);
+                user.setBanEndDate(null);
+                userRepository.save(user);
+            }
+        }
+    }
+
+    public void unbanUser(String userId) {
+        AbalacticosUser user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        user.setBanned(false);
+        user.setBanStartDate(null);
+        user.setBanEndDate(null);
+
+        userRepository.save(user);
+    }
+
+
+
+    // Fetching history of all users who have been banned (completed bans)
+    public List<BanHistoryDto> getCompletedBanHistory() {
+        List<AbalacticosUser> allUsers = userRepository.findAll();
+        List<BanHistoryDto> completedBanHistory = new ArrayList<>();
+
+        for (AbalacticosUser user : allUsers) {
+            if (user.getBanEndDate() != null && user.getBanEndDate().isBefore(LocalDateTime.now())) {
+                long duration = Duration.between(user.getBanStartDate(), user.getBanEndDate()).toDays();
+
+                BanHistoryDto historyDto = new BanHistoryDto(
+                        user.getUsername(),
+                        user.getBanStartDate(),
+                        user.getBanEndDate(),
+                        duration,
+                        user.getBanReason(),
+                        user.getBanCount()
+                );
+                completedBanHistory.add(historyDto);
+            }
+        }
+        return completedBanHistory;
+    }
+
+
+    // Fetching users who are currently banned
+    public List<BanHistoryDto> getCurrentBannedUsers() {
+        List<AbalacticosUser> allUsers = userRepository.findAll();
+        List<BanHistoryDto> currentBannedUsers = new ArrayList<>();
+
+        for (AbalacticosUser user : allUsers) {
+            // Check if user is currently banned
+            if (user.isBanned() && (user.getBanEndDate() == null || user.getBanEndDate().isAfter(LocalDateTime.now()))) {
+                long duration = user.getBanEndDate() != null ?
+                        Duration.between(user.getBanStartDate(), user.getBanEndDate()).toDays() :
+                        Duration.between(user.getBanStartDate(), LocalDateTime.now()).toDays();
+
+                BanHistoryDto historyDto = new BanHistoryDto(
+                        user.getUsername(),
+                        user.getBanStartDate(),
+                        user.getBanEndDate(),
+                        duration,
+                        user.getBanReason(),
+                        user.getBanCount()
+                );
+                currentBannedUsers.add(historyDto);
+            }
+        }
+        return currentBannedUsers;
+    }
+
 
 
 }

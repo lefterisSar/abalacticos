@@ -19,6 +19,9 @@ public interface UserRepository extends MongoRepository<AbalacticosUser, String>
 
     // New method to check if a username exists
     boolean existsByUsername(String username);
+
+    //List with the Banned users
+    List<AbalacticosUser> findAllByIsBannedTrue();
 }
 
 

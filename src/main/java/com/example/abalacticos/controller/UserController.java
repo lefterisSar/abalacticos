@@ -3,8 +3,10 @@ package com.example.abalacticos.controller;
 import com.example.abalacticos.model.*;
 
 
-import com.example.abalacticos.model.UpdateDtos.UpdatePasswordDto;
-import com.example.abalacticos.model.UpdateDtos.UpdateUsernameDto;
+import com.example.abalacticos.model.Dtos.BanHistoryDto;
+import com.example.abalacticos.model.Dtos.BanRequestDto;
+import com.example.abalacticos.model.Dtos.UpdatePasswordDto;
+import com.example.abalacticos.model.Dtos.UpdateUsernameDto;
 import com.example.abalacticos.service.UserService;
 import com.example.abalacticos.repository.ClubRepository;
 
@@ -18,11 +20,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import java.security.Principal;
-import java.util.Collections;
 
 import javax.validation.Valid;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/users")
@@ -215,6 +215,43 @@ public class UserController {
         //update password
         return userService.updatePassword(user, updateRequest);
     }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PutMapping("/{id}/ban")
+    public ResponseEntity<?> banUser(@PathVariable String id, @RequestBody BanRequestDto banRequest) {
+        try {
+            userService.banUser(id, banRequest);
+            return ResponseEntity.ok("User has been banned successfully.");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PutMapping("/{id}/goodBoi")
+    public ResponseEntity<?> unbanUser(@PathVariable String id) {
+        try {
+            userService.unbanUser(id);
+            return ResponseEntity.ok("User has been unbanned successfully.");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    // Endpoint to get completed ban history
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/ban-history/completed")
+    public ResponseEntity<List<BanHistoryDto>> getCompletedBanHistory() {
+        return ResponseEntity.ok(userService.getCompletedBanHistory());
+    }
+
+    // Endpoint to get currently banned users
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/ban-history/current")
+    public ResponseEntity<List<BanHistoryDto>> getCurrentBannedUsers() {
+        return ResponseEntity.ok(userService.getCurrentBannedUsers());
+    }
+
 
 // Other CRUD operations if needed
 }

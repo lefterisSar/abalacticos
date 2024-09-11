@@ -4,6 +4,7 @@ import jakarta.persistence.ElementCollection;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Document(collection = "abalacticos_users")
@@ -55,6 +56,12 @@ public class AbalacticosUser {
     private boolean canHoldItems = false;
 
     private Set<String> ownedShirts = new HashSet<>(); // Use Set<String> to store shirt colors
+
+    private boolean isBanned = false;
+    private LocalDateTime banStartDate;
+    private LocalDateTime banEndDate;
+    private String banReason;
+    private int banCount = 0;
 
 
 
@@ -375,6 +382,46 @@ public class AbalacticosUser {
     // Remove a shirt from the user's collection
     public void removeShirt(String shirtColor) {
         this.ownedShirts.remove(shirtColor);
+    }
+
+    public boolean isBanned() {
+        return isBanned;
+    }
+
+    public void setBanned(boolean banned) {
+        this.isBanned = banned;
+    }
+
+    public LocalDateTime getBanStartDate() {
+        return banStartDate;
+    }
+
+    public void setBanStartDate(LocalDateTime banStartDate) {
+        this.banStartDate = banStartDate;
+    }
+
+    public LocalDateTime getBanEndDate() {
+        return banEndDate;
+    }
+
+    public void setBanEndDate(LocalDateTime banEndDate) {
+        this.banEndDate = banEndDate;
+    }
+
+    public String getBanReason() {
+        return banReason;
+    }
+
+    public void setBanReason(String banReason) {
+        this.banReason = banReason;
+    }
+
+    public int getBanCount() {
+        return banCount;
+    }
+
+    public void setBanCount(int banCount) {
+        this.banCount = banCount;
     }
 
 }

@@ -4,6 +4,8 @@ import AddClubForm from './AdminDashboardComponents/ClubForm';
 import HandleItemsForm from './AdminDashboardComponents/HandleItemsForm';
 import HandleSavings from './AdminDashboardComponents/HandleSavings';
 import HandleTeamShirts from './AdminDashboardComponents/HandleTeamShirts';
+import BanUser from './AdminDashboardComponents/BanUser';
+import Court from './AdminDashboardComponents/Court';
 
 const AdminDashboard = () => {
     const navigate = useNavigate();
@@ -26,6 +28,9 @@ const AdminDashboard = () => {
             <button onClick={() => handleNavigate('Friday')}>Friday</button>
             <h2>Mplouzakia</h2>
             <button onClick={() => navigate('/team-shirts')}>TeamShirts</button>
+            <h2>Court</h2>
+            <button onClick={() => navigate('/BanUser')}>punish</button>
+            <button onClick={() => navigate('/Court')}>αρχείο</button>
 
         </div>
     );
