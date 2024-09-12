@@ -5,6 +5,8 @@ import axios from 'axios';
 import {Button, ListItemIcon, ListItemText, Menu, MenuItem} from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { useNavigate } from 'react-router-dom';
+import CheckIcon from '@mui/icons-material/Check';
+import RemoveDoneIcon from '@mui/icons-material/RemoveDone';
 
 const MatchesGrid = () => {
     const [matches, setMatches] = useState([]);
@@ -120,6 +122,41 @@ const MatchesGrid = () => {
         navigate(`/team-selection/${day}?date=${datePlayed}&matchId=${matchId}`);
     };
 
+    const handleConfirmTeams = async (matchId, day, datePlayed, isConfirmed, result ,teamB, teamA) => {
+        try {
+            const token = localStorage.getItem('authToken');
+            const match = {
+                id: matchId,
+                result: result,
+                teamB: teamB,
+                teamA: teamA,
+                datePlayed: datePlayed,
+                day: day,
+                confirmed: isConfirmed
+            };
+            const url = 'http://localhost:8080/api/matches/confirm';
+
+            await axios.post(url, match, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+
+            // Update the state directly
+            setMatches(prevMatches =>
+                prevMatches.map(m =>
+                    m.id === matchId ? { ...m, confirmed: isConfirmed } : m
+                )
+            );
+
+            alert(isConfirmed ? 'Confirmed match' : 'Match confirmation is deleted!');
+        } catch (error) {
+            console.error('Error confirming match:', error);
+        }
+    };
+
+
+
     const columns = [
         {
             field: 'id',
@@ -134,6 +171,7 @@ const MatchesGrid = () => {
                 </Button>
             ),
         },
+        { field: 'confirmed', headerName: 'Confirmed',width: 80},
         { field: 'datePlayed', headerName: 'Date Played', flex: 1 },
         { field: 'day', headerName: 'Day', width: 150 },
         {
@@ -155,6 +193,12 @@ const MatchesGrid = () => {
             flex: 1,
             renderCell: (params) => (
                 <div>
+                    <Button variant="contained" color="primary"
+                            onClick={() =>
+                                handleConfirmTeams(params.row.id, params.row.day,params.row.datePlayed,
+                                    !params.row.confirmed, params.row.result ,params.row.teamB, params.row.teamA)}>
+                        {!params.row.confirmed? "Confirm Match": "Stop Confirmation"}
+                    </Button>
                     <Button
                         variant="contained"
                         color="primary"
@@ -212,6 +256,17 @@ const MatchesGrid = () => {
                     anchorReference="anchorPosition"
                     anchorPosition={{ top: contextMenu.mouseY, left: contextMenu.mouseX }}
                 >
+                    <MenuItem
+                        onClick={()=> {
+                            handleConfirmTeams(contextMenu.match.id, contextMenu.match.day, contextMenu.match.datePlayed,
+                                !contextMenu.match.confirmed, contextMenu.match.result ,contextMenu.match.teamB, contextMenu.match.teamA)
+                        }}>
+                        <ListItemIcon>
+                            {!contextMenu.match.confirmed? <CheckIcon fontSize={"small"}></CheckIcon> :
+                                <RemoveDoneIcon fontSize={"small"}></RemoveDoneIcon>}
+                        </ListItemIcon>
+                        <ListItemText>{!contextMenu.match.confirmed?"Confirm Match": "Stop Confirmation"}</ListItemText>
+                    </MenuItem>
                     <MenuItem
                         onClick={() => {
                         handleNavigateToTeamSelection(contextMenu.match.day, contextMenu.match.datePlayed, contextMenu.match.id);
