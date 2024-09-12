@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
+import EditIcon from '@mui/icons-material/Edit';
 import { DataGrid } from '@mui/x-data-grid';
 import axios from 'axios';
-import { Button } from '@mui/material';
+import {Button, ListItemIcon, ListItemText, Menu, MenuItem} from '@mui/material';
+import DeleteIcon from '@mui/icons-material/Delete';
 import { useNavigate } from 'react-router-dom';
 
 const MatchesGrid = () => {
@@ -10,7 +12,7 @@ const MatchesGrid = () => {
     const [loading, setLoading] = useState(true);
     const role = localStorage.getItem('userRole');
     const navigate = useNavigate();
-    const [isConfirmed, setIsConfirmed] = useState(false);
+    const [contextMenu, setContextMenu] = useState(null); // To store menu position and match details
 
     const handleDeleteMatch = async (id) => {
         if (window.confirm("Are you sure you want to delete this match?")) {
@@ -42,6 +44,19 @@ const MatchesGrid = () => {
         } catch (error) {
             console.error('Error updating match result:', error);
         }
+    };
+
+    const handleContextMenu = (event, params) => {
+        event.preventDefault();
+        setContextMenu({
+            mouseX: event.clientX - 2,
+            mouseY: event.clientY - 4,
+            match: params.row // Store match details
+        });
+    };
+
+    const handleCloseContextMenu = () => {
+        setContextMenu(null);
     };
 
     useEffect(() => {
@@ -105,40 +120,6 @@ const MatchesGrid = () => {
         navigate(`/team-selection/${day}?date=${datePlayed}&matchId=${matchId}`);
     };
 
-    const handleConfirmTeams = async (matchId, day, datePlayed, isConfirmed, result ,teamB, teamA) => {
-        try {
-            setIsConfirmed(true)
-            const token = localStorage.getItem('authToken');
-            const match = {
-                id: matchId,
-                result: result,
-                teamB: teamB,
-                teamA: teamA,
-                datePlayed: datePlayed,
-                day: day,
-                confirmed: isConfirmed
-            };
-            const url = 'http://localhost:8080/api/matches/confirm';
-
-            await axios.post(url, match, {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
-            });
-
-            // Update the state directly
-            setMatches(prevMatches =>
-                prevMatches.map(m =>
-                    m.id === matchId ? { ...m, confirmed: isConfirmed } : m
-                )
-            );
-
-            alert(isConfirmed ? 'Confirmed match' : 'Match confirmation is deleted!');
-        } catch (error) {
-            console.error('Error confirming match:', error);
-        }
-    };
-
     const columns = [
         {
             field: 'id',
@@ -147,6 +128,7 @@ const MatchesGrid = () => {
             renderCell: (params) => (
                 <Button
                     onClick={() => handleNavigateToTeamSelection(params.row.day, params.row.datePlayed, params.row.id)}
+                    onContextMenu={(event) => handleContextMenu(event, params)} // Capture right-click event
                 >
                     {params.value}
                 </Button>
@@ -167,20 +149,12 @@ const MatchesGrid = () => {
             valueGetter: (value,row) => formatTeamDisplay(row.teamB)
         },
         { field: 'result', headerName: 'Result', width: 80 },
-        { field: 'confirmed', headerName: 'Confirmed',width: 80},
         role === 'ADMIN' && {
             field: 'actions',
             headerName: 'Actions',
             flex: 1,
             renderCell: (params) => (
                 <div>
-
-                    <Button variant="contained" color="primary"
-                            onClick={() =>
-                                handleConfirmTeams(params.row.id, params.row.day,params.row.datePlayed,
-                                !params.row.confirmed, params.row.result ,params.row.teamB, params.row.teamA)}>
-                        {!params.row.confirmed? "Confirm Match": "Stop Confirmation"}
-                    </Button>
                     <Button
                         variant="contained"
                         color="primary"
@@ -230,6 +204,53 @@ const MatchesGrid = () => {
                     },
                 }}
             />
+
+            {role === 'ADMIN' && contextMenu && (
+                <Menu
+                    open={true}
+                    onClose={handleCloseContextMenu}
+                    anchorReference="anchorPosition"
+                    anchorPosition={{ top: contextMenu.mouseY, left: contextMenu.mouseX }}
+                >
+                    <MenuItem
+                        onClick={() => {
+                        handleNavigateToTeamSelection(contextMenu.match.day, contextMenu.match.datePlayed, contextMenu.match.id);
+                        handleCloseContextMenu();
+                    }}>
+                        <ListItemIcon>
+                            <EditIcon fontSize={"small"}></EditIcon>
+                        </ListItemIcon>
+                        <ListItemText>EditMatch</ListItemText>
+                    </MenuItem>
+                    <MenuItem
+                        onClick={() => {
+                            handleUpdateMatchResult(contextMenu.match.id, 'TeamA');
+                            handleCloseContextMenu();
+                        }}
+                    >
+                        Mark Team A as Winner
+                    </MenuItem>
+                    <MenuItem
+                        onClick={() => {
+                            handleUpdateMatchResult(contextMenu.match.id, 'TeamB');
+                            handleCloseContextMenu();
+                        }}
+                    >
+                        Mark Team B as Winner
+                    </MenuItem>
+                    <MenuItem
+                        onClick={() => {
+                            handleDeleteMatch(contextMenu.match.id);
+                            handleCloseContextMenu();
+                        }}
+                    >
+                        <ListItemIcon>
+                            <DeleteIcon fontSize={"small"}></DeleteIcon>
+                        </ListItemIcon>
+                        <ListItemText>Delete Match</ListItemText>
+                    </MenuItem>
+                </Menu>
+            )}
         </div>
     );
 };
