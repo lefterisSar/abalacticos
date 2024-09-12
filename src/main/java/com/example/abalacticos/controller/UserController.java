@@ -1,23 +1,28 @@
 package com.example.abalacticos.controller;
 
-import com.example.abalacticos.model.AbalacticosUser;
-import com.example.abalacticos.model.Match;
-import com.example.abalacticos.model.RegistrationDto;
+import com.example.abalacticos.model.*;
+
+
+import com.example.abalacticos.model.Dtos.BanHistoryDto;
+import com.example.abalacticos.model.Dtos.BanRequestDto;
+import com.example.abalacticos.model.Dtos.UpdatePasswordDto;
+import com.example.abalacticos.model.Dtos.UpdateUsernameDto;
 import com.example.abalacticos.service.UserService;
+import com.example.abalacticos.repository.ClubRepository;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import java.security.Principal;
-import java.util.Collections;
 
 import javax.validation.Valid;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/users")
@@ -32,8 +37,16 @@ public class UserController {
     private UserService userService;
 
     @Autowired
+    private ClubRepository clubRepository;
+
+
+    @Autowired
     public UserController(UserService userService) {
         this.userService = userService;
+    }
+
+    public UserController(ClubRepository clubRepository) {
+        this.clubRepository = clubRepository;
     }
 
     @PreAuthorize("hasRole('ADMIN')")
@@ -100,9 +113,20 @@ public class UserController {
 
                 existingUser.setAvailable(updatedUser.isAvailable());
 
+                existingUser.setPositionRatings(updatedUser.getPositionRatings());
+
+                existingUser.setOwnedShirts(updatedUser.getOwnedShirts());
+
+
+            if (updatedUser.getFavClub() != null && updatedUser.getFavClub().getId() != null) {
+                Club favClub = clubRepository.findById(updatedUser.getFavClub().getId())
+                        .orElseThrow(() -> new RuntimeException("Club not found"));
+                existingUser.setFavClub(updatedUser.getFavClub());
+            }
+
 
             userService.updateUser(id, existingUser);
-            return ResponseEntity.ok("User updated successfully (User).");
+            return ResponseEntity.ok("User updated successfully - Absent,Injured,Available, Positions (User).");
         }
 
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You do not have permission to update this user.");
@@ -154,6 +178,78 @@ public class UserController {
             return ResponseEntity.ok(user);  // Ensure the user object includes all required fields
         }
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not authenticated");
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<List<AbalacticosUser>> searchUsers(@RequestParam(value = "query", required = false) String query) {
+        List<AbalacticosUser> users;
+
+        if (query != null && !query.isEmpty()) {
+            users = userService.searchUsersByUsername(query);
+        } else {
+            users = userService.getAllUsers();
+        }
+
+        return ResponseEntity.ok(users);
+    }
+
+    @PutMapping("/update-username")
+    public ResponseEntity<?> updateUsername(@RequestBody UpdateUsernameDto updateRequest, Authentication authentication) {
+        // Fetch the current username from the Authentication object
+        String currentUsername = authentication.getName();
+        // Look up the user from the database using the current username
+        AbalacticosUser user = userService.findUserByUsername(currentUsername);
+
+        // Now update the username as per your service logic
+        return userService.updateUsername(user, updateRequest);
+    }
+
+
+    @PutMapping("/update-password")
+    public ResponseEntity<?> updatePassword(@RequestBody UpdatePasswordDto updateRequest, Authentication authentication) {
+        // Fetch the current username from the Authentication object
+        String currentUsername = authentication.getName();
+        // Fetch the user using the username
+        AbalacticosUser user = userService.findUserByUsername(currentUsername);
+
+        //update password
+        return userService.updatePassword(user, updateRequest);
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PutMapping("/{id}/ban")
+    public ResponseEntity<?> banUser(@PathVariable String id, @RequestBody BanRequestDto banRequest) {
+        try {
+            userService.banUser(id, banRequest);
+            return ResponseEntity.ok("User has been banned successfully.");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PutMapping("/{id}/goodBoi")
+    public ResponseEntity<?> unbanUser(@PathVariable String id) {
+        try {
+            userService.unbanUser(id);
+            return ResponseEntity.ok("User has been unbanned successfully.");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    // Endpoint to get completed ban history
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/ban-history/completed")
+    public ResponseEntity<List<BanHistoryDto>> getCompletedBanHistory() {
+        return ResponseEntity.ok(userService.getCompletedBanHistory());
+    }
+
+    // Endpoint to get currently banned users
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/ban-history/current")
+    public ResponseEntity<List<BanHistoryDto>> getCurrentBannedUsers() {
+        return ResponseEntity.ok(userService.getCurrentBannedUsers());
     }
 
 

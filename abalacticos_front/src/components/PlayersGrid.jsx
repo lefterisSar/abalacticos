@@ -119,7 +119,9 @@ const PlayersGrid = () => {
                         id: player.id || `${player.name}-${player.surname}-${player.birthday}`, // Fallback if no id field is present
                         age: calculateAge(player.birthday), // Calculate age based on birthday
                         availability: player.availability || [], // Ensure availability is an array
-                        absentDates: player.absentDates || []
+                        absentDates: player.absentDates || [],
+
+
                     }));
                     setRows(playersWithIdAndAge);
                 } else {
@@ -214,6 +216,8 @@ const PlayersGrid = () => {
         );
     };
 
+
+
     const columns = [
         { field: "id", headerName: "ID", width: 150, editable: false},
         { field: 'username', headerName: 'Username', width: 150, editable: isAdmin },
@@ -226,6 +230,7 @@ const PlayersGrid = () => {
         { field: 'age', headerName: 'Age', width: 100, editable: false }, // Not editable because it's calculated
         { field: 'debutDate', headerName: 'Debut Date', width: 150, editable: isAdmin, renderCell: renderDatePicker },
         { field: 'lastGK', headerName: 'Last GK Date', width: 150, editable: isAdmin, renderCell: renderDatePicker },
+
         {
             field: 'availability',
             headerName: 'Availability',

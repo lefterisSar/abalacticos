@@ -1,23 +1,32 @@
 package com.example.abalacticos.service;
 
 import com.example.abalacticos.model.AbalacticosUser;
+import com.example.abalacticos.model.Club;
+import com.example.abalacticos.model.Dtos.BanHistoryDto;
+import com.example.abalacticos.model.Dtos.BanRequestDto;
 import com.example.abalacticos.model.RegistrationDto;
+import com.example.abalacticos.model.Dtos.UpdatePasswordDto;
+import com.example.abalacticos.model.Dtos.UpdateUsernameDto;
+import com.example.abalacticos.repository.InventoryRepository;
 import com.example.abalacticos.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import java.util.ArrayList;
+
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.*;
 
 import java.time.LocalDate;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 
 @Service
 public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+
+    private InventoryRepository inventoryRepository;
 
 
     @Autowired
@@ -61,7 +70,6 @@ public class UserService {
         newUser.setLosses(registrationDto.getLosses());
         newUser.setDraws(registrationDto.getDraws());
         newUser.setInvitationFriend(registrationDto.getInvitationFriend());
-        newUser.setFavClub(registrationDto.getFavClub());
         newUser.setSn(registrationDto.getSn());
         newUser.setBirthday(registrationDto.getBirthday());
         newUser.setCommunicationDetails(registrationDto.getCommunicationDetails());
@@ -76,6 +84,12 @@ public class UserService {
         newUser.setAvailable(false);
         newUser.setInjured(false);
         newUser.setAbsent(false);
+        newUser.setPositionRatings(new HashMap<>());
+
+        newUser.setFavClub(new Club());
+
+
+        newUser.setOwnedShirts(new HashSet<>());
 
     }
 
@@ -106,6 +120,12 @@ public class UserService {
         existingUser.setAvailable(updatedUser.isAvailable());
         existingUser.setAbsent(updatedUser.isAbsent());
         existingUser.setInjured(updatedUser.isInjured());
+        existingUser.setPositionRatings(updatedUser.getPositionRatings());
+
+        existingUser.setFavClub(updatedUser.getFavClub());
+
+
+        existingUser.setOwnedShirts(updatedUser.getOwnedShirts());
 
         userRepository.save(existingUser);
     }
@@ -299,6 +319,147 @@ public class UserService {
     public AbalacticosUser getUserProfile(String username) {
         return userRepository.findByUsername(username);
     }
+
+
+
+    // Fetch the user's owned shirts
+    public Set<String> getOwnedShirts(String userId) {
+        Optional<AbalacticosUser> userOptional = userRepository.findById(userId);
+        if (userOptional.isPresent()) {
+            AbalacticosUser user = userOptional.get();
+            return user.getOwnedShirts();  // Ensure this getter exists in AbalacticosUser
+        } else {
+            throw new RuntimeException("User not found"); // Handle user not found case
+        }
+    }
+
+    public List<AbalacticosUser> searchUsersByUsername(String query) {
+        return userRepository.findByUsernameContainingIgnoreCase(query); // Assuming a method exists in your repository
+    }
+
+    public AbalacticosUser findUserByUsername(String username) {
+        return userRepository.findOptionalByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found with username: " + username));
+    }
+
+
+    public ResponseEntity<?> updateUsername(AbalacticosUser user, UpdateUsernameDto updateRequest) {
+        if (userRepository.existsByUsername(updateRequest.getNewUsername())) {
+            return ResponseEntity.badRequest().body("Username is already taken");
+        }
+
+        user.setUsername(updateRequest.getNewUsername());
+        userRepository.save(user);
+        return ResponseEntity.ok("Username updated successfully");
+    }
+
+    public ResponseEntity<?> updatePassword(AbalacticosUser user, UpdatePasswordDto updateRequest) {
+        if (!passwordEncoder.matches(updateRequest.getCurrentPassword(), user.getPassword())) {
+            return ResponseEntity.badRequest().body("Current password is incorrect");
+        }
+
+        if (!updateRequest.getNewPassword().equals(updateRequest.getConfirmNewPassword())) {
+            return ResponseEntity.badRequest().body("New passwords do not match");
+        }
+
+        user.setPassword(passwordEncoder.encode(updateRequest.getNewPassword()));
+        userRepository.save(user);
+        return ResponseEntity.ok("Password updated successfully");
+    }
+
+    public void banUser(String userId, BanRequestDto banRequest) {
+        AbalacticosUser user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // Set the ban start date to now if it's not provided
+        LocalDateTime banStartDate = banRequest.getBanStartDate() != null ? banRequest.getBanStartDate() : LocalDateTime.now();
+        user.setBanStartDate(banStartDate);
+
+        // Allow banEndDate to remain null for indefinite bans
+        user.setBanEndDate(banRequest.getBanEndDate());
+        user.setBanReason(banRequest.getBanReason() != null ? banRequest.getBanReason() : "No reason provided");
+
+        user.setBanned(true);
+        user.setBanCount(user.getBanCount() + 1);
+        userRepository.save(user);
+    }
+
+    // Method to automatically unban a user after the ban period ends
+    public void checkForBanExpiry() {
+        List<AbalacticosUser> bannedUsers = userRepository.findAllByIsBannedTrue();
+        for (AbalacticosUser user : bannedUsers) {
+            if (user.getBanEndDate() != null && user.getBanEndDate().isBefore(LocalDateTime.now())) {
+                user.setBanned(false);
+                user.setBanStartDate(null);
+                user.setBanEndDate(null);
+                userRepository.save(user);
+            }
+        }
+    }
+
+    public void unbanUser(String userId) {
+        AbalacticosUser user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        user.setBanned(false);
+        user.setBanStartDate(null);
+        user.setBanEndDate(null);
+
+        userRepository.save(user);
+    }
+
+
+
+    // Fetching history of all users who have been banned (completed bans)
+    public List<BanHistoryDto> getCompletedBanHistory() {
+        List<AbalacticosUser> allUsers = userRepository.findAll();
+        List<BanHistoryDto> completedBanHistory = new ArrayList<>();
+
+        for (AbalacticosUser user : allUsers) {
+            if (user.getBanEndDate() != null && user.getBanEndDate().isBefore(LocalDateTime.now())) {
+                long duration = Duration.between(user.getBanStartDate(), user.getBanEndDate()).toDays();
+
+                BanHistoryDto historyDto = new BanHistoryDto(
+                        user.getUsername(),
+                        user.getBanStartDate(),
+                        user.getBanEndDate(),
+                        duration,
+                        user.getBanReason(),
+                        user.getBanCount()
+                );
+                completedBanHistory.add(historyDto);
+            }
+        }
+        return completedBanHistory;
+    }
+
+
+    // Fetching users who are currently banned
+    public List<BanHistoryDto> getCurrentBannedUsers() {
+        List<AbalacticosUser> allUsers = userRepository.findAll();
+        List<BanHistoryDto> currentBannedUsers = new ArrayList<>();
+
+        for (AbalacticosUser user : allUsers) {
+            // Check if user is currently banned
+            if (user.isBanned() && (user.getBanEndDate() == null || user.getBanEndDate().isAfter(LocalDateTime.now()))) {
+                long duration = user.getBanEndDate() != null ?
+                        Duration.between(user.getBanStartDate(), user.getBanEndDate()).toDays() :
+                        Duration.between(user.getBanStartDate(), LocalDateTime.now()).toDays();
+
+                BanHistoryDto historyDto = new BanHistoryDto(
+                        user.getUsername(),
+                        user.getBanStartDate(),
+                        user.getBanEndDate(),
+                        duration,
+                        user.getBanReason(),
+                        user.getBanCount()
+                );
+                currentBannedUsers.add(historyDto);
+            }
+        }
+        return currentBannedUsers;
+    }
+
 
 
 }
