@@ -127,9 +127,21 @@ public class MatchController {
     }
 
 
-    @GetMapping("/byDayDateAndId")
-    public ResponseEntity<?> getMatchByDayDateAndId(@RequestParam String day, @RequestParam String datePlayed, @RequestParam String matchId) {
-        Match match = matchService.getMatchByDayDateAndId(day, datePlayed, matchId);
+//    @GetMapping("/byDayDateAndId")
+//    public ResponseEntity<?> getMatchByDayDateAndId(@RequestParam String day, @RequestParam String datePlayed, @RequestParam String matchId) {
+//        Match match = matchService.getMatchByDayDateAndId(day, datePlayed, matchId);
+//        if (match == null) {
+//            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+//                    .header(HttpHeaders.CONTENT_TYPE, "application/json")
+//                    .body(Map.of("error", "Match not found", "type", "NO_MATCH_FOUND"));
+//        }
+//        return ResponseEntity.ok(match);
+//    }
+//
+
+    @GetMapping("/matchbyid")
+    public ResponseEntity<?> getMatchByDayDateAndId( @RequestParam String matchId) {
+        Match match = matchService.getMatchById( matchId);
         if (match == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .header(HttpHeaders.CONTENT_TYPE, "application/json")

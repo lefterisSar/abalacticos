@@ -93,11 +93,11 @@ const TeamSelection = () => {
 
         try {
             if (matchId !== null) {
-                const response = await axios.get('http://localhost:8080/api/matches/byDayDateAndId', {
+                const response = await axios.get('http://localhost:8080/api/matches/matchbyid', {
                     headers: {
                         Authorization: `Bearer ${token}`
                     },
-                    params: { day, datePlayed: dateFromParams || nextMatchDate.toISOString().split('T')[0], matchId }
+                    params: { matchId }
                 });
 
                 if (response.status === 200 && response.data) {
