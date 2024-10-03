@@ -18,6 +18,7 @@ import HandleSavings from './components/AdminDashboardComponents/HandleSavings';
 import HandleTeamShirts from './components/AdminDashboardComponents/HandleTeamShirts';
 import BanUser from './components/AdminDashboardComponents/BanUser';
 import Court from './components/AdminDashboardComponents/Court';
+import SoccerField from "./components/AdminDashboardComponents/SoccerField";
 
 const App = () => (
     <Router>
@@ -32,6 +33,7 @@ const App = () => (
             <Route path="/team-selection/:day" element={<PrivateRoute role="ADMIN"><TeamSelection /></PrivateRoute>} />
             <Route path="/matches" element={<MatchesGrid/>} />
             <Route path="/" element={<Navigate to="/players" />} />
+            <Route path="/soccer-field" element={<SoccerField />} />
             <Route path="*" element={<PageNotFound />} />
             <Route path="/profile" element={<UserProfile/>} />
             <Route path="/add-club" element={<PrivateRoute role="ADMIN"><ClubForm /></PrivateRoute>} />

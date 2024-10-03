@@ -155,7 +155,10 @@ const MatchesGrid = () => {
         }
     };
 
-
+    // Function to handle navigation to the soccer field
+    const handleTeamClick = (team, teamName) => {
+        navigate('/soccer-field', { state: { team, teamName } });
+    };
 
     const columns = [
         {
@@ -178,13 +181,25 @@ const MatchesGrid = () => {
             field: 'teamA',
             headerName: 'Team A',
             flex: 1,
-            valueGetter: (value,row) => formatTeamDisplay(row.teamA)
+            headerClassName: 'wrap-header', // Add the custom class for wrapping
+            valueGetter: (value,row) => formatTeamDisplay(row.teamA),
+            renderCell: (params) => (
+                <Button onClick={() => handleTeamClick(params.row.teamA, 'Team A')}>
+                    View Team A
+                </Button>
+            ),
         },
         {
             field: 'teamB',
             headerName: 'Team B',
             flex: 1,
-            valueGetter: (value,row) => formatTeamDisplay(row.teamB)
+            headerClassName: 'wrap-header', // Add the custom class for wrapping
+            valueGetter: (value,row) => formatTeamDisplay(row.teamB),
+            renderCell: (params) => (
+                <Button onClick={() => handleTeamClick(params.row.teamB, 'Team B')}>
+                    View Team B
+                </Button>
+            ),
         },
         { field: 'result', headerName: 'Result', width: 80 },
         role === 'ADMIN' && {
@@ -258,8 +273,12 @@ const MatchesGrid = () => {
                 >
                     <MenuItem
                         onClick={()=> {
-                            handleConfirmTeams(contextMenu.match.id, contextMenu.match.day, contextMenu.match.datePlayed,
-                                !contextMenu.match.confirmed, contextMenu.match.result ,contextMenu.match.teamB, contextMenu.match.teamA)
+                            handleConfirmTeams(contextMenu.match.id, contextMenu.match.day,
+                                contextMenu.match.datePlayed,
+                                !contextMenu.match.confirmed,
+                                contextMenu.match.result ,
+                                contextMenu.match.teamB,
+                                contextMenu.match.teamA)
                         }}>
                         <ListItemIcon>
                             {!contextMenu.match.confirmed? <CheckIcon fontSize={"small"}></CheckIcon> :

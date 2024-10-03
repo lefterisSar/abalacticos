@@ -1,0 +1,22 @@
+/* src/components/SoccerField.css */
+.soccer-field-container {
+    text-align: center;
+    margin: 20px;
+}
+
+.soccer-field {
+    width: 600px;
+    height: 400px;
+    background-color: green;
+    border: 2px solid white;
+    position: relative;
+    margin: 0 auto;
+}
+
+.player-position {
+    color: white;
+    font-size: 14px;
+    padding: 10px;
+    position: absolute;
+    /* Adjust the position of the players here */
+}

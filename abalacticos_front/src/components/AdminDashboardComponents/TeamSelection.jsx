@@ -289,7 +289,13 @@ const TeamSelection = () => {
                     discordUserId: player.discordUserId // Ensure discordUserId is included
                 }));
 
-                setPlayers(playersWithId);
+                setPlayers(prevPlayers => {
+                    // Filter out duplicates based on unique player IDs
+                    const newPlayers = playersWithId.filter(
+                        newPlayer => !prevPlayers.some(player => player.id === newPlayer.id)
+                    );
+                    return [...prevPlayers, ...newPlayers];
+                });
                 await fetchMatch(); // Fetch the match after loading players
             } else {
                 console.error('Unexpected response format:', response.data);
@@ -321,11 +327,32 @@ const TeamSelection = () => {
             alert(`Team ${team === teamA ? 'A' : 'B'} is full!`);
             return;
         }
-        setTeam([...team, player]);
+
+        // Only update the state of the team without re-triggering fetch
+        setTeam(prevTeam => [...prevTeam, player]); // Use functional update
     };
 
     const handleRemoveFromTeam = (team, setTeam, player) => {
-        setTeam(team.filter(p => p.id !== player.id));
+        // Only update the state of the team without re-triggering fetch
+        setTeam(prevTeam => prevTeam.filter(p => p.id !== player.id)); // Remove player from team
+    };
+
+    const renderActionButton = (team, setTeam, player) => {
+        if (team.some(p => p.id === player.id)) {
+            // Show "Remove from Team" button if player is in the team
+            return (
+                <Button variant="contained" color="secondary" onClick={() => handleRemoveFromTeam(team, setTeam, player)}>
+                    Remove from Team
+                </Button>
+            );
+        } else {
+            // Show "Add to Team" button if player is not in the team
+            return (
+                <Button variant="contained" color="primary" onClick={() => handleAddToTeam(team, setTeam, player)}>
+                    Add to Team
+                </Button>
+            );
+        }
     };
 
     const columns = [
