@@ -156,8 +156,8 @@ const MatchesGrid = () => {
     };
 
     // Function to handle navigation to the soccer field
-    const handleTeamClick = (team, teamName) => {
-        navigate('/soccer-field', { state: { team, teamName } });
+    const handleTeamClick = (teamA, teamB) => {
+        navigate('/soccer-field', { state: { teamA, teamB } });
     };
 
     const columns = [
@@ -178,26 +178,14 @@ const MatchesGrid = () => {
         { field: 'datePlayed', headerName: 'Date Played', flex: 1 },
         { field: 'day', headerName: 'Day', width: 150 },
         {
-            field: 'teamA',
-            headerName: 'Team A',
+            field: 'teams',
+            headerName: 'Teams',
             flex: 1,
             headerClassName: 'wrap-header', // Add the custom class for wrapping
             valueGetter: (value,row) => formatTeamDisplay(row.teamA),
             renderCell: (params) => (
-                <Button onClick={() => handleTeamClick(params.row.teamA, 'Team A')}>
-                    View Team A
-                </Button>
-            ),
-        },
-        {
-            field: 'teamB',
-            headerName: 'Team B',
-            flex: 1,
-            headerClassName: 'wrap-header', // Add the custom class for wrapping
-            valueGetter: (value,row) => formatTeamDisplay(row.teamB),
-            renderCell: (params) => (
-                <Button onClick={() => handleTeamClick(params.row.teamB, 'Team B')}>
-                    View Team B
+                <Button onClick={() => handleTeamClick(params.row.teamA, params.row.teamB)}>
+                    View Teams
                 </Button>
             ),
         },
