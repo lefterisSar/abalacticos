@@ -142,53 +142,49 @@
 }
 .home-team .player2{
     top:310px;
-    left:80px;
+    left:110px;
 }
 .home-team .player2:after{
     content:"2";
 }
 .home-team .player3{
     top:60px;
-    left:80px;
+    left:110px;
 }
 .home-team .player3:after{
     content:"3";
 }
 .home-team .player4{
-    top:145px;
-    left:80px;
-}
-.home-team .player4{
     top:185px;
-    left:80px;
+    left:110px;
 }
 .home-team .player4:after{
     content:"5";
 }
 .home-team .player5{
     top:310px;
-    left:160px;
+    left:190px;
 }
 .home-team .player5:after{
     content:"6";
 }
 .home-team .player6{
     top:60px;
-    left:160px;
+    left:190px;
 }
 .home-team .player6:after{
     content:"7";
 }
 .home-team .player7{
     top:185px;
-    left:160px;
+    left:190px;
 }
 .home-team .player7:after{
     content:"8";
 }
 .home-team .player9{
     top:185px;
-    left:240px;
+    left:270px;
 }
 .home-team .player9:after{
     content:"11";
@@ -211,49 +207,49 @@
 }
 .visitor-team .player2{
     top:310px;
-    right:80px;
+    right:110px;
 }
 .visitor-team .player2:after{
     content:"2";
 }
 .visitor-team .player3{
     top:60px;
-    right:80px;
+    right:110px;
 }
 .visitor-team .player3:after{
     content:"3";
 }
 .visitor-team .player4{
     top:185px;
-    right:80px;
+    right:110px;
 }
 .visitor-team .player4:after{
     content:"5";
 }
 .visitor-team .player5{
     top:310px;
-    right:160px;
+    right:190px;
 }
 .visitor-team .player5:after{
     content:"6";
 }
 .visitor-team .player6{
     top:60px;
-    right:160px;
+    right:190px;
 }
 .visitor-team .player6:after{
     content:"7";
 }
 .visitor-team .player7{
     top:185px;
-    right:160px;
+    right:190px;
 }
 .visitor-team .player7:after{
     content:"8";
 }
 .visitor-team .player9{
     top:185px;
-    right:240px;
+    right:270px;
 }
 .visitor-team .player9:after{
     content:"11";
