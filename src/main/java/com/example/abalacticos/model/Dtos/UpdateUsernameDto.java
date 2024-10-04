@@ -1,14 +1,10 @@
 package com.example.abalacticos.model.Dtos;
 
+import lombok.Getter;
+import lombok.Setter;
+
+@Setter
+@Getter
 public class UpdateUsernameDto {
     private String newUsername;
-
-    // Getters and setters
-    public String getNewUsername() {
-        return newUsername;
-    }
-
-    public void setNewUsername(String newUsername) {
-        this.newUsername = newUsername;
-    }
 }

@@ -1,7 +1,12 @@
 package com.example.abalacticos.model.Dtos;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import java.time.LocalDateTime;
 
+@Setter
+@Getter
 public class BanHistoryDto {
     private String username;
     private LocalDateTime banStartDate;
@@ -20,52 +25,5 @@ public class BanHistoryDto {
         this.banCount = banCount;
     }
 
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public LocalDateTime getBanStartDate() {
-        return banStartDate;
-    }
-
-    public void setBanStartDate(LocalDateTime banStartDate) {
-        this.banStartDate = banStartDate;
-    }
-
-    public LocalDateTime getBanEndDate() {
-        return banEndDate;
-    }
-
-    public void setBanEndDate(LocalDateTime banEndDate) {
-        this.banEndDate = banEndDate;
-    }
-
-    public long getDuration() {
-        return duration;
-    }
-
-    public void setDuration(long duration) {
-        this.duration = duration;
-    }
-
-    public String getBanReason() {
-        return banReason;
-    }
-
-    public void setBanReason(String banReason) {
-        this.banReason = banReason;
-    }
-
-    public int getBanCount() {
-        return banCount;
-    }
-
-    public void setBanCount(int banCount) {
-        this.banCount = banCount;
-    }
 }
 

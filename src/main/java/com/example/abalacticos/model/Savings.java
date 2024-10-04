@@ -1,5 +1,7 @@
 package com.example.abalacticos.model;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -8,13 +10,12 @@ import java.util.Date;
 import java.util.List;
 
 @Document(collection = "savings")
+@Getter
+@Setter
 public class Savings {
-
-
 
     @Id
     private String id;
-
     private float teamSavings; // Total team savings
     private List<AdminSavings> adminSavings;
     private List<SavingsHistory> savingsHistory;
@@ -24,46 +25,6 @@ public class Savings {
         this.adminSavings = new ArrayList<>();
         this.savingsHistory = new ArrayList<>();
     }
-
-    public Savings(float teamSavings, List<AdminSavings> adminSavings) {
-        this.teamSavings = teamSavings;
-        this.adminSavings = adminSavings;
-        this.savingsHistory = new ArrayList<>();
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public float getTeamSavings() {
-        return teamSavings;
-    }
-
-    public void setTeamSavings(float teamSavings) {
-        this.teamSavings = teamSavings;
-    }
-
-    public List<AdminSavings> getAdminSavings() {
-        return adminSavings;
-    }
-
-    public void setAdminSavings(List<AdminSavings> adminSavings) {
-        this.adminSavings = adminSavings;
-    }
-
-    public List<SavingsHistory> getSavingsHistory() {
-        return savingsHistory;
-    }
-
-    public void setSavingsHistory(List<SavingsHistory> savingsHistory) {
-        this.savingsHistory = savingsHistory;
-    }
-
-
     // Method to add or update an admin's savings
     public void addOrUpdateAdminSavings(String userId, String userName, float amount) {
         boolean found = false;
@@ -95,44 +56,23 @@ public class Savings {
 
 
 
+    @Setter
+    @Getter
     public static class AdminSavings {
         private String userId;
         private String userName;
         private float savings;
 
-        // Constructors
         public AdminSavings(String userId, String userName, float savings) {
             this.userId = userId;
             this.userName = userName;
             this.savings = savings;
         }
 
-        // Getters and Setters
-        public String getUserId() {
-            return userId;
-        }
-
-        public void setUserId(String userId) {
-            this.userId = userId;
-        }
-
-        public String getUserName() {
-            return userName;
-        }
-
-        public void setUserName(String userName) {
-            this.userName = userName;
-        }
-
-        public float getSavings() {
-            return savings;
-        }
-
-        public void setSavings(float savings) {
-            this.savings = savings;
-        }
     }
 
+    @Getter
+    @Setter
     public static class SavingsHistory {
         private String userName;
         private float amount;
@@ -141,31 +81,6 @@ public class Savings {
         public SavingsHistory(String userName, float amount, Date date) {
             this.userName = userName;
             this.amount = amount;
-            this.date = date;
-        }
-
-        // Getters
-        public String getUserName() {
-            return userName;
-        }
-
-        public void setUserName(String userName) {
-            this.userName = userName;
-        }
-
-        public float getAmount() {
-            return amount;
-        }
-
-        public void setAmount(float amount) {
-            this.amount = amount;
-        }
-
-        public Date getDate() {
-            return date;
-        }
-
-        public void setDate(Date date) {
             this.date = date;
         }
     }

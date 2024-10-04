@@ -1,21 +1,12 @@
 package com.example.abalacticos.model;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
+@AllArgsConstructor
 public class LoginResponse {
     private String token;
-
-    public LoginResponse(String token) {
-        this.token = token;
-    }
-
-    // Getter
-
-    public String getToken() {
-        return token;
-    }
-
-    // Setter (if needed)
-
-    public void setToken(String token) {
-        this.token = token;
-    }
 }

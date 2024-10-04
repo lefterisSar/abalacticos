@@ -106,25 +106,20 @@ public class UserController {
         }
 
         // If the user is not an admin but is the owner, restrict them to updating only certain fields
-        if (isOwner) {
-                existingUser.setAbsent(updatedUser.isAbsent());
+        if (isOwner)
+        {
+            existingUser.setAbsent(updatedUser.isAbsent());
+            existingUser.setInjured(updatedUser.isInjured());
+            existingUser.setAvailable(updatedUser.isAvailable());
+            existingUser.setPositionRatings(updatedUser.getPositionRatings());
+            existingUser.setOwnedShirts(updatedUser.getOwnedShirts());
 
-                existingUser.setInjured(updatedUser.isInjured());
-
-                existingUser.setAvailable(updatedUser.isAvailable());
-
-                existingUser.setPositionRatings(updatedUser.getPositionRatings());
-
-                existingUser.setOwnedShirts(updatedUser.getOwnedShirts());
-
-
-            if (updatedUser.getFavClub() != null && updatedUser.getFavClub().getId() != null) {
+            if (updatedUser.getFavClub() != null && updatedUser.getFavClub().getId() != null)
+            {
                 Club favClub = clubRepository.findById(updatedUser.getFavClub().getId())
                         .orElseThrow(() -> new RuntimeException("Club not found"));
                 existingUser.setFavClub(updatedUser.getFavClub());
             }
-
-
             userService.updateUser(id, existingUser);
             return ResponseEntity.ok("User updated successfully - Absent,Injured,Available, Positions (User).");
         }

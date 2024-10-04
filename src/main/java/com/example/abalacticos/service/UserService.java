@@ -80,17 +80,12 @@ public class UserService {
         newUser.setWednesdayAppearances(registrationDto.getWednesdayAppearances());
         newUser.setDiscordID(registrationDto.getDiscordID());
         newUser.setAbsentDates(new ArrayList<>());
-
         newUser.setAvailable(false);
         newUser.setInjured(false);
         newUser.setAbsent(false);
         newUser.setPositionRatings(new HashMap<>());
-
         newUser.setFavClub(new Club());
-
-
         newUser.setOwnedShirts(new HashSet<>());
-
     }
 
 

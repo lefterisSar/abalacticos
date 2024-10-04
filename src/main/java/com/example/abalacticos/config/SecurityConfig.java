@@ -27,8 +27,6 @@ import org.slf4j.LoggerFactory;
 @EnableMethodSecurity
 public class SecurityConfig {
 
-
-
     @Autowired
     private JwtAuthenticationFilter jwtAuthenticationFilter;
 
