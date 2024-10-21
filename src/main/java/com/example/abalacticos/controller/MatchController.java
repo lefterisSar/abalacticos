@@ -12,6 +12,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -154,4 +155,38 @@ public class MatchController {
     private String getFirstPlayerId(List<Map<String, String>> team) {
         return team.get(0).keySet().iterator().next();
     }
+
+
+
+    @PostMapping("/create")
+    public ResponseEntity<?> createMatch(@RequestBody Match match) {
+        // Save the match
+        matchService.saveMatch(match);
+
+        // Add participation records for each player in the match
+        LocalDateTime invitationTime = LocalDateTime.now();
+        for (Map<String, String> playerStatus : match.getTeamA()) {
+            String playerId = playerStatus.keySet().iterator().next();
+            userService.addMatchParticipation(playerId, match.getId(), invitationTime);
+        }
+        for (Map<String, String> playerStatus : match.getTeamB()) {
+            String playerId = playerStatus.keySet().iterator().next();
+            userService.addMatchParticipation(playerId, match.getId(), invitationTime);
+        }
+
+        return ResponseEntity.ok("Match created and participation records updated.");
+    }
+
+    @PutMapping("/{matchId}/respond")
+    public ResponseEntity<?> respondToMatchInvitation(@PathVariable String matchId, @RequestParam String userId, @RequestParam String status) {
+        LocalDateTime responseTime = LocalDateTime.now();
+        userService.updateMatchParticipationStatus(userId, matchId, status, responseTime);
+
+        // Optionally update the match object as well
+        matchService.updatePlayerStatus(matchId, userId, status);
+
+        return ResponseEntity.ok("Participation status updated.");
+    }
+
+
 }

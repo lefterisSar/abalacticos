@@ -3,12 +3,10 @@ package com.example.abalacticos.controller;
 import com.example.abalacticos.model.*;
 
 
-import com.example.abalacticos.model.Dtos.BanHistoryDto;
-import com.example.abalacticos.model.Dtos.BanRequestDto;
-import com.example.abalacticos.model.Dtos.UpdatePasswordDto;
-import com.example.abalacticos.model.Dtos.UpdateUsernameDto;
+import com.example.abalacticos.model.Dtos.*;
 import com.example.abalacticos.service.UserService;
 import com.example.abalacticos.repository.ClubRepository;
+
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -22,7 +20,9 @@ import org.springframework.web.bind.annotation.*;
 import java.security.Principal;
 
 import javax.validation.Valid;
+import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/users")
@@ -251,6 +251,18 @@ public class UserController {
     public ResponseEntity<List<BanHistoryDto>> getCurrentBannedUsers() {
         return ResponseEntity.ok(userService.getCurrentBannedUsers());
     }
+
+    @GetMapping("/{id}/fidelity-rating")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> getUserFidelityRating(@PathVariable String id, @RequestParam int year) {
+        FidelityRating rating = userService.getUserFidelityRating(id, year);
+        if (rating != null) {
+            return ResponseEntity.ok(rating);
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Fidelity rating not found for the specified year.");
+        }
+    }
+
 
 
 // Other CRUD operations if needed

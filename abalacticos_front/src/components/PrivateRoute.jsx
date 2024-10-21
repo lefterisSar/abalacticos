@@ -1,6 +1,6 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
-import {jwtDecode} from 'jwt-decode';
+import { jwtDecode } from 'jwt-decode';
 
 const PrivateRoute = ({ children, role }) => {
     const token = localStorage.getItem('authToken');
@@ -11,7 +11,15 @@ const PrivateRoute = ({ children, role }) => {
 
     try {
         const decodedToken = jwtDecode(token);
-        if (role && decodedToken.role.toUpperCase() !== role) {
+        const userRoles = decodedToken.roles || [];
+
+        // Optional: Log roles for debugging
+        console.log('Decoded Token:', decodedToken);
+        console.log('User Roles:', userRoles);
+
+
+        // Check if the user has the required role
+        if (role && !userRoles.includes(role.toUpperCase())) {
             return <Navigate to="/forbidden" />;
         }
     } catch (error) {
@@ -23,3 +31,4 @@ const PrivateRoute = ({ children, role }) => {
 };
 
 export default PrivateRoute;
+

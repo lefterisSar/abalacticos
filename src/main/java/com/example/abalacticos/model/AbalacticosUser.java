@@ -1,5 +1,6 @@
 package com.example.abalacticos.model;
 
+import com.example.abalacticos.model.Dtos.AbalacticosUserDTO;
 import jakarta.persistence.ElementCollection;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -62,6 +63,9 @@ public class AbalacticosUser {
     private LocalDateTime banEndDate;
     private String banReason;
     private int banCount = 0;
+
+    private List<MatchParticipation> matchParticipations;
+
 
 
 
@@ -352,7 +356,6 @@ public class AbalacticosUser {
 
 
 
-
     public List<Inventory> getOwnedItems() {
         return ownedItems;
     }
@@ -423,5 +426,66 @@ public class AbalacticosUser {
     public void setBanCount(int banCount) {
         this.banCount = banCount;
     }
+
+
+    public List<MatchParticipation> getMatchParticipations() {
+        return matchParticipations;
+    }
+
+    public void setMatchParticipations(List<MatchParticipation> matchParticipations) {
+        this.matchParticipations = matchParticipations;
+    }
+
+
+    public static class MatchParticipation {
+        private String matchId;
+        private String status; // "waiting", "confirmed", "absent", "declined"
+        private LocalDateTime invitationSentTime;
+        private LocalDateTime responseTime;
+
+        // Constructors
+        public MatchParticipation() {
+        }
+
+        public MatchParticipation(String matchId, String status, LocalDateTime invitationSentTime) {
+            this.matchId = matchId;
+            this.status = status;
+            this.invitationSentTime = invitationSentTime;
+        }
+
+        // Getters and Setters
+        public String getMatchId() {
+            return matchId;
+        }
+
+        public void setMatchId(String matchId) {
+            this.matchId = matchId;
+        }
+
+        public String getStatus() {
+            return status;
+        }
+
+        public void setStatus(String status) {
+            this.status = status;
+        }
+
+        public LocalDateTime getInvitationSentTime() {
+            return invitationSentTime;
+        }
+
+        public void setInvitationSentTime(LocalDateTime invitationSentTime) {
+            this.invitationSentTime = invitationSentTime;
+        }
+
+        public LocalDateTime getResponseTime() {
+            return responseTime;
+        }
+
+        public void setResponseTime(LocalDateTime responseTime) {
+            this.responseTime = responseTime;
+        }
+    }
+
 
 }

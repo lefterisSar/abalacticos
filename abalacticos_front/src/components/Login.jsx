@@ -2,7 +2,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import {jwtDecode} from "jwt-decode";
+import { jwtDecode } from 'jwt-decode';
+
 
 const Login = () => {
     const [username, setUsername] = useState('');
@@ -11,33 +12,45 @@ const Login = () => {
     const navigate = useNavigate();
 
     const handleLogin = async (event) => {
-        event.preventDefault();
+            event.preventDefault();
 
-        try {
-            const response = await axios.post('http://localhost:8080/api/auth/login', {
-                username,
-                password
-            });
+            try {
+                const response = await axios.post('http://localhost:8080/api/auth/login', {
+                    username,
+                    password
+                });
 
-            if (response.data && response.data.token) {
-                localStorage.setItem('authToken', response.data.token);
-                const decodedToken = jwtDecode(response.data.token);
-                localStorage.setItem('userRole', decodedToken.role);
-                localStorage.setItem('userName', decodedToken.sub);
-                decodedToken.role.toUpperCase()!=="ADMIN"? navigate('/players'): navigate('/admin-dashboard')
-            } else {
-                setError('Unexpected response format');
-                console.error('Unexpected response format:', response.data);
+                if (response.data && response.data.token) {
+                    localStorage.setItem('authToken', response.data.token);
+
+                    const decodedToken = jwtDecode(response.data.token); // Updated function name
+                    console.log('Decoded Token:', decodedToken); // For debugging
+
+                    // Extract roles from the decoded token
+                    const userRoles = decodedToken.roles || [];
+                    localStorage.setItem('userRole', userRoles[0]); // Store the first role or adjust as needed
+                    localStorage.setItem('userName', decodedToken.sub);
+
+                    // Navigate based on role
+                    if (userRoles.includes('ADMIN')) {
+                        navigate('/admin-dashboard');
+                    } else {
+                        navigate('/players');
+                    }
+                } else {
+                    setError('Unexpected response format');
+                    console.error('Unexpected response format:', response.data);
+                }
+            } catch (error) {
+                if (error.response && error.response.status === 401) {
+                    setError('Invalid username or password');
+                } else {
+                    setError('An error occurred. Please try again later.');
+                    console.error('There was an error logging in!', error);
+                }
             }
-        } catch (error) {
-            if (error.response && error.response.status === 401) {
-                setError('Invalid username or password');
-            } else {
-                setError('An error occurred. Please try again later.');
-                console.error('There was an error logging in!', error);
-            }
-        }
-    };
+        };
+
 
     return (
         <form onSubmit={handleLogin}>

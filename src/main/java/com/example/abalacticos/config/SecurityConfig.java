@@ -3,6 +3,7 @@ package com.example.abalacticos.config;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -10,9 +11,11 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.LogoutConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -47,20 +50,27 @@ public class SecurityConfig {
         http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(AbstractHttpConfigurer::disable)
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authz -> authz
                 .requestMatchers("/", "/public/**", "/api/users/register", "/api/auth/**", "/api/users/fetchByIds",
                                 "/api/matches/**", "/api/discord/**","/api/config/**", "/api/users/*", "/api/users/profile", "/api/users/{id}", "/api/clubs/**",
-                                "/api/team-shirts/all", "/api/inventory/user/{userId}/items").permitAll()
+                                "/api/team-shirts/all", "/api/inventory/user/{userId}/items", "/api/formations/all").permitAll()
                                 .requestMatchers("/api/users/update-username", "/api/users/update-password").authenticated()
-                                .requestMatchers("api/team-shirts/**", "/api/inventory/**", "/api/users/**", "/api/users/registerAdmin", "/api/users/update/**").hasRole("ADMIN")
+                                .requestMatchers("api/team-shirts/**", "/api/inventory/**", "/api/users/**", "/api/users/registerAdmin", "/api/users/update/**", "/api/formations/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
+                )
+                //gia na doume ti symvainei xwris formlogin
+                /*
                 .formLogin(form -> form
                     .loginPage("/login")
                     .defaultSuccessUrl("/home", true)
                     .permitAll()
                 )
                 .logout(LogoutConfigurer::permitAll)
+                 */
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class); // Add JWT filter
 
         return http.build();

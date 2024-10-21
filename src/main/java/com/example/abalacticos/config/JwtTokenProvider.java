@@ -8,6 +8,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.security.core.GrantedAuthority;
 
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,14 +31,20 @@ public class JwtTokenProvider {
 
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + jwtExpirationMs);
-        String roles = userPrincipal.getAuthorities().stream()
+
+        // **Modified Part: Include roles as a list in the claims**
+        List<String> roles = userPrincipal.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
-                .collect(Collectors.joining(","));
-        String newRoles = roles.substring(5);
+                .map(role -> role.startsWith("ROLE_") ? role.substring(5) : role)
+                .collect(Collectors.toList());
+
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("roles", roles); // Add roles as a claim
+
         return Jwts.builder()
+                .setClaims(claims) // Set the claims including roles
                 .setSubject(userPrincipal.getUsername())
-                .claim("role", newRoles) // Add roles as a claim
-                .setIssuedAt(new Date())
+                .setIssuedAt(now)
                 .setExpiration(expiryDate)
                 .signWith(SignatureAlgorithm.HS512, jwtSecret)
                 .compact();
@@ -48,6 +57,18 @@ public class JwtTokenProvider {
                 .getBody();
 
         return claims.getSubject();
+    }
+
+    // **New Method: Get roles from the token**
+    public List<String> getRolesFromToken(String token) {
+        Claims claims = Jwts.parser()
+                .setSigningKey(jwtSecret)
+                .parseClaimsJws(token)
+                .getBody();
+
+        @SuppressWarnings("unchecked")
+        List<String> roles = (List<String>) claims.get("roles");
+        return roles;
     }
 
     public boolean validateToken(String authToken) {

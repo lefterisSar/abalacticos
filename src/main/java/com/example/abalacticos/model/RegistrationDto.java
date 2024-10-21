@@ -11,7 +11,7 @@ public class RegistrationDto {
     private String username;
     @NotEmpty
     private String password;
-    @NotEmpty
+    //@NotEmpty
     private String email;
     private String role;
     // Player attributes

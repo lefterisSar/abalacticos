@@ -4,9 +4,11 @@ import com.example.abalacticos.model.AbalacticosUser;
 import com.example.abalacticos.model.Club;
 import com.example.abalacticos.model.Dtos.BanHistoryDto;
 import com.example.abalacticos.model.Dtos.BanRequestDto;
+import com.example.abalacticos.model.FidelityRating;
 import com.example.abalacticos.model.RegistrationDto;
 import com.example.abalacticos.model.Dtos.UpdatePasswordDto;
 import com.example.abalacticos.model.Dtos.UpdateUsernameDto;
+import com.example.abalacticos.repository.FidelityRatingRepository;
 import com.example.abalacticos.repository.InventoryRepository;
 import com.example.abalacticos.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,11 +16,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.DayOfWeek;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.format.TextStyle;
 import java.util.*;
 
 import java.time.LocalDate;
+import java.util.stream.Collectors;
 
 @Service
 public class UserService {
@@ -27,6 +32,7 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
 
     private InventoryRepository inventoryRepository;
+    private FidelityRatingRepository fidelityRatingRepository;
 
 
     @Autowired
@@ -460,6 +466,85 @@ public class UserService {
         return currentBannedUsers;
     }
 
+    public FidelityRating getUserFidelityRating(String userId, int year) {
+        // Fetch the latest fidelity rating for the user
+        return fidelityRatingRepository.findByUserIdAndYear(userId, year)
+                .stream()
+                .max(Comparator.comparingInt(FidelityRating::getSemester))
+                .orElse(null);
+    }
+
+
+    public void addMatchParticipation(String userId, String matchId, LocalDateTime invitationSentTime) {
+        AbalacticosUser user = findPlayerById(userId);
+        AbalacticosUser.MatchParticipation participation = new AbalacticosUser.MatchParticipation();
+        participation.setMatchId(matchId);
+        participation.setStatus("waiting");
+        participation.setInvitationSentTime(invitationSentTime);
+
+        if (user.getMatchParticipations() == null) {
+            user.setMatchParticipations(new ArrayList<>());
+        }
+        user.getMatchParticipations().add(participation);
+        userRepository.save(user);
+    }
+
+    public void updateMatchParticipationStatus(String userId, String matchId, String status, LocalDateTime responseTime) {
+        AbalacticosUser user = findPlayerById(userId);
+        if (user.getMatchParticipations() != null) {
+            for (AbalacticosUser.MatchParticipation participation : user.getMatchParticipations()) {
+                if (participation.getMatchId().equals(matchId)) {
+                    participation.setStatus(status);
+                    participation.setResponseTime(responseTime);
+                    break;
+                }
+            }
+            userRepository.save(user);
+        }
+    }
+
+    public List<AbalacticosUser> getAvailablePlayersForDate(LocalDateTime dateTime) {
+        DayOfWeek dayOfWeek = dateTime.getDayOfWeek();
+        String dayName = dayOfWeek.toString();
+
+        return userRepository.findAll().stream()
+                .filter(user -> {
+                    boolean isAvailableOnDay = user.getAvailability() != null &&
+                            user.getAvailability().stream()
+                                    .anyMatch(day -> day.equalsIgnoreCase(dayName));
+
+                    boolean isAbsentOnDate = user.getAbsentDates() != null &&
+                            user.getAbsentDates().contains(dateTime.toLocalDate().toString());
+
+                    return isAvailableOnDay && !isAbsentOnDate && !user.isBanned();
+                })
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Retrieves available players for a given date.
+     *
+     * @param date The date for which to find available players.
+     * @return A list of available players.
+     */
+    public List<AbalacticosUser> getPlayersByDate(LocalDate date) {
+        String dayName = date.getDayOfWeek().toString(); // e.g., "MONDAY"
+
+        // Fetch players available on the specified day, case-insensitive
+        List<AbalacticosUser> availablePlayers = userRepository.findByAvailabilityIgnoreCase(dayName);
+
+        // Filter out banned, injured, or absent players
+        return availablePlayers.stream()
+                .filter(user -> !user.isBanned())
+                .filter(user -> !user.isInjured())
+                .filter(user -> !user.isAbsent())
+                .filter(user -> {
+                    // Assuming AbalacticosUser has a list of absent dates as strings in "YYYY-MM-DD" format
+                    List<String> absentDates = user.getAbsentDates();
+                    return absentDates == null || !absentDates.contains(date.toString());
+                })
+                .collect(Collectors.toList());
+    }
 
 
 }

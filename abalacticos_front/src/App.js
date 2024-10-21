@@ -1,4 +1,5 @@
 import React from 'react';
+import 'bootstrap/dist/css/bootstrap.min.css';
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import PlayersGrid from './components/PlayersGrid';
 import Login from './components/Login';
@@ -18,6 +19,8 @@ import HandleSavings from './components/AdminDashboardComponents/HandleSavings';
 import HandleTeamShirts from './components/AdminDashboardComponents/HandleTeamShirts';
 import BanUser from './components/AdminDashboardComponents/BanUser';
 import Court from './components/AdminDashboardComponents/Court';
+import FormationsPage from './components/FormationComponents/FormationsPage';
+
 
 const App = () => (
     <Router>
@@ -40,6 +43,8 @@ const App = () => (
             <Route path="/team-shirts" element={<PrivateRoute role="ADMIN"><HandleTeamShirts /></PrivateRoute>} />
             <Route path="/BanUser" element={<PrivateRoute role="ADMIN"><BanUser /></PrivateRoute>} />
             <Route path="/Court" element={<PrivateRoute role="ADMIN"><Court /></PrivateRoute>} />
+            <Route path="/formations" element={<PrivateRoute role="ADMIN"><FormationsPage /></PrivateRoute>} />
+
 
 
         </Routes>
