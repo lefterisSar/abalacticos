@@ -524,11 +524,11 @@ public class UserService {
     /**
      * Retrieves available players for a given date.
      *
-     * @param date The date for which to find available players.
+     * @param dateTime The date for which to find available players.
      * @return A list of available players.
      */
-    public List<AbalacticosUser> getPlayersByDate(LocalDate date) {
-        String dayName = date.getDayOfWeek().toString(); // e.g., "MONDAY"
+    public List<AbalacticosUser> getPlayersByDate(LocalDateTime dateTime) {
+        String dayName = dateTime.getDayOfWeek().toString(); // e.g., "MONDAY"
 
         // Fetch players available on the specified day, case-insensitive
         List<AbalacticosUser> availablePlayers = userRepository.findByAvailabilityIgnoreCase(dayName);
@@ -541,7 +541,7 @@ public class UserService {
                 .filter(user -> {
                     // Assuming AbalacticosUser has a list of absent dates as strings in "YYYY-MM-DD" format
                     List<String> absentDates = user.getAbsentDates();
-                    return absentDates == null || !absentDates.contains(date.toString());
+                    return absentDates == null || !absentDates.contains(dateTime.toString());
                 })
                 .collect(Collectors.toList());
     }
