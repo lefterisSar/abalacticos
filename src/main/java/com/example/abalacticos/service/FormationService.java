@@ -32,7 +32,15 @@ public class FormationService {
     private ModelMapper modelMapper;
 
     @PreAuthorize("hasRole('ADMIN')")
-    public Formation createFormation(LocalDateTime dateTime, int numberOfPlayers, int autoFillPlayersCount, int manualFillPlayersCount, List<String> manualPlayerIds, List<String> unregisteredPlayerNames) {
+    public Formation createFormation(
+            LocalDateTime dateTime,
+            int numberOfPlayers,
+            int autoFillPlayersCount,
+            int manualFillPlayersCount,
+            List<String> manualPlayerIds,
+            List<String> autoFillPlayerIds,
+            List<String> unregisteredPlayerNames
+    ) {
         Formation formation = new Formation(dateTime, numberOfPlayers, autoFillPlayersCount, manualFillPlayersCount);
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -41,7 +49,8 @@ public class FormationService {
         formation.setCreatedBy(username);
         formation.setCreatedAt(LocalDateTime.now());
 
-        // Validate manual player IDs and ensure they meet the criteria
+
+        // Validate manual player IDs
         final List<String> validManualPlayerIds;
         if (manualPlayerIds != null && !manualPlayerIds.isEmpty()) {
             validManualPlayerIds = manualPlayerIds.stream()
@@ -67,71 +76,62 @@ public class FormationService {
             validManualPlayerIds = new ArrayList<>();
         }
 
-        // Calculate remaining slots for autofill
-        int remainingSlots = numberOfPlayers - validManualPlayerIds.size();
+        // Validate auto-filled player IDs
+        final List<String> validAutoFillPlayerIds;
+        if (autoFillPlayerIds != null && !autoFillPlayerIds.isEmpty()) {
+            validAutoFillPlayerIds = autoFillPlayerIds.stream()
+                    .filter(id -> {
+                        AbalacticosUser user = userRepository.findById(id).orElse(null);
+                        if (user == null) return false;
+                        if (user.isBanned()) return false;
+                        boolean isEligible = (!user.isInjured() && !user.isAbsent()) || user.isAvailable();
+                        boolean isAvailableOnDay = user.getAvailability() != null &&
+                                user.getAvailability().stream()
+                                        .anyMatch(day -> day.equalsIgnoreCase(dateTime.getDayOfWeek().toString()));
+                        return isEligible && isAvailableOnDay;
+                    })
+                    .collect(Collectors.toList());
+        } else {
+            validAutoFillPlayerIds = new ArrayList<>();
+        }
 
-        // Fetch eligible players for autofill, excluding manually selected players
-        List<AbalacticosUser> eligiblePlayers = userRepository.findAll().stream()
-                .filter(user -> {
-                    // Exclude manually selected players
-                    if (validManualPlayerIds.contains(user.getId())) return false;
-
-                    // Check if user is banned
-                    if (user.isBanned()) return false;
-
-                    // Player is not injured or absent, or they are marked as available
-                    boolean isEligible = (!user.isInjured() && !user.isAbsent()) || user.isAvailable();
-
-                    // Player's availability matches the day of the formation
-                    boolean isAvailableOnDay = user.getAvailability() != null &&
-                            user.getAvailability().stream()
-                                    .anyMatch(day -> day.equalsIgnoreCase(dateTime.getDayOfWeek().toString()));
-
-                    return isEligible && isAvailableOnDay;
-                })
-                .collect(Collectors.toList());
-
-        // Adjust autofill count based on available players
-        int autoFillCount = Math.min(remainingSlots, eligiblePlayers.size());
-
-        // Shuffle and select players for autofill
-        Collections.shuffle(eligiblePlayers);
-        List<String> autoFillPlayerIds = eligiblePlayers.stream()
-                .limit(autoFillCount)
-                .map(AbalacticosUser::getId)
-                .collect(Collectors.toList());
-
-        // Combine manual and autofilled player IDs
-        List<String> allPlayerIds = new ArrayList<>();
+        // Combine Manual and Auto-Filled Player IDs using Set to prevent duplicates
+        Set<String> allPlayerIds = new LinkedHashSet<>();
         allPlayerIds.addAll(validManualPlayerIds);
-        allPlayerIds.addAll(autoFillPlayerIds);
+        allPlayerIds.addAll(validAutoFillPlayerIds);
 
-        //autofillcount
-        formation.setAutoFillPlayersCount(autoFillPlayerIds.size());
+        // Calculate Remaining Slots for Unregistered Players
+        int remainingSlots = numberOfPlayers - allPlayerIds.size();
 
-        //Calculate remaining slots after auto-fill
-        remainingSlots = numberOfPlayers - allPlayerIds.size();
-
-        // Initialize the list for unregistered player names in the formation
+        // Initialize the List for Unregistered Player Names in the Formation
         List<String> unregisteredPlayerNamesInFormation = new ArrayList<>();
 
+
+
         if (remainingSlots > 0) {
-            // Handle unregistered player names provided by the admin
+            // Handle Unregistered Player Names Provided by the Admin
             if (unregisteredPlayerNames != null && !unregisteredPlayerNames.isEmpty()) {
                 int namesToAdd = Math.min(remainingSlots, unregisteredPlayerNames.size());
                 unregisteredPlayerNamesInFormation.addAll(unregisteredPlayerNames.subList(0, namesToAdd));
                 remainingSlots -= namesToAdd;
             }
 
-            // Fill any remaining slots with placeholders
+
+        /*
+            //Fill Any Remaining Slots with Placeholders
             for (int i = 0; i < remainingSlots; i++) {
                 unregisteredPlayerNamesInFormation.add("Player " + (allPlayerIds.size() + unregisteredPlayerNamesInFormation.size() + 1));
             }
+
+         */
         }
 
-        // Set the player IDs and unregistered player names in the formation
-        formation.setPlayerIds(allPlayerIds);
+        // Set Player IDs and Unregistered Player Names in the Formation
+        formation.setPlayerIds(new ArrayList<>(allPlayerIds));
         formation.setUnregisteredPlayerNames(unregisteredPlayerNamesInFormation);
+
+        // Set Auto-Fill Players Count Based on Valid Auto-Fill Player IDs
+        formation.setAutoFillPlayersCount(validAutoFillPlayerIds.size());
 
         // Save and return the formation
         return formationRepository.save(formation);

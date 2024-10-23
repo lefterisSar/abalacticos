@@ -2,15 +2,13 @@ package com.example.abalacticos.service;
 
 import com.example.abalacticos.model.AbalacticosUser;
 import com.example.abalacticos.model.Club;
-import com.example.abalacticos.model.Dtos.BanHistoryDto;
-import com.example.abalacticos.model.Dtos.BanRequestDto;
+import com.example.abalacticos.model.Dtos.*;
 import com.example.abalacticos.model.FidelityRating;
 import com.example.abalacticos.model.RegistrationDto;
-import com.example.abalacticos.model.Dtos.UpdatePasswordDto;
-import com.example.abalacticos.model.Dtos.UpdateUsernameDto;
 import com.example.abalacticos.repository.FidelityRatingRepository;
 import com.example.abalacticos.repository.InventoryRepository;
 import com.example.abalacticos.repository.UserRepository;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -39,6 +37,13 @@ public class UserService {
     public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+    }
+
+    @Autowired
+    private ModelMapper modelMapper;
+
+    private AbalacticosUserDTO convertToDto(AbalacticosUser user) {
+        return modelMapper.map(user, AbalacticosUserDTO.class);
     }
 
     public AbalacticosUser registerUserAdmin(RegistrationDto registrationDto)
@@ -522,27 +527,120 @@ public class UserService {
     }
 
     /**
-     * Retrieves available players for a given date.
+     * Fetches available players for a specific date as DTOs.
+     * Available means:
+     * - Not injured, not absent, not banned, and available by day
+     * OR
+     * - Explicitly marked as available
      *
-     * @param dateTime The date for which to find available players.
-     * @return A list of available players.
+     * @param date The date of the formation.
+     * @return List of available players as DTOs.
      */
-    public List<AbalacticosUser> getPlayersByDate(LocalDateTime dateTime) {
-        String dayName = dateTime.getDayOfWeek().toString(); // e.g., "MONDAY"
+    public List<AbalacticosUserDTO> getAvailablePlayersByDateDTO(LocalDate date) {
+        String dayName = date.getDayOfWeek().toString();
+        String dateStr = date.toString();
 
-        // Fetch players available on the specified day, case-insensitive
-        List<AbalacticosUser> availablePlayers = userRepository.findByAvailabilityIgnoreCase(dayName);
+        // Fetch available by day
+        List<AbalacticosUser> availableByDay = userRepository.findByAvailabilityAndEligible(dayName);
 
-        // Filter out banned, injured, or absent players
+        // Fetch explicitly available
+        List<AbalacticosUser> explicitlyAvailable = userRepository.findOverrideAvailablePlayersByDayAndNotAbsent(dayName, dateStr);
+
+        // Combine and remove duplicates
+        Set<AbalacticosUser> combined = new LinkedHashSet<>();
+        combined.addAll(availableByDay);
+        combined.addAll(explicitlyAvailable);
+
+        return combined.stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Fetches all players as DTOs.
+     *
+     * @return List of all players as DTOs.
+     */
+    public List<AbalacticosUserDTO> getAllPlayersDTO() {
+        List<AbalacticosUser> allPlayers = userRepository.findAll();
+        return allPlayers.stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Fetches injured players for a specific date as DTOs.
+     *
+     * @param date The date of the formation.
+     * @return List of injured players as DTOs.
+     */
+    public List<AbalacticosUserDTO> getInjuredPlayersByDateDTO(LocalDate date) {
+        String dayName = date.getDayOfWeek().toString();
+        String dateStr = date.toString();
+        List<AbalacticosUser> injuredPlayers = userRepository.findInjuredPlayersByDayAndNotAbsent(dayName, dateStr);
+        return injuredPlayers.stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Fetches absent players for a specific date as DTOs.
+     *
+     * @param date The date of the formation.
+     * @return List of absent players as DTOs.
+     */
+    public List<AbalacticosUserDTO> getAbsentPlayersByDateDTO(LocalDate date) {
+        String dayName = date.getDayOfWeek().toString();
+        String dateStr = date.toString();
+        List<AbalacticosUser> absentPlayers = userRepository.findAbsentPlayersByDayAndDate(dayName, dateStr);
+        return absentPlayers.stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Fetches banned players for a specific date as DTOs.
+     *
+     * @param date The date of the formation.
+     * @return List of banned players as DTOs.
+     */
+    public List<AbalacticosUserDTO> getBannedPlayersByDateDTO(LocalDate date) {
+        String dayName = date.getDayOfWeek().toString();
+        String dateStr = date.toString();
+        List<AbalacticosUser> bannedPlayers = userRepository.findBannedPlayersByDayAndNotAbsent(dayName, dateStr);
+        return bannedPlayers.stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Fetches non-excluded available players for a specific date as DTOs.
+     * Non-excluded means not banned, not injured, not absent, and available by day or available flag.
+     *
+     * @param date The date of the formation.
+     * @return List of available players as DTOs.
+     */
+    public List<AbalacticosUserDTO> getNonExcludedAvailablePlayersByDateDTO(LocalDate date) {
+        String dayName = date.getDayOfWeek().toString();
+        String dateStr = date.toString();
+        List<AbalacticosUser> availablePlayers = userRepository.findNonExcludedAvailablePlayersByDayAndNotAbsent(dayName, dateStr);
         return availablePlayers.stream()
-                .filter(user -> !user.isBanned())
-                .filter(user -> !user.isInjured())
-                .filter(user -> !user.isAbsent())
-                .filter(user -> {
-                    // Assuming AbalacticosUser has a list of absent dates as strings in "YYYY-MM-DD" format
-                    List<String> absentDates = user.getAbsentDates();
-                    return absentDates == null || !absentDates.contains(dateTime.toString());
-                })
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Fetches players who are explicitly marked as available, regardless of other statuses, as DTOs.
+     *
+     * @param date The date of the formation.
+     * @return List of explicitly available players as DTOs.
+     */
+    public List<AbalacticosUserDTO> getExplicitlyAvailablePlayersByDateDTO(LocalDate date) {
+        String dayName = date.getDayOfWeek().toString();
+        String dateStr = date.toString();
+        List<AbalacticosUser> explicitlyAvailablePlayers = userRepository.findOverrideAvailablePlayersByDayAndNotAbsent(dayName, dateStr);
+        return explicitlyAvailablePlayers.stream()
+                .map(this::convertToDto)
                 .collect(Collectors.toList());
     }
 

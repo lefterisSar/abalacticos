@@ -18,6 +18,8 @@ import javax.validation.Valid;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -42,9 +44,10 @@ public class FormationController {
         int autoFillPlayersCount = formationRequest.getAutoFillPlayersCount();
         int manualFillPlayersCount = formationRequest.getManualFillPlayersCount();
         List<String> manualPlayerIds = formationRequest.getManualPlayerIds();
+        List<String> autoFillPlayerIds = formationRequest.getAutoFillPlayerIds();
         List<String> unregisteredPlayerNames = formationRequest.getUnregisteredPlayerNames();
 
-        return formationService.createFormation(dateTime, numberOfPlayers, autoFillPlayersCount, manualFillPlayersCount, manualPlayerIds, unregisteredPlayerNames);
+        return formationService.createFormation(dateTime, numberOfPlayers, autoFillPlayersCount, manualFillPlayersCount, manualPlayerIds, autoFillPlayerIds, unregisteredPlayerNames);
     }
 
 
@@ -85,41 +88,45 @@ public class FormationController {
         return ResponseEntity.ok("Teams manually assigned and colors allocated.");
     }
 
+    // Fetch Available Players for Formation Date
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/available-players")
-    public List<AbalacticosUserDTO> getAvailablePlayers(@RequestParam("dateTime") String dateTimeStr) {
-        LocalDateTime dateTime = LocalDateTime.parse(dateTimeStr);
-        List<AbalacticosUser> availablePlayers = userService.getAvailablePlayersForDate(dateTime);
-
-        return availablePlayers.stream()
-                .map(user -> modelMapper.map(user, AbalacticosUserDTO.class))
-                .collect(Collectors.toList());
+    public ResponseEntity<?> getAvailablePlayers(@RequestParam("date") String dateStr) {
+        try {
+            LocalDateTime dateTime = LocalDateTime.parse(dateStr);
+            LocalDate date = dateTime.toLocalDate();
+            List<AbalacticosUserDTO> availablePlayers = userService.getAvailablePlayersByDateDTO(date);
+            return ResponseEntity.ok(availablePlayers);
+        } catch (DateTimeParseException e) {
+            return ResponseEntity.badRequest().body("Invalid date format. Expected format: YYYY-MM-DDTHH:mm");
+        }
     }
 
 
-    //Endpoint to fetch available and absent players for a specific date.
+    // Endpoint to fetch available and absent players for a specific date.
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/available-players-by-date")
-    public ResponseEntity<Map<String, List<AbalacticosUser>>> getAvailablePlayersByDate(@RequestParam("dateTime") String dateTimeStr) {
-        LocalDateTime dateTime = LocalDateTime.parse(dateTimeStr);
-        List<AbalacticosUser> players = userService.getPlayersByDate(dateTime);
+    public ResponseEntity<?> getAvailablePlayersByDate(@RequestParam("date") String dateStr) {
+        try {
+            LocalDate date = LocalDate.parse(dateStr, DateTimeFormatter.ISO_LOCAL_DATE);
+            List<AbalacticosUserDTO> availablePlayers = userService.getAvailablePlayersByDateDTO(date);
+            List<AbalacticosUserDTO> injuredPlayers = userService.getInjuredPlayersByDateDTO(date);
+            List<AbalacticosUserDTO> absentPlayers = userService.getAbsentPlayersByDateDTO(date);
+            List<AbalacticosUserDTO> bannedPlayers = userService.getBannedPlayersByDateDTO(date);
+            List<AbalacticosUserDTO> explicitlyAvailablePlayers = userService.getExplicitlyAvailablePlayersByDateDTO(date);
 
-        // Separate players into available and absent
-        List<AbalacticosUser> availablePlayers = players.stream()
-                .filter(player -> !player.isAbsent())
-                .collect(Collectors.toList());
+            Map<String, List<AbalacticosUserDTO>> response = Map.of(
+                    "availablePlayers", availablePlayers,
+                    "injuredPlayers", injuredPlayers,
+                    "absentPlayers", absentPlayers,
+                    "bannedPlayers", bannedPlayers,
+                    "explicitlyAvailablePlayers", explicitlyAvailablePlayers
+            );
 
-        List<AbalacticosUser> absentPlayers = players.stream()
-                .filter(AbalacticosUser::isAbsent)
-                .collect(Collectors.toList());
-
-        // Create a map to return both lists
-        Map<String, List<AbalacticosUser>> response = Map.of(
-                "availablePlayers", availablePlayers,
-                "absentPlayers", absentPlayers
-        );
-
-        return ResponseEntity.ok(response);
+            return ResponseEntity.ok(response);
+        } catch (DateTimeParseException e) {
+            return ResponseEntity.badRequest().body("Invalid date format. Expected format: YYYY-MM-DD");
+        }
     }
 
 }

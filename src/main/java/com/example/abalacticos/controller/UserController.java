@@ -21,6 +21,8 @@ import java.security.Principal;
 
 import javax.validation.Valid;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -261,6 +263,61 @@ public class UserController {
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Fidelity rating not found for the specified year.");
         }
+    }
+
+    // Fetch Available Players (Not injured, not absent, not banned OR available)
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/available")
+    public ResponseEntity<List<AbalacticosUserDTO>> getAvailablePlayers(@RequestParam("date") String dateStr) {
+            LocalDate date = LocalDate.parse(dateStr, DateTimeFormatter.ISO_LOCAL_DATE);
+            List<AbalacticosUserDTO> availablePlayers = userService.getNonExcludedAvailablePlayersByDateDTO(date);
+            return ResponseEntity.ok(availablePlayers);
+    }
+
+
+
+    // Fetch Injured Players
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/injured")
+    public ResponseEntity<List<AbalacticosUserDTO>> getInjuredPlayers(@RequestParam("date") String dateStr) {
+        LocalDate date = LocalDate.parse(dateStr, DateTimeFormatter.ISO_LOCAL_DATE);
+        List<AbalacticosUserDTO> injuredPlayers = userService.getInjuredPlayersByDateDTO(date);
+        return ResponseEntity.ok(injuredPlayers);
+    }
+
+    // Fetch Absent Players
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/absent")
+    public ResponseEntity<List<AbalacticosUserDTO>> getAbsentPlayers(@RequestParam("date") String dateStr) {
+        LocalDate date = LocalDate.parse(dateStr, DateTimeFormatter.ISO_LOCAL_DATE);
+        List<AbalacticosUserDTO> absentPlayers = userService.getAbsentPlayersByDateDTO(date);
+        return ResponseEntity.ok(absentPlayers);
+    }
+
+    // Fetch Banned Players
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/banned")
+    public ResponseEntity<List<AbalacticosUserDTO>> getBannedPlayers(@RequestParam("date") String dateStr) {
+        LocalDate date = LocalDate.parse(dateStr, DateTimeFormatter.ISO_LOCAL_DATE);
+        List<AbalacticosUserDTO> bannedPlayers = userService.getBannedPlayersByDateDTO(date);
+        return ResponseEntity.ok(bannedPlayers);
+    }
+
+    // Fetch Explicitly Available Players
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/explicitly-available")
+    public ResponseEntity<List<AbalacticosUserDTO>> getExplicitlyAvailablePlayers(@RequestParam("date") String dateStr) {
+        LocalDate date = LocalDate.parse(dateStr, DateTimeFormatter.ISO_LOCAL_DATE);
+        List<AbalacticosUserDTO> explicitlyAvailablePlayers = userService.getExplicitlyAvailablePlayersByDateDTO(date);
+        return ResponseEntity.ok(explicitlyAvailablePlayers);
+    }
+
+    // Fetch All Players
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/all")
+    public ResponseEntity<List<AbalacticosUserDTO>> getAllPlayers() {
+        List<AbalacticosUserDTO> allPlayers = userService.getAllPlayersDTO();
+        return ResponseEntity.ok(allPlayers);
     }
 
 

@@ -5,7 +5,6 @@ import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 
 import javax.validation.constraints.NotNull;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
@@ -28,6 +27,7 @@ public class FormationRequest {
     private int manualFillPlayersCount;
 
     private List<String> manualPlayerIds;
+    private List<String> autoFillPlayerIds; // Newly added field
 
     // New field for unregistered player names
     private List<String> unregisteredPlayerNames;
@@ -43,12 +43,13 @@ public class FormationRequest {
     public FormationRequest() {
     }
 
-    public FormationRequest(LocalDateTime dateTime, int numberOfPlayers, int autoFillPlayersCount, int manualFillPlayersCount, List<String> manualPlayerIds, List<String> unregisteredPlayerNames, int missingSlots) {
+    public FormationRequest(LocalDateTime dateTime, int numberOfPlayers, int autoFillPlayersCount, int manualFillPlayersCount, List<String> manualPlayerIds, List<String> autoFillPlayerIds, List<String> unregisteredPlayerNames, int missingSlots) {
         this.dateTime = dateTime;
         this.numberOfPlayers = numberOfPlayers;
         this.autoFillPlayersCount = autoFillPlayersCount;
         this.manualFillPlayersCount = manualFillPlayersCount;
         this.manualPlayerIds = manualPlayerIds;
+        this.autoFillPlayerIds = autoFillPlayerIds;
 
 
         // New field for unregistered player names
@@ -116,6 +117,14 @@ public class FormationRequest {
 
     public void setManualPlayerIds(List<String> manualPlayerIds) {
         this.manualPlayerIds = manualPlayerIds;
+    }
+
+    public List<String> getAutoFillPlayerIds() {
+        return autoFillPlayerIds;
+    }
+
+    public void setAutoFillPlayerIds(List<String> autoFillPlayersIds) {
+        this.autoFillPlayerIds = autoFillPlayersIds;
     }
 
     public int getMissingSlots() {

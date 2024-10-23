@@ -20,6 +20,7 @@ public class Formation {
     private int autoFillPlayersCount;
     private int manualFillPlayersCount;
 
+
     // New field for unregistered player names
     private List<String> unregisteredPlayerNames;
 
