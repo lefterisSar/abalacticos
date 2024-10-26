@@ -269,10 +269,12 @@ public class UserController {
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/available")
     public ResponseEntity<List<AbalacticosUserDTO>> getAvailablePlayers(@RequestParam("date") String dateStr) {
-            LocalDate date = LocalDate.parse(dateStr, DateTimeFormatter.ISO_LOCAL_DATE);
-            List<AbalacticosUserDTO> availablePlayers = userService.getNonExcludedAvailablePlayersByDateDTO(date);
-            return ResponseEntity.ok(availablePlayers);
+        LocalDate date = LocalDate.parse(dateStr, DateTimeFormatter.ISO_LOCAL_DATE);
+        List<AbalacticosUserDTO> availablePlayers = userService.getAvailablePlayersByDateDTO(date);
+        return ResponseEntity.ok(availablePlayers);
     }
+
+
 
 
 

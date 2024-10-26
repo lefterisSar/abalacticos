@@ -51,6 +51,7 @@ public class FormationService {
 
 
         // Validate manual player IDs
+        // Validate manual player IDs
         final List<String> validManualPlayerIds;
         if (manualPlayerIds != null && !manualPlayerIds.isEmpty()) {
             validManualPlayerIds = manualPlayerIds.stream()
@@ -58,25 +59,15 @@ public class FormationService {
                         AbalacticosUser user = userRepository.findById(id).orElse(null);
                         if (user == null) return false;
 
-                        // Check if user is banned
-                        if (user.isBanned()) return false;
-
-                        // Player is not injured or absent, or they are marked as available
-                        boolean isEligible = (!user.isInjured() && !user.isAbsent()) || user.isAvailable();
-
-                        // Player's availability matches the day of the formation
-                        boolean isAvailableOnDay = user.getAvailability() != null &&
-                                user.getAvailability().stream()
-                                        .anyMatch(day -> day.equalsIgnoreCase(dateTime.getDayOfWeek().toString()));
-
-                        return isEligible && isAvailableOnDay;
+                        // Allow admin to add any player, even if they are banned, injured, absent, or unavailable
+                        return true;
                     })
                     .collect(Collectors.toList());
         } else {
             validManualPlayerIds = new ArrayList<>();
         }
 
-        // Validate auto-filled player IDs
+        // Validate autofilled player IDs
         final List<String> validAutoFillPlayerIds;
         if (autoFillPlayerIds != null && !autoFillPlayerIds.isEmpty()) {
             validAutoFillPlayerIds = autoFillPlayerIds.stream()
@@ -139,14 +130,13 @@ public class FormationService {
 
 
     private List<AbalacticosUser> getAutoFillPlayers(LocalDate date, int autoFillPlayersCount, List<String> excludedPlayerIds) {
-        DayOfWeek dayOfWeek = date.getDayOfWeek();
-        String dayName = dayOfWeek.toString(); // e.g., "MONDAY"
+        String dayName = date.getDayOfWeek().toString();
+        String dateStr = date.toString();
 
-        // Fetch available players using repository method
-        List<AbalacticosUser> availablePlayers = userRepository.findByAvailabilityContainingAndInjuredFalseAndAbsentFalseAndIsBannedFalse(dayName)
+        // Fetch players using findByAvailabilityAndEligible
+        List<AbalacticosUser> availablePlayers = userRepository.findAvailablePlayersByDay(dayName)
                 .stream()
                 .filter(player -> !excludedPlayerIds.contains(player.getId()))
-                .filter(player -> player.getAbsentDates() == null || !player.getAbsentDates().contains(date.toString()))
                 .collect(Collectors.toList());
 
         if (availablePlayers.size() < autoFillPlayersCount) {
@@ -157,6 +147,7 @@ public class FormationService {
         Collections.shuffle(availablePlayers);
         return availablePlayers.subList(0, autoFillPlayersCount);
     }
+
 
     private boolean isPlayerAvailableOnDate(AbalacticosUser player, LocalDate date) {
         // Check if the player is available on the given date

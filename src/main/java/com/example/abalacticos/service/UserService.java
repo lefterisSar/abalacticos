@@ -531,30 +531,19 @@ public class UserService {
      * Available means:
      * - Not injured, not absent, not banned, and available by day
      * OR
-     * - Explicitly marked as available
-     *
-     * @param date The date of the formation.
-     * @return List of available players as DTOs.
      */
     public List<AbalacticosUserDTO> getAvailablePlayersByDateDTO(LocalDate date) {
-        String dayName = date.getDayOfWeek().toString();
-        String dateStr = date.toString();
+        String dayName = date.getDayOfWeek().getDisplayName(TextStyle.FULL, Locale.ENGLISH);
+        System.out.println("Day Name: " + dayName);
 
-        // Fetch available by day
-        List<AbalacticosUser> availableByDay = userRepository.findByAvailabilityAndEligible(dayName);
+        List<AbalacticosUser> availablePlayers = userRepository.findAvailablePlayersByDay(dayName);
 
-        // Fetch explicitly available
-        List<AbalacticosUser> explicitlyAvailable = userRepository.findOverrideAvailablePlayersByDayAndNotAbsent(dayName, dateStr);
-
-        // Combine and remove duplicates
-        Set<AbalacticosUser> combined = new LinkedHashSet<>();
-        combined.addAll(availableByDay);
-        combined.addAll(explicitlyAvailable);
-
-        return combined.stream()
+        return availablePlayers.stream()
                 .map(this::convertToDto)
                 .collect(Collectors.toList());
     }
+
+
 
     /**
      * Fetches all players as DTOs.
@@ -576,8 +565,7 @@ public class UserService {
      */
     public List<AbalacticosUserDTO> getInjuredPlayersByDateDTO(LocalDate date) {
         String dayName = date.getDayOfWeek().toString();
-        String dateStr = date.toString();
-        List<AbalacticosUser> injuredPlayers = userRepository.findInjuredPlayersByDayAndNotAbsent(dayName, dateStr);
+        List<AbalacticosUser> injuredPlayers = userRepository.findInjuredPlayersByDayAndNotAbsent(dayName);
         return injuredPlayers.stream()
                 .map(this::convertToDto)
                 .collect(Collectors.toList());

@@ -88,45 +88,6 @@ public class FormationController {
         return ResponseEntity.ok("Teams manually assigned and colors allocated.");
     }
 
-    // Fetch Available Players for Formation Date
-    @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping("/available-players")
-    public ResponseEntity<?> getAvailablePlayers(@RequestParam("date") String dateStr) {
-        try {
-            LocalDateTime dateTime = LocalDateTime.parse(dateStr);
-            LocalDate date = dateTime.toLocalDate();
-            List<AbalacticosUserDTO> availablePlayers = userService.getAvailablePlayersByDateDTO(date);
-            return ResponseEntity.ok(availablePlayers);
-        } catch (DateTimeParseException e) {
-            return ResponseEntity.badRequest().body("Invalid date format. Expected format: YYYY-MM-DDTHH:mm");
-        }
-    }
 
-
-    // Endpoint to fetch available and absent players for a specific date.
-    @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping("/available-players-by-date")
-    public ResponseEntity<?> getAvailablePlayersByDate(@RequestParam("date") String dateStr) {
-        try {
-            LocalDate date = LocalDate.parse(dateStr, DateTimeFormatter.ISO_LOCAL_DATE);
-            List<AbalacticosUserDTO> availablePlayers = userService.getAvailablePlayersByDateDTO(date);
-            List<AbalacticosUserDTO> injuredPlayers = userService.getInjuredPlayersByDateDTO(date);
-            List<AbalacticosUserDTO> absentPlayers = userService.getAbsentPlayersByDateDTO(date);
-            List<AbalacticosUserDTO> bannedPlayers = userService.getBannedPlayersByDateDTO(date);
-            List<AbalacticosUserDTO> explicitlyAvailablePlayers = userService.getExplicitlyAvailablePlayersByDateDTO(date);
-
-            Map<String, List<AbalacticosUserDTO>> response = Map.of(
-                    "availablePlayers", availablePlayers,
-                    "injuredPlayers", injuredPlayers,
-                    "absentPlayers", absentPlayers,
-                    "bannedPlayers", bannedPlayers,
-                    "explicitlyAvailablePlayers", explicitlyAvailablePlayers
-            );
-
-            return ResponseEntity.ok(response);
-        } catch (DateTimeParseException e) {
-            return ResponseEntity.badRequest().body("Invalid date format. Expected format: YYYY-MM-DD");
-        }
-    }
 
 }

@@ -6,14 +6,9 @@ import {
     Paper,
     Typography,
     CircularProgress,
-    Checkbox,
-    FormControlLabel,
     Accordion,
     AccordionSummary,
     AccordionDetails,
-    List,
-    ListItem,
-    ListItemText,
     IconButton,
     Autocomplete,
 } from '@mui/material';
@@ -31,7 +26,7 @@ const CreateFormationForm = () => {
     const [dateTime, setDateTime] = useState(null);
     const [numberOfPlayers, setNumberOfPlayers] = useState('');
     const [availablePlayers, setAvailablePlayers] = useState([]);
-    const [selectedPlayers, setSelectedPlayers] = useState([]); // Array of player objects
+    const [playerSlots, setPlayerSlots] = useState([]); // Array of { player, isAutoFilled }
     const [queueList, setQueueList] = useState([]); // Array of player objects
     const [searchTerm, setSearchTerm] = useState('');
     const [loading, setLoading] = useState(false);
@@ -74,7 +69,7 @@ const CreateFormationForm = () => {
             fetchAvailablePlayers(dateTime);
         } else {
             setAvailablePlayers([]);
-            setSelectedPlayers([]);
+            setPlayerSlots([]);
             setQueueList([]);
         }
     }, [dateTime]);
@@ -82,9 +77,34 @@ const CreateFormationForm = () => {
     // Update player slots when numberOfPlayers changes
     useEffect(() => {
         const totalPlayers = parseInt(numberOfPlayers) || 0;
-        // If selectedPlayers exceed the new number, trim the list
-        if (selectedPlayers.length > totalPlayers) {
-            setSelectedPlayers(selectedPlayers.slice(0, totalPlayers));
+        setPlayerSlots((prevSlots) => {
+            const newSlots = [...prevSlots];
+            // Add empty slots if needed
+            while (newSlots.length < totalPlayers) {
+                newSlots.push(null);
+            }
+            // Remove extra slots if needed
+            while (newSlots.length > totalPlayers) {
+                newSlots.pop();
+            }
+            return newSlots;
+        });
+
+        // Adjust queue list if necessary
+        if (queueList.length > 0 && playerSlots.filter(slot => slot && slot.player).length < totalPlayers) {
+            // Move players from queue to slots if slots are available
+            const updatedSlots = [...playerSlots];
+            let slotIndex = 0;
+            for (let i = 0; i < updatedSlots.length; i++) {
+                if (!updatedSlots[i] || !updatedSlots[i].player) {
+                    if (slotIndex < queueList.length) {
+                        updatedSlots[i] = { player: queueList[slotIndex], isAutoFilled: false };
+                        slotIndex++;
+                    }
+                }
+            }
+            setPlayerSlots(updatedSlots);
+            setQueueList(queueList.slice(slotIndex));
         }
     }, [numberOfPlayers]);
 
@@ -97,20 +117,20 @@ const CreateFormationForm = () => {
 
         try {
             setLoading(true);
-            const formattedDateTime = dayjs(selectedDateTime).format('YYYY-MM-DDTHH:mm');
-            const response = await axios.get('http://localhost:8080/api/formations/available-players', {
+            const formattedDate = dayjs(selectedDateTime).format('YYYY-MM-DD');
+            const response = await axios.get('http://localhost:8080/api/users/available', {
                 headers: {
                     'Authorization': `Bearer ${token}`,
                 },
                 params: {
-                    dateTime: formattedDateTime,
+                    date: formattedDate,
                 },
             });
 
             const players = response.data; // Assuming this is an array of AbalacticosUserDTO
             setAvailablePlayers(players);
-            setSelectedPlayers([]); // Reset selected players on new dateTime
-            setQueueList([]); // Reset queue list on new dateTime
+            setPlayerSlots([]); // Reset player slots on new dateTime
+            setQueueList([]);
             setMessage('');
             setError('');
         } catch (err) {
@@ -199,36 +219,44 @@ const CreateFormationForm = () => {
         }));
     };
 
-    // Function to add a player to selectedPlayers
-    const addPlayerToSelected = (player) => {
-        if (selectedPlayers.length >= parseInt(numberOfPlayers)) {
-            setError('All player slots are filled.');
+    // Function to add a player to the next available slot
+    const addPlayerToSlot = (player) => {
+        const totalPlayers = parseInt(numberOfPlayers) || 0;
+
+        if (playerSlots.filter(slot => slot && slot.player).length >= totalPlayers) {
+            // Add to queue if slots are full
+            addPlayerToQueue(player);
             return;
         }
 
         // Check if player is already selected
-        if (selectedPlayers.some((p) => p.id === player.id)) {
+        if (playerSlots.some((slot) => slot && slot.player && slot.player.id === player.id)) {
             setError('Player already selected.');
             return;
         }
 
-        setSelectedPlayers((prev) => [...prev, player]);
-        setMessage('');
-        setError('');
-    };
-
-    // Function to remove a player from selectedPlayers
-    const removePlayerFromSelected = (playerId) => {
-        setSelectedPlayers((prev) => prev.filter((player) => player.id !== playerId));
-        setMessage('');
-        setError('');
+        // Find the first empty slot
+        const slotIndex = playerSlots.findIndex((slot) => !slot || !slot.player);
+        if (slotIndex !== -1) {
+            const updatedSlots = [...playerSlots];
+            updatedSlots[slotIndex] = { player: player, isAutoFilled: false };
+            setPlayerSlots(updatedSlots);
+            setMessage('');
+            setError('');
+        } else {
+            // No empty slots, add to queue
+            addPlayerToQueue(player);
+        }
     };
 
     // Function to add a player to the queue
     const addPlayerToQueue = (player) => {
-        // Check if player is already in the queue
-        if (queueList.some((p) => p.id === player.id)) {
-            setError('Player already in queue.');
+        // Check if player is already in the queue or slots
+        if (
+            queueList.some((p) => p.id === player.id) ||
+            playerSlots.some((slot) => slot && slot.player && slot.player.id === player.id)
+        ) {
+            setError('Player already selected or in queue.');
             return;
         }
 
@@ -244,12 +272,21 @@ const CreateFormationForm = () => {
         setError('');
     };
 
-    // Function to handle unregistered player names
-    const handleUnregisteredPlayerNameChange = (e, index) => {
-        const value = e.target.value;
-        const updatedPlayers = [...selectedPlayers];
-        updatedPlayers[index] = { ...updatedPlayers[index], name: value };
-        setSelectedPlayers(updatedPlayers);
+    // Function to handle changes in player slots (manual entry)
+    const handlePlayerSlotChange = (event, index) => {
+        const value = event.target.value;
+        const updatedSlots = [...playerSlots];
+        updatedSlots[index] = { player: value, isAutoFilled: false };
+        setPlayerSlots(updatedSlots);
+    };
+
+    // Function to remove a player from a slot
+    const removePlayerFromSlot = (index) => {
+        const updatedSlots = [...playerSlots];
+        updatedSlots[index] = null;
+        setPlayerSlots(updatedSlots);
+        setMessage('');
+        setError('');
     };
 
     // Function to handle Auto-Fill
@@ -261,13 +298,13 @@ const CreateFormationForm = () => {
 
         try {
             setLoading(true);
-            const formattedDateTime = dayjs(dateTime).format('YYYY-MM-DDTHH:mm');
-            const response = await axios.get('http://localhost:8080/api/formations/available-players', {
+            const formattedDate = dayjs(dateTime).format('YYYY-MM-DD');
+            const response = await axios.get('http://localhost:8080/api/users/available', {
                 headers: {
                     'Authorization': `Bearer ${token}`,
                 },
                 params: {
-                    dateTime: formattedDateTime,
+                    date: formattedDate,
                 },
             });
 
@@ -275,11 +312,13 @@ const CreateFormationForm = () => {
 
             // Filter out already selected players
             const availableToAutoFill = players.filter(
-                (player) => !selectedPlayers.some((p) => p.id === player.id)
+                (player) =>
+                    !playerSlots.some((slot) => slot && slot.player && slot.player.id === player.id) &&
+                    !queueList.some((p) => p.id === player.id)
             );
 
             // Calculate remaining slots
-            const remainingSlots = parseInt(numberOfPlayers) - selectedPlayers.length;
+            const remainingSlots = playerSlots.filter((slot) => !slot || !slot.player).length;
 
             if (availableToAutoFill.length < remainingSlots) {
                 setMessage(`Only ${availableToAutoFill.length} players available to auto-fill. ${remainingSlots - availableToAutoFill.length} slots remain.`);
@@ -289,7 +328,26 @@ const CreateFormationForm = () => {
             const shuffled = availableToAutoFill.sort(() => 0.5 - Math.random());
             const playersToAdd = shuffled.slice(0, remainingSlots);
 
-            setSelectedPlayers((prev) => [...prev, ...playersToAdd]);
+            // Fill the empty slots
+            const updatedSlots = [...playerSlots];
+            let slotIndex = 0;
+            for (let i = 0; i < updatedSlots.length; i++) {
+                if (!updatedSlots[i] || !updatedSlots[i].player) {
+                    if (slotIndex < playersToAdd.length) {
+                        updatedSlots[i] = { player: playersToAdd[slotIndex], isAutoFilled: true };
+                        slotIndex++;
+                    }
+                }
+            }
+
+            setPlayerSlots(updatedSlots);
+
+            // If there are still remaining players, add them to the queue
+            const remainingPlayers = shuffled.slice(playersToAdd.length);
+            if (remainingPlayers.length > 0) {
+                setQueueList((prev) => [...prev, ...remainingPlayers]);
+            }
+
             setMessage('Auto-filled remaining slots.');
             setError('');
         } catch (err) {
@@ -316,10 +374,23 @@ const CreateFormationForm = () => {
         }
 
         const totalPlayers = parseInt(numberOfPlayers);
-        const filledSlots = selectedPlayers.length;
+        if (isNaN(totalPlayers)) {
+            setError('Number of players must be a number.');
+            setMessage('');
+            return;
+        }
 
-        if (filledSlots < totalPlayers) {
-            setMessage(`You have ${totalPlayers - filledSlots} free slot(s) remaining.`);
+        // Define manualFillPlayers and autoFillPlayers
+        const manualFillPlayers = playerSlots.filter(slot => slot && slot.player && !slot.isAutoFilled);
+        const autoFillPlayers = playerSlots.filter(slot => slot && slot.player && slot.isAutoFilled);
+
+        const manualFillPlayersCount = manualFillPlayers.length;
+        const autoFillPlayersCount = autoFillPlayers.length;
+        const missingSlots = totalPlayers - (manualFillPlayersCount + autoFillPlayersCount);
+
+        if (missingSlots > 0) {
+            setMessage(`You have ${missingSlots} free slot(s) remaining.`);
+            // Do not prevent submission
         }
 
         setLoading(true);
@@ -331,15 +402,33 @@ const CreateFormationForm = () => {
             return; // Early exit if token is not present
         }
 
-        // Prepare data for submission
+        // Collect IDs
+        // Collect IDs, including players with missing 'id' properties for manualPlayerIds
+        const manualPlayerIds = manualFillPlayers
+            .map(slot => slot.player && slot.player.id ? slot.player.id : null)
+            .filter(id => id !== null);
+
+        const unregisteredPlayerNames = manualFillPlayers
+            .filter(slot => typeof slot.player === 'string')
+            .map(slot => slot.player);
+
+        const autoFillPlayerIds = autoFillPlayers
+            .filter(slot => typeof slot.player === 'object' && slot.player.id)
+            .map(slot => slot.player.id);
+
+        const queuePlayerIds = queueList.map((p) => p.id);
+
         const formationData = {
             dateTime: dayjs(dateTime).format('YYYY-MM-DDTHH:mm'),
             numberOfPlayers: totalPlayers,
-            autoFillPlayersCount: selectedPlayers.length > 0 ? selectedPlayers.filter(p => p.isAutoFilled).length : 0,
-            manualFillPlayersCount: selectedPlayers.length - (selectedPlayers.filter(p => p.isAutoFilled).length),
-            manualPlayerIds: selectedPlayers.filter(p => !p.isAutoFilled && p.id).map(p => p.id),
-            autoFillPlayerIds: selectedPlayers.filter(p => p.isAutoFilled && p.id).map(p => p.id),
-            unregisteredPlayerNames: selectedPlayers.filter(p => !p.id && p.name).map(p => p.name),
+            manualPlayerIds: manualPlayerIds,
+            autoFillPlayerIds: autoFillPlayerIds,
+            unregisteredPlayerNames: unregisteredPlayerNames,
+            queuePlayerIds: queuePlayerIds,
+            manualFillPlayersCount: manualFillPlayersCount,
+            autoFillPlayersCount: autoFillPlayersCount,
+            missingSlots: missingSlots,
+            // You can include other necessary fields here
         };
 
         try {
@@ -378,8 +467,8 @@ const CreateFormationForm = () => {
     };
 
     // Function to handle player selection from filter choices
-    const handleFilterPlayerSelect = (filterType, player) => {
-        addPlayerToSelected(player);
+    const handleFilterPlayerSelect = (player) => {
+        addPlayerToSlot(player);
     };
 
     // Function to handle player search within filters
@@ -392,19 +481,20 @@ const CreateFormationForm = () => {
         try {
             setLoading(true);
             let endpoint = '';
+            const formattedDate = dayjs(dateTime).format('YYYY-MM-DD');
 
             switch (filterType) {
                 case 'all':
                     endpoint = `http://localhost:8080/api/users/search?query=${query}`;
                     break;
                 case 'injured':
-                    endpoint = `http://localhost:8080/api/users/injured?date=${dayjs(dateTime).format('YYYY-MM-DD')}`;
+                    endpoint = `http://localhost:8080/api/users/injured?date=${formattedDate}`;
                     break;
                 case 'absent':
-                    endpoint = `http://localhost:8080/api/users/absent?date=${dayjs(dateTime).format('YYYY-MM-DD')}`;
+                    endpoint = `http://localhost:8080/api/users/absent?date=${formattedDate}`;
                     break;
                 case 'banned':
-                    endpoint = `http://localhost:8080/api/users/banned?date=${dayjs(dateTime).format('YYYY-MM-DD')}`;
+                    endpoint = `http://localhost:8080/api/users/banned?date=${formattedDate}`;
                     break;
                 default:
                     return;
@@ -485,7 +575,7 @@ const CreateFormationForm = () => {
                                             <Typography variant="body1">
                                                 {`${player.name} ${player.surname} (${player.username})`}
                                             </Typography>
-                                            <Button variant="outlined" size="small" onClick={() => addPlayerToSelected(player)}>
+                                            <Button variant="outlined" size="small" onClick={() => addPlayerToSlot(player)}>
                                                 Add
                                             </Button>
                                         </div>
@@ -496,7 +586,7 @@ const CreateFormationForm = () => {
                         </div>
                     </Grid>
 
-                    {/* Box 3: Player Selection and Queue Management */}
+                    {/* Box 3: Player Slots */}
                     <Grid item xs={12} md={6}>
                         <Typography variant="h6">Player Selection</Typography>
                         <TextField
@@ -509,207 +599,124 @@ const CreateFormationForm = () => {
                             inputProps={{ min: 1 }}
                             margin="normal"
                         />
-                        <Button variant="contained" color="secondary" onClick={handleAutoFill} disabled={selectedPlayers.length >= parseInt(numberOfPlayers)}>
+                        <Button
+                            variant="contained"
+                            color="secondary"
+                            onClick={handleAutoFill}
+                            disabled={playerSlots.filter(slot => slot && slot.player).length >= parseInt(numberOfPlayers)}
+                            style={{ marginBottom: '1rem' }}
+                        >
                             Auto-Fill Remaining Slots
                         </Button>
-                        <List>
-                            {selectedPlayers.map((player, index) => (
-                                <ListItem key={index} secondaryAction={
-                                    <IconButton edge="end" aria-label="remove" onClick={() => removePlayerFromSelected(player.id)}>
+                        {playerSlots.map((slot, index) => (
+                            <div key={index} style={{ display: 'flex', alignItems: 'center', marginBottom: '1rem' }}>
+                                <Autocomplete
+                                    options={availablePlayers}
+                                    getOptionLabel={(option) => {
+                                        if (typeof option === 'string') {
+                                            return option;
+                                        }
+                                        return option && option.name && option.surname ? `${option.name} ${option.surname}` : '';
+                                    }}
+                                    value={slot && slot.player ? slot.player : ''}
+                                    onChange={(event, newValue) => {
+                                        const updatedSlots = [...playerSlots];
+                                        updatedSlots[index] = { player: newValue, isAutoFilled: slot ? slot.isAutoFilled : false };
+                                        setPlayerSlots(updatedSlots);
+                                    }}
+                                    renderInput={(params) => (
+                                        <TextField
+                                            {...params}
+                                            label={`Player ${index + 1}`}
+                                            fullWidth
+                                            onChange={(event) => handlePlayerSlotChange(event, index)}
+                                            style={{ minWidth: '300px' }} // Adjust the size here
+                                        />
+                                    )}
+                                    freeSolo
+                                    style={{ flexGrow: 1 }}
+                                />
+                                {slot && slot.player && (
+                                    <IconButton edge="end" aria-label="remove" onClick={() => removePlayerFromSlot(index)}>
                                         <RemoveCircleOutlineIcon />
                                     </IconButton>
-                                }>
-                                    <ListItemText
-                                        primary={player.id ? `${player.name} ${player.surname} (${player.username})` : `Unregistered: ${player.name}`}
-                                    />
-                                </ListItem>
-                            ))}
-                        </List>
-                        <Typography variant="h6" style={{ marginTop: '1rem' }}>Queue List</Typography>
+                                )}
+                            </div>
+                        ))}
+                    </Grid>
+
+                    {/* Box 4: Queue List */}
+                    <Grid item xs={12} md={6}>
+                        <Typography variant="h6">Queue List</Typography>
                         <Autocomplete
                             options={availablePlayers}
-                            getOptionLabel={(option) => `${option.name} ${option.surname} (${option.username})`}
+                            getOptionLabel={(option) => {
+                                if (typeof option === 'string') {
+                                    return option; // Unregistered player's name
+                                }
+                                return option && option.name && option.surname ? `${option.name} ${option.surname}` : '';
+                            }}
                             onChange={(event, value) => value && addPlayerToQueue(value)}
                             renderInput={(params) => <TextField {...params} label="Add to Queue" variant="outlined" />}
                             disabled={!dateTime}
                         />
-                        <List>
+                        <div style={{ maxHeight: '300px', overflowY: 'auto', marginTop: '1rem' }}>
                             {queueList.map((player, index) => (
-                                <ListItem key={index} secondaryAction={
+                                <div key={index} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                                    <Typography variant="body1">
+                                        {`${player.name} ${player.surname} (${player.username})`}
+                                    </Typography>
                                     <IconButton edge="end" aria-label="remove" onClick={() => removePlayerFromQueue(player.id)}>
                                         <RemoveCircleOutlineIcon />
                                     </IconButton>
-                                }>
-                                    <ListItemText
-                                        primary={`${player.name} ${player.surname} (${player.username})`}
-                                    />
-                                </ListItem>
+                                </div>
                             ))}
-                        </List>
+                        </div>
                     </Grid>
 
-                    {/* Box 4: Filter Choices */}
+                    {/* Box 5: Filter Choices */}
                     <Grid item xs={12} md={6}>
                         <Typography variant="h6">Filter Choices</Typography>
-                        <Accordion expanded={expandedFilters.all} onChange={handleAccordionChange('all')}>
-                            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                                <Typography>All Players</Typography>
-                            </AccordionSummary>
-                            <AccordionDetails>
-                                <TextField
-                                    label="Search All Players"
-                                    value={searchFilters.all}
-                                    onChange={(e) => {
-                                        handleFilterPlayerSearch('all', e.target.value);
-                                        handleFilterSearch('all', e.target.value);
-                                    }}
-                                    fullWidth
-                                    margin="normal"
-                                />
-                                <div style={{ maxHeight: '200px', overflowY: 'auto' }}>
-                                    {filterData.all.length > 0 ? (
-                                        filterData.all
-                                            .filter((player) =>
-                                                `${player.name} ${player.surname}`.toLowerCase().includes(searchFilters.all.toLowerCase())
-                                            )
-                                            .map((player) => (
-                                                <ListItem
-                                                    key={player.id}
-                                                    secondaryAction={
-                                                        <IconButton edge="end" aria-label="add" onClick={() => handleFilterPlayerSelect('all', player)}>
+                        {/* Repeat Accordion for each filterType */}
+                        {['all', 'injured', 'absent', 'banned'].map((filterType) => (
+                            <Accordion key={filterType} expanded={expandedFilters[filterType]} onChange={handleAccordionChange(filterType)}>
+                                <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                                    <Typography>{`${filterType.charAt(0).toUpperCase() + filterType.slice(1)} Players`}</Typography>
+                                </AccordionSummary>
+                                <AccordionDetails>
+                                    <TextField
+                                        label={`Search ${filterType.charAt(0).toUpperCase() + filterType.slice(1)} Players`}
+                                        value={searchFilters[filterType]}
+                                        onChange={(e) => {
+                                            handleFilterPlayerSearch(filterType, e.target.value);
+                                            handleFilterSearch(filterType, e.target.value);
+                                        }}
+                                        fullWidth
+                                        margin="normal"
+                                    />
+                                    <div style={{ maxHeight: '200px', overflowY: 'auto' }}>
+                                        {filterData[filterType].length > 0 ? (
+                                            filterData[filterType]
+                                                .filter((player) =>
+                                                    `${player.name} ${player.surname}`.toLowerCase().includes(searchFilters[filterType].toLowerCase())
+                                                )
+                                                .map((player) => (
+                                                    <div key={player.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                        <Typography variant="body1">
+                                                            {`${player.name} ${player.surname} (${player.username})`}
+                                                        </Typography>
+                                                        <IconButton edge="end" aria-label="add" onClick={() => handleFilterPlayerSelect(player)}>
                                                             <AddCircleOutlineIcon />
                                                         </IconButton>
-                                                    }
-                                                >
-                                                    <ListItemText primary={`${player.name} ${player.surname} (${player.username})`} />
-                                                </ListItem>
-                                            ))
-                                    ) : (
-                                        <Typography variant="body2">No players found.</Typography>
-                                    )}
-                                </div>
-                            </AccordionDetails>
-                        </Accordion>
-
-                        <Accordion expanded={expandedFilters.injured} onChange={handleAccordionChange('injured')}>
-                            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                                <Typography>Injured Players</Typography>
-                            </AccordionSummary>
-                            <AccordionDetails>
-                                <TextField
-                                    label="Search Injured Players"
-                                    value={searchFilters.injured}
-                                    onChange={(e) => {
-                                        handleFilterPlayerSearch('injured', e.target.value);
-                                        handleFilterSearch('injured', e.target.value);
-                                    }}
-                                    fullWidth
-                                    margin="normal"
-                                />
-                                <div style={{ maxHeight: '200px', overflowY: 'auto' }}>
-                                    {filterData.injured.length > 0 ? (
-                                        filterData.injured
-                                            .filter((player) =>
-                                                `${player.name} ${player.surname}`.toLowerCase().includes(searchFilters.injured.toLowerCase())
-                                            )
-                                            .map((player) => (
-                                                <ListItem
-                                                    key={player.id}
-                                                    secondaryAction={
-                                                        <IconButton edge="end" aria-label="add" onClick={() => handleFilterPlayerSelect('injured', player)}>
-                                                            <AddCircleOutlineIcon />
-                                                        </IconButton>
-                                                    }
-                                                >
-                                                    <ListItemText primary={`${player.name} ${player.surname} (${player.username})`} />
-                                                </ListItem>
-                                            ))
-                                    ) : (
-                                        <Typography variant="body2">No injured players found.</Typography>
-                                    )}
-                                </div>
-                            </AccordionDetails>
-                        </Accordion>
-
-                        <Accordion expanded={expandedFilters.absent} onChange={handleAccordionChange('absent')}>
-                            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                                <Typography>Absent Players</Typography>
-                            </AccordionSummary>
-                            <AccordionDetails>
-                                <TextField
-                                    label="Search Absent Players"
-                                    value={searchFilters.absent}
-                                    onChange={(e) => {
-                                        handleFilterPlayerSearch('absent', e.target.value);
-                                        handleFilterSearch('absent', e.target.value);
-                                    }}
-                                    fullWidth
-                                    margin="normal"
-                                />
-                                <div style={{ maxHeight: '200px', overflowY: 'auto' }}>
-                                    {filterData.absent.length > 0 ? (
-                                        filterData.absent
-                                            .filter((player) =>
-                                                `${player.name} ${player.surname}`.toLowerCase().includes(searchFilters.absent.toLowerCase())
-                                            )
-                                            .map((player) => (
-                                                <ListItem
-                                                    key={player.id}
-                                                    secondaryAction={
-                                                        <IconButton edge="end" aria-label="add" onClick={() => handleFilterPlayerSelect('absent', player)}>
-                                                            <AddCircleOutlineIcon />
-                                                        </IconButton>
-                                                    }
-                                                >
-                                                    <ListItemText primary={`${player.name} ${player.surname} (${player.username})`} />
-                                                </ListItem>
-                                            ))
-                                    ) : (
-                                        <Typography variant="body2">No absent players found.</Typography>
-                                    )}
-                                </div>
-                            </AccordionDetails>
-                        </Accordion>
-
-                        <Accordion expanded={expandedFilters.banned} onChange={handleAccordionChange('banned')}>
-                            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                                <Typography>Banned Players</Typography>
-                            </AccordionSummary>
-                            <AccordionDetails>
-                                <TextField
-                                    label="Search Banned Players"
-                                    value={searchFilters.banned}
-                                    onChange={(e) => {
-                                        handleFilterPlayerSearch('banned', e.target.value);
-                                        handleFilterSearch('banned', e.target.value);
-                                    }}
-                                    fullWidth
-                                    margin="normal"
-                                />
-                                <div style={{ maxHeight: '200px', overflowY: 'auto' }}>
-                                    {filterData.banned.length > 0 ? (
-                                        filterData.banned
-                                            .filter((player) =>
-                                                `${player.name} ${player.surname}`.toLowerCase().includes(searchFilters.banned.toLowerCase())
-                                            )
-                                            .map((player) => (
-                                                <ListItem
-                                                    key={player.id}
-                                                    secondaryAction={
-                                                        <IconButton edge="end" aria-label="add" onClick={() => handleFilterPlayerSelect('banned', player)}>
-                                                            <AddCircleOutlineIcon />
-                                                        </IconButton>
-                                                    }
-                                                >
-                                                    <ListItemText primary={`${player.name} ${player.surname} (${player.username})`} />
-                                                </ListItem>
-                                            ))
-                                    ) : (
-                                        <Typography variant="body2">No banned players found.</Typography>
-                                    )}
-                                </div>
-                            </AccordionDetails>
-                        </Accordion>
+                                                    </div>
+                                                ))
+                                        ) : (
+                                            <Typography variant="body2">No {filterType} players found.</Typography>
+                                        )}
+                                    </div>
+                                </AccordionDetails>
+                            </Accordion>
+                        ))}
                     </Grid>
 
                     {/* Messages */}
@@ -740,6 +747,7 @@ const CreateFormationForm = () => {
             </form>
         </Paper>
     );
-}
+};
 
 export default CreateFormationForm;
+
