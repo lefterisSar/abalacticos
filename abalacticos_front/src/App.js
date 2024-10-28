@@ -20,6 +20,7 @@ import HandleTeamShirts from './components/AdminDashboardComponents/HandleTeamSh
 import BanUser from './components/AdminDashboardComponents/BanUser';
 import Court from './components/AdminDashboardComponents/Court';
 import FormationsPage from './components/FormationComponents/FormationsPage';
+import FormationDetails from './components/FormationComponents/FormationDetails';
 
 
 const App = () => (
@@ -44,6 +45,7 @@ const App = () => (
             <Route path="/BanUser" element={<PrivateRoute role="ADMIN"><BanUser /></PrivateRoute>} />
             <Route path="/Court" element={<PrivateRoute role="ADMIN"><Court /></PrivateRoute>} />
             <Route path="/formations" element={<PrivateRoute role="ADMIN"><FormationsPage /></PrivateRoute>} />
+            <Route path="/formations/:id" element={<FormationDetails />} />
 
 
 
