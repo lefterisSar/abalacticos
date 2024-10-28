@@ -33,7 +33,7 @@ public class Formation {
 
     private String status; // e.g., "Scheduled", "Completed", "Canceled"
 
-    private Map<String, List<String>> teams = new HashMap<>(); // teamColor -> List of playerIds
+    private Map<String, List<PlayerAssignment>> teams = new HashMap<>();
     private List<String> availableColors = new ArrayList<>(Arrays.asList("Red", "Blue", "Black", "Gray", "Green"));
 
     private String createdBy; // New field
@@ -150,11 +150,11 @@ public class Formation {
         this.status = status;
     }
 
-    public Map<String, List<String>> getTeams() {
+    public Map<String, List<PlayerAssignment>> getTeams() {
         return teams;
     }
 
-    public void setTeams(Map<String, List<String>> teams) {
+    public void setTeams(Map<String, List<PlayerAssignment>> teams) {
         this.teams = teams;
     }
 
@@ -167,7 +167,7 @@ public class Formation {
     }
 
     // **Method to Assign Teams and Colors**
-    public void assignTeams(Map<String, List<String>> teamAssignments, List<String> colorsAssigned) {
+    public void assignTeams(Map<String, List<PlayerAssignment>> teamAssignments, List<String> colorsAssigned) {
         this.teams = teamAssignments;
         this.availableColors.removeAll(colorsAssigned);
     }

@@ -3,6 +3,7 @@ package com.example.abalacticos.service;
 import com.example.abalacticos.model.AbalacticosUser;
 import com.example.abalacticos.model.Formation;
 import com.example.abalacticos.model.FormationDTOS.FormationRequest;
+import com.example.abalacticos.model.PlayerAssignment;
 import com.example.abalacticos.repository.FormationRepository;
 import com.example.abalacticos.repository.UserRepository;
 import org.modelmapper.ModelMapper;
@@ -129,43 +130,8 @@ public class FormationService {
     }
 
 
-    private List<AbalacticosUser> getAutoFillPlayers(LocalDate date, int autoFillPlayersCount, List<String> excludedPlayerIds) {
-        String dayName = date.getDayOfWeek().toString();
-        String dateStr = date.toString();
-
-        // Fetch players using findByAvailabilityAndEligible
-        List<AbalacticosUser> availablePlayers = userRepository.findAvailablePlayersByDay(dayName)
-                .stream()
-                .filter(player -> !excludedPlayerIds.contains(player.getId()))
-                .collect(Collectors.toList());
-
-        if (availablePlayers.size() < autoFillPlayersCount) {
-            throw new IllegalArgumentException("Not enough available players to auto-fill.");
-        }
-
-        // Shuffle and select random players
-        Collections.shuffle(availablePlayers);
-        return availablePlayers.subList(0, autoFillPlayersCount);
-    }
 
 
-    private boolean isPlayerAvailableOnDate(AbalacticosUser player, LocalDate date) {
-        // Check if the player is available on the given date
-        DayOfWeek dayOfWeek = date.getDayOfWeek();
-        String dayName = dayOfWeek.toString();
-
-        // Check if player's availability includes the day
-        if (player.getAvailability() == null || !player.getAvailability().contains(dayName)) {
-            return false;
-        }
-
-        // Check if the player has marked the date as absent
-        if (player.getAbsentDates() != null && player.getAbsentDates().contains(date.toString())) {
-            return false;
-        }
-
-        return true;
-    }
 
 
     public List<Formation> getAllFormations() {
@@ -176,17 +142,21 @@ public class FormationService {
         return formationRepository.findById(id);
     }
 
-    public Formation updateFormation(String id, FormationRequest formationRequest) {
+    public Formation updateFormation(String id, Formation updatedFormation) {
         Optional<Formation> optionalFormation = formationRepository.findById(id);
         if (!optionalFormation.isPresent()) {
             throw new RuntimeException("Formation not found with id " + id);
         }
 
         Formation formation = optionalFormation.get();
-        // Update the formation fields based on the request
-        formation.setDateTime(formationRequest.getDateTime());
-        formation.setNumberOfPlayers(formationRequest.getNumberOfPlayers());
-        // ... update other fields as needed
+
+        // Update fields
+        formation.setDateTime(updatedFormation.getDateTime());
+        formation.setNumberOfPlayers(updatedFormation.getNumberOfPlayers());
+        formation.setPlayerIds(updatedFormation.getPlayerIds());
+        formation.setUnregisteredPlayerNames(updatedFormation.getUnregisteredPlayerNames());
+        formation.setTeams(updatedFormation.getTeams());
+
 
         return formationRepository.save(formation);
     }
@@ -204,15 +174,19 @@ public class FormationService {
         Optional<Formation> formationOpt = getFormationById(formationId);
         if (formationOpt.isPresent()) {
             Formation formation = formationOpt.get();
-            List<String> confirmedPlayers = formation.getPlayerIds(); // Assuming this list has confirmed players
+            List<String> confirmedPlayers = formation.getPlayerIds();
 
             // Shuffle the list for randomness
             Collections.shuffle(confirmedPlayers);
 
             // Split the list into two teams
             int midIndex = confirmedPlayers.size() / 2;
-            List<String> team1 = confirmedPlayers.subList(0, midIndex);
-            List<String> team2 = confirmedPlayers.subList(midIndex, confirmedPlayers.size());
+            List<String> team1PlayerIds = confirmedPlayers.subList(0, midIndex);
+            List<String> team2PlayerIds = confirmedPlayers.subList(midIndex, confirmedPlayers.size());
+
+            // Assign positions based on your logic
+            List<PlayerAssignment> team1Assignments = assignPositionsToPlayers(team1PlayerIds);
+            List<PlayerAssignment> team2Assignments = assignPositionsToPlayers(team2PlayerIds);
 
             // Assign colors
             List<String> colorsAssigned = new ArrayList<>();
@@ -221,25 +195,62 @@ public class FormationService {
             colorsAssigned.add(color1);
             colorsAssigned.add(color2);
 
-            Map<String, List<String>> teamAssignments = new HashMap<>();
-            teamAssignments.put(color1, new ArrayList<>(team1));
-            teamAssignments.put(color2, new ArrayList<>(team2));
+            // Create team assignments
+            Map<String, List<PlayerAssignment>> teamAssignments = new HashMap<>();
+            teamAssignments.put(color1, team1Assignments);
+            teamAssignments.put(color2, team2Assignments);
 
             formation.assignTeams(teamAssignments, colorsAssigned);
             formationRepository.save(formation);
         }
     }
 
+    private List<PlayerAssignment> assignPositionsToPlayers(List<String> playerIds) {
+        List<PlayerAssignment> assignments = new ArrayList<>();
+
+        // Define positions based on the number of players
+        List<String> positions = getPositionsForPlayers(playerIds.size());
+
+        for (int i = 0; i < playerIds.size(); i++) {
+            String playerId = playerIds.get(i);
+            String position = positions.get(i);
+
+            // Create a new PlayerAssignment with position
+            PlayerAssignment assignment = new PlayerAssignment("registered", playerId, position);
+            assignments.add(assignment);
+        }
+
+        return assignments;
+    }
+
+    private List<String> getPositionsForPlayers(int numberOfPlayers) {
+        List<String> positions = new ArrayList<>();
+        if (numberOfPlayers == 8) {
+            // Example positions for 8v8
+            positions.addAll(Arrays.asList("Goalkeeper", "Right Back", "Center Back", "Left Back", "Midfielder", "Right winger", "Left winger", "Forward"));
+        } else if (numberOfPlayers == 11) {
+            // Example positions for 11v11
+            positions.addAll(Arrays.asList("Goalkeeper", "Right Back", "Center Back", "Center Back", "Left Back", "Defensive Midfielder", "Central Midfielder", "Attacking Midfielder", "Right Winger", "Left Winger", "Striker"));
+        } else {
+            // Adjust accordingly or throw an exception
+            throw new IllegalArgumentException("Unsupported number of players: " + numberOfPlayers);
+        }
+        return positions;
+    }
+
+
+
+
+
     // **Method to Manually Assign Teams**
-    public void manualAssignTeams(String formationId, Map<String, List<String>> teamAssignments) {
+    public void manualAssignTeams(String formationId, Map<String, List<PlayerAssignment>> teamAssignments) {
         Optional<Formation> formationOpt = getFormationById(formationId);
         if (formationOpt.isPresent()) {
             Formation formation = formationOpt.get();
 
-            // Extract colors assigned
-            List<String> colorsAssigned = new ArrayList<>(teamAssignments.keySet());
+            // Validate and process teamAssignments as needed
 
-            formation.assignTeams(teamAssignments, colorsAssigned);
+            formation.assignTeams(teamAssignments, new ArrayList<>(teamAssignments.keySet()));
             formationRepository.save(formation);
         }
     }

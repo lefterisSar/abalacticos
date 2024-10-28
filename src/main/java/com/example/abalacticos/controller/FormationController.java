@@ -8,6 +8,7 @@ import org.modelmapper.ModelMapper;
 import com.example.abalacticos.model.FormationDTOS.FormationRequest;
 import com.example.abalacticos.model.Formation;
 import com.example.abalacticos.service.FormationService;
+import com.example.abalacticos.model.PlayerAssignment;
 import com.example.abalacticos.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -63,8 +64,8 @@ public class FormationController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/update/{id}")
-    public Formation updateFormation(@PathVariable String id, @RequestBody FormationRequest formationRequest) {
-        return formationService.updateFormation(id, formationRequest);
+    public Formation updateFormation(@PathVariable String id, @RequestBody Formation formation) {
+        return formationService.updateFormation(id, formation);
     }
 
     @DeleteMapping("/delete/{id}")
@@ -83,7 +84,7 @@ public class FormationController {
     // **Endpoint for Manual Team Assignment**
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/{id}/manual-assign-teams")
-    public ResponseEntity<?> manualAssignTeams(@PathVariable String id, @RequestBody Map<String, List<String>> teamAssignments) {
+    public ResponseEntity<?> manualAssignTeams(@PathVariable String id, @RequestBody Map<String, List<PlayerAssignment>> teamAssignments) {
         formationService.manualAssignTeams(id, teamAssignments);
         return ResponseEntity.ok("Teams manually assigned and colors allocated.");
     }
